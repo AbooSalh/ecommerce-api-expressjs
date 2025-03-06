@@ -4,5 +4,6 @@ const categoryRouter = express.Router();
 categoryRouter
   .route("/categories")
   .get(categoryController.getAll)
-  .post(categoryController.createCategory);
+  .post(categoryController.create);
+categoryRouter.route("/categories/:title").get(categoryController.getOne);
 export default categoryRouter;

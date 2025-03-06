@@ -7,28 +7,28 @@ export const categoryController = {
   // @route   GET /api/categories
   // @access  Public
   getAll: expressAsyncHandler(async (req: Request, res: Response) => {
-    // pagination
     const page = parseInt(req.query.page as string) || 1;
     const result = await categoryService.getAllCategories(page);
     res.status(200).json({ success: true, data: result });
   }),
-
+  // @desc    Get one category
+  // @route   GET /api/categories/:id
+  // @access  Public
+  getOne: expressAsyncHandler(async (req: Request, res: Response) => {
+    const title = req.params.title as string;
+    const category = await categoryService.getCategoryByTitle(title);
+    res.status(200).json({ success: true, data: category });
+  }),
   // @desc    Create a new category
   // @route   POST /api/categories
   // @access  Private
-  createCategory: expressAsyncHandler(async (req: Request, res: Response) => {
-    const { name, slug, image } = req.body;
+  create: expressAsyncHandler(async (req: Request, res: Response) => {
+    const { title, image } = req.body;
+    const newCategory = await categoryService.createCategory({
+      title,
+      image,
+    });
 
-    try {
-      const newCategory = await categoryService.createCategory({
-        name,
-        slug,
-        image,
-      });
-
-      res.status(201).json({ success: true, data: newCategory });
-    } catch (error: any) {
-      res.status(400).json({ success: false, error: error.message });
-    }
+    res.status(201).json({ success: true, data: newCategory });
   }),
 };

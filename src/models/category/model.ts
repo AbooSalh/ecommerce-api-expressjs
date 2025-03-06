@@ -2,7 +2,7 @@ import mongoose, { Schema } from "mongoose";
 
 const categorySchema = new Schema(
   {
-    name: {
+    title: {
       type: String,
       required: [true, "Category name is required"],
       unique: [true, "Category name must be unique"],
