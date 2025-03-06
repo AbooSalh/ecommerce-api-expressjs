@@ -14,6 +14,9 @@ const categorySchema = new Schema(
       type: String,
       lowercase: true,
     },
+    image: {
+      type: String,
+    },
   },
   //   mongoose options
   {
