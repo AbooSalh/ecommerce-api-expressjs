@@ -1,22 +1,29 @@
-import type { Request, Response } from "express";
-import CategoryModel from "./model";
 import slugify from "slugify";
+import CategoryModel from "./model";
 
 interface CreateCategory {
   name: string;
   slug: string;
+  image?: string;
 }
 
-export function getCategories(_req: Request, res: Response) {
-  res.send("lol");
+// Fetch all categories
+export async function getAllCategories() {
+  return await CategoryModel.find();
 }
 
-export function createCategory(
-  req: Request<{}, {}, CreateCategory>,
-  res: Response
-) {
-  const { name, slug } = req.body;
-  CategoryModel.create({ name, slug: slugify(slug) })
-  .then((category) => res.status(201).json({ data: category }))
-  .catch((err) => res.status(400).send(err));
+// Create a new category
+export async function createCategoryService(categoryData: CreateCategory) {
+  const { name, slug, image } = categoryData;
+
+  try {
+    const category = await CategoryModel.create({
+      name,
+      slug: slugify(slug),
+      image,
+    });
+    return { success: true, data: category };
+  } catch (error: any) {
+    return { success: false, error };
+  }
 }
