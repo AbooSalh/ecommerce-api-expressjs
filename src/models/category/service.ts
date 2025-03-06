@@ -59,4 +59,9 @@ export const categoryService = {
 
     return category;
   },
+  // Delete a category
+  deleteCategory: async (title: string) => {
+    const category = await Category.findOneAndDelete({ title });
+    return category;
+  },
 };

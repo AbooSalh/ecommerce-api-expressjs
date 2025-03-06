@@ -8,5 +8,6 @@ categoryRouter
 categoryRouter
   .route("/categories/:title")
   .get(categoryController.getOne)
-  .put(categoryController.update);
+  .put(categoryController.update)
+  .delete(categoryController.delete);
 export default categoryRouter;

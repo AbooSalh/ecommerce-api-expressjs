@@ -43,5 +43,9 @@ export const categoryController = {
   // @desc    Delete a category
   // @route   DELETE /api/categories/:id
   // @access  Private
-  delete: expressAsyncHandler(async (req: Request, res: Response) => {}),
+  delete: expressAsyncHandler(async (req: Request, res: Response) => {
+    const title = req.params.title as string;
+    const category = await categoryService.deleteCategory(title);
+    res.status(200).json({ success: true, data: category });
+  }),
 };
