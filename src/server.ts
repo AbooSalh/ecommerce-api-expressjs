@@ -1,7 +1,7 @@
 import express, { NextFunction, Request, Response } from "express";
 import dotenv from "dotenv";
-import dbConnection from "./core/config/database.config";
-import categoryRouter from "./models/category/route";
+import dbConnection from "./common/config/database.config";
+import categoryRouter from "./modules/category/route";
 
 dotenv.config();
 
