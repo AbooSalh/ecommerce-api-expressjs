@@ -1,4 +1,4 @@
-import { Schema } from "mongoose";
+import mongoose, { Schema } from "mongoose";
 
 const categorySchema = new Schema(
   {
@@ -13,6 +13,7 @@ const categorySchema = new Schema(
     slug: {
       type: String,
       lowercase: true,
+      unique: [true, "slug must be unique"],
     },
     image: {
       type: String,
@@ -24,3 +25,6 @@ const categorySchema = new Schema(
     timestamps: true,
   }
 );
+
+const CategoryModel = mongoose.model("Category", categorySchema);
+export default CategoryModel;
