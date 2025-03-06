@@ -3,6 +3,7 @@ import Category from "./model";
 
 interface CreateCategory {
   title: string;
+  slug?: string;
   image?: string;
 }
 
@@ -38,6 +39,24 @@ export const categoryService = {
       slug: slugify(title, { lower: true }),
       image,
     });
+    return category;
+  },
+  // Update a category
+  updateCategory: async (title: string, updatedData: CreateCategory) => {
+    // Generate a new slug only if the title is being updated
+    if (updatedData.title) {
+      updatedData = {
+        ...updatedData,
+        slug: slugify(updatedData.title, { lower: true }),
+      };
+    }
+
+    const category = await Category.findOneAndUpdate(
+      { title: title },
+      { $set: updatedData },
+      { new: true, runValidators: true } // Ensures validation runs on update
+    );
+
     return category;
   },
 };

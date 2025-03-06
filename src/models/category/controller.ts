@@ -31,4 +31,17 @@ export const categoryController = {
 
     res.status(201).json({ success: true, data: newCategory });
   }),
+  // @desc    Update a category
+  // @route   PUT /api/categories/:id
+  // @access  Private
+  update: expressAsyncHandler(async (req: Request, res: Response) => {
+    const title = req.params.title as string;
+    const updatedData = req.body;
+    const category = await categoryService.updateCategory(title, updatedData);
+    res.status(200).json({ success: true, data: category });
+  }),
+  // @desc    Delete a category
+  // @route   DELETE /api/categories/:id
+  // @access  Private
+  delete: expressAsyncHandler(async (req: Request, res: Response) => {}),
 };
