@@ -4,10 +4,10 @@ const categorySchema = new Schema(
   {
     title: {
       type: String,
-      required: [true, "Category name is required"],
-      unique: [true, "Category name must be unique"],
-      minLength: [3, "Category name must be at least 3 characters"],
-      maxLength: [32, "Category name must be at most 32 characters"],
+      required: [true, "Category title is required"],
+      unique: [true, "Category title must be unique"],
+      minLength: [3, "Category title must be at least 3 characters"],
+      maxLength: [32, "Category title must be at most 32 characters"],
     },
     // api endpoint
     slug: {

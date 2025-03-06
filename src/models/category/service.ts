@@ -33,7 +33,8 @@ export const categoryService = {
   // Create a new category
   createCategory: async (categoryData: CreateCategory) => {
     const { title, image } = categoryData;
-
+    console.log(title);
+    
     const category = await Category.create({
       title,
       slug: slugify(title, { lower: true }),
