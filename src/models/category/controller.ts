@@ -1,16 +1,29 @@
-import { Request, Response } from "express";
-import { createCategoryService, getAllCategories } from "./service";
+import { NextFunction, Request, Response } from "express";
+import { categoriesService } from "./service";
+import expressAsyncHandler from "express-async-handler";
 
-export async function getCategories(_req: Request, res: Response) {
-  try {
-    const categories = await getAllCategories();
+export const categoryController = {
+  getAll: expressAsyncHandler(async (_req: Request, res: Response) => {
+    const categories = await categoriesService.getAll();
     res.json({ success: true, data: categories });
-  } catch (error) {
-    res.status(500).json({ success: false, error: "Internal Server Error" });
-  }
-}
-export async function createCategory(req: Request, res: Response) {
-  const { name, slug, image } = req.body;
-  const result = await createCategoryService({ name, slug, image });
-  res.send(result);
-}
+  }),
+
+  createCategory: expressAsyncHandler(async (req: Request, res: Response) => {
+    const { name, slug, image } = req.body;
+
+    try {
+      const result = await categoriesService.createCategory({
+        name,
+        slug,
+        image,
+      });
+
+      res.status(201).json({ success: true, data: result });
+    } catch (error: any) {
+      res.status(400).json({
+        success: false,
+        error: error.message || "Something went wrong",
+      });
+    }
+  }),
+};

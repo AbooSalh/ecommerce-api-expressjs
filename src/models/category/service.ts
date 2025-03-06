@@ -8,12 +8,12 @@ interface CreateCategory {
 }
 
 // Fetch all categories
-export async function getAllCategories() {
+export async function getAll() {
   return await CategoryModel.find();
 }
 
 // Create a new category
-export async function createCategoryService(categoryData: CreateCategory) {
+export async function createCategory(categoryData: CreateCategory) {
   const { name, slug, image } = categoryData;
 
   try {
@@ -22,8 +22,13 @@ export async function createCategoryService(categoryData: CreateCategory) {
       slug: slugify(slug),
       image,
     });
-    return { success: true, data: category };
+
+    return category;
   } catch (error: any) {
-    return { success: false, error };
+    console.error("Error creating category:", error);
+
+    throw new Error(error.message || "Database error");
   }
 }
+
+export const categoriesService = { getAll, createCategory };
