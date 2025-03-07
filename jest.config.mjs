@@ -2,6 +2,8 @@
  * For a detailed explanation regarding each configuration property, visit:
  * https://jestjs.io/docs/configuration
  */
+import { pathsToModuleNameMapper } from "ts-jest";
+import tsconfig from "./tsconfig.json" assert { type: "json" };
 
 /** @type {import('jest').Config} */
 const config = {
@@ -89,7 +91,12 @@ const config = {
   ],
 
   // A map from regular expressions to module names or to arrays of module names that allow to stub out resources with a single module
-  // moduleNameMapper: {},
+  moduleNameMapper: pathsToModuleNameMapper(tsconfig.compilerOptions.paths, {
+    prefix: "<rootDir>/",
+  }),
+  transform: {
+    "^.+\\.(ts|tsx)$": "ts-jest",
+  },
 
   // An array of regexp pattern strings, matched against all module paths before considered 'visible' to the module loader
   // modulePathIgnorePatterns: [],
@@ -174,9 +181,6 @@ const config = {
   // testRunner: "jest-circus/runner",
 
   // A map from regular expressions to paths to transformers
-  transform: {
-    "^.+\\.(ts|tsx)$": "ts-jest",
-  },
 
   // An array of regexp pattern strings that are matched against all source file paths, matched files will skip transformation
   // transformIgnorePatterns: [
