@@ -10,9 +10,7 @@ export default function validatorMiddleware(
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
     const errorMessages = errors.array().map((err) => err.msg);
-    return next(
-      new ApiError("Validation failed", "BAD_REQUEST", errorMessages)
-    );
+    return next(new ApiError(errorMessages, "BAD_REQUEST"));
   }
   next();
 }

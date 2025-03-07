@@ -15,11 +15,10 @@ class ApiError extends Error {
   } as const;
 
   constructor(
-    message: string,
-    statusCode: number | keyof typeof ApiError.statusCodes = 500,
-    errors: string[] = []
+    errors: string[] | string, // Accepts either a string or an array of errors
+    statusCode: number | keyof typeof ApiError.statusCodes = 500
   ) {
-    super(message);
+    super(typeof errors === "string" ? errors : errors[0]); // Set first error as main message
 
     this.statusCode =
       typeof statusCode === "string"
@@ -30,7 +29,7 @@ class ApiError extends Error {
       this.statusCode >= 400 && this.statusCode < 500 ? "fail" : "error";
 
     this.isOperational = true;
-    this.errors = errors;
+    this.errors = Array.isArray(errors) ? errors : [errors]; // Ensure it's always an array
 
     Object.setPrototypeOf(this, new.target.prototype);
   }

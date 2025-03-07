@@ -1,5 +1,5 @@
 import validatorMiddleware from "@/common/middleware/validator";
-import { body, oneOf } from "express-validator";
+import { body, oneOf, param } from "express-validator";
 
 export const categoryValidator = {
   createCategory: [
@@ -12,22 +12,23 @@ export const categoryValidator = {
   updateCategory: [
     // rules
     // at least one exists
+    param("title").exists().withMessage("Category title is required"),
     oneOf([
-      body("title").exists().withMessage("Category title is required"),
-      body("image").exists().withMessage("Category image is required"),
+      body("title").exists().withMessage("at least update one value"),
+      body("image").exists().withMessage("at least update one value"),
     ]),
     // middleware catch
     validatorMiddleware,
   ],
   deleteCategory: [
     // rules
-    body("title").exists().withMessage("Category title is required"),
+    param("title").exists().withMessage("Category title is required"),
     // middleware catch
     validatorMiddleware,
   ],
   getCategoryByTitle: [
     // rules
-    body("title").exists().withMessage("Category title is required"),
+    param("title").exists().withMessage("Category title is required"),
     // middleware catch
     validatorMiddleware,
   ],
