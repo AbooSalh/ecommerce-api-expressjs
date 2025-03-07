@@ -1,6 +1,6 @@
 import express from "express";
 import { categoryController as controller } from "./controller";
-import {categoryValidator as validator} from "./validators";
+import { categoryValidator as validator } from "./validators";
 const categoryRouter = express.Router();
 categoryRouter
   .route("/categories")
@@ -9,7 +9,7 @@ categoryRouter
 
 categoryRouter
   .route("/categories/:title")
-  .get(controller.getOne)
-  .put(controller.update)
-  .delete(controller.delete);
+  .get(validator.getCategoryByTitle, controller.getOne)
+  .put(validator.updateCategory, controller.update)
+  .delete(validator.deleteCategory, controller.delete);
 export default categoryRouter;
