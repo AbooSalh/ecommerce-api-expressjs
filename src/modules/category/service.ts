@@ -29,16 +29,19 @@ export const categoryService = {
   // Get one category
   getCategoryByTitle: async (title: string) => {
     if (!title) {
-      throw new ApiError("Category title is required", 400);
+      throw new ApiError("Category title is required", "BAD_REQUEST");
     }
     const category = await Category.find({ title });
     if (category.length === 0) {
-      throw new ApiError("Category not found", 404);
+      throw new ApiError("Category not found", "NOT_FOUND");
     }
     return category;
   },
   // Create a new category
   createCategory: async (categoryData: CreateCategory) => {
+    if (!categoryData.title || !categoryData.image) {
+      throw new ApiError("Category title", "BAD_REQUEST");
+    }
     const { title, image } = categoryData;
     const category = await Category.create({
       title,
@@ -49,6 +52,12 @@ export const categoryService = {
   },
   // Update a category
   updateCategory: async (title: string, updatedData: CreateCategory) => {
+    if (!title) {
+      throw new ApiError("Category title is required", "BAD_REQUEST");
+    }
+    if (!updatedData) {
+      throw new ApiError("Category data is required", "BAD_REQUEST");
+    }
     // Generate a new slug only if the title is being updated
     if (updatedData.title) {
       updatedData = {
@@ -62,11 +71,16 @@ export const categoryService = {
       { $set: updatedData },
       { new: true, runValidators: true } // Ensures validation runs on update
     );
-
+    if (!category) {
+      throw new ApiError("Category not found", "NOT_FOUND");
+    }
     return category;
   },
   // Delete a category
   deleteCategory: async (title: string) => {
+    if (!title) {
+      throw new ApiError("Category title is required", "BAD_REQUEST");
+    }
     const category = await Category.findOneAndDelete({ title });
     return category;
   },
