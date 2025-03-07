@@ -39,9 +39,6 @@ export const categoryService = {
   },
   // Create a new category
   createCategory: async (categoryData: CreateCategory) => {
-    if (!categoryData.title || !categoryData.image) {
-      throw new ApiError("Category title", "BAD_REQUEST");
-    }
     const { title, image } = categoryData;
     const category = await Category.create({
       title,
