@@ -3,6 +3,7 @@ import dotenv from "dotenv";
 import dbConnection from "./common/config/database.config";
 import categoryRouter from "./modules/category/route";
 import ApiError from "./common/utils/ApiError";
+import globalError from "./common/middleware/globalError";
 
 dotenv.config();
 
@@ -18,16 +19,7 @@ app.use("/api", [categoryRouter]);
 app.all("*", (req: Request, res: Response, next: NextFunction) => {
   next(new ApiError(`Route ${req.originalUrl} not found`, 404));
 });
-app.use((err: ApiError, req: Request, res: Response, next: NextFunction) => {
-  res
-    .status(err.statusCode || 500)
-    .json({
-      status: err.status,
-      error: err,
-      message: err.message,
-      stack: err.stack,
-    });
-});
+app.use(globalError);
 app.listen(PORT, () => {
   console.log(`🚀 Server running on http://localhost:${PORT}`);
 });
