@@ -20,6 +20,15 @@ app.all("*", (req: Request, res: Response, next: NextFunction) => {
   next(new ApiError(`Route ${req.originalUrl} not found`, "NOT_FOUND"));
 });
 app.use(globalError);
-app.listen(PORT, () => {
+const server = app.listen(PORT, () => {
   console.log(`🚀 Server running on http://localhost:${PORT}`);
+});
+
+// Events
+
+// handle uncaught exceptions
+process.on("unhandledRejection", (err: Error) => {
+  console.error(`Internal Server Error: ${err.name} | ${err.message}`);
+  console.error("shutting down...");
+  server.close(() => process.exit(1));
 });
