@@ -21,40 +21,28 @@ export const categoryService = {
       hasNextPage: results.length === limit,
       lastPage: Math.ceil((await Category.countDocuments()) / limit),
     };
-    return {
-      success: true,
-      data,
-    };
+    return data;
   },
   // Get one category
   getCategoryByTitle: async (title: string) => {
-    if (!title) {
-      throw new ApiError("Category title is required", "BAD_REQUEST");
-    }
-    const category = await Category.find({ title });
-    if (category.length === 0) {
+    const data = await Category.find({ title });
+    if (data.length === 0) {
       throw new ApiError("Category not found", "NOT_FOUND");
     }
-    return category;
+    return data;
   },
   // Create a new category
   createCategory: async (categoryData: CreateCategory) => {
     const { title, image } = categoryData;
-    const category = await Category.create({
+    const data = await Category.create({
       title,
       slug: slugify(title, { lower: true }),
       image,
     });
-    return category;
+    return data;
   },
   // Update a category
   updateCategory: async (title: string, updatedData: CreateCategory) => {
-    if (!title) {
-      throw new ApiError("Category title is required", "BAD_REQUEST");
-    }
-    if (!updatedData) {
-      throw new ApiError("Category data is required", "BAD_REQUEST");
-    }
     // Generate a new slug only if the title is being updated
     if (updatedData.title) {
       updatedData = {
@@ -63,22 +51,19 @@ export const categoryService = {
       };
     }
 
-    const category = await Category.findOneAndUpdate(
+    const data = await Category.findOneAndUpdate(
       { title: title },
       { $set: updatedData },
       { new: true, runValidators: true } // Ensures validation runs on update
     );
-    if (!category) {
+    if (!data) {
       throw new ApiError("Category not found", "NOT_FOUND");
     }
-    return category;
+    return data;
   },
   // Delete a category
   deleteCategory: async (title: string) => {
-    if (!title) {
-      throw new ApiError("Category title is required", "BAD_REQUEST");
-    }
-    const category = await Category.findOneAndDelete({ title });
-    return category;
+    const data = await Category.findOneAndDelete({ title });
+    return data;
   },
 };

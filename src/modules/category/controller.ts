@@ -9,7 +9,7 @@ export const categoryController = {
   getAll: expressAsyncHandler(async (req: Request, res: Response) => {
     const page = parseInt(req.query.page as string) || 1;
     const result = await categoryService.getAllCategories(page);
-    res.status(200).json({ success: true, data: result });
+    res.status(200).json({ status: "success", data: result });
   }),
   // @desc    Get one category
   // @route   GET /api/categories/:id
@@ -17,7 +17,7 @@ export const categoryController = {
   getOne: expressAsyncHandler(async (req: Request, res: Response) => {
     const title = req.params.title as string;
     const category = await categoryService.getCategoryByTitle(title);
-    res.status(200).json({ success: true, data: category });
+    res.status(200).json({ status: "success", data: category });
   }),
   // @desc    Create a new category
   // @route   POST /api/categories
@@ -29,7 +29,7 @@ export const categoryController = {
       image,
     });
 
-    res.status(201).json({ success: true, data: newCategory });
+    res.status(201).json({ status: "success", data: newCategory });
   }),
   // @desc    Update a category
   // @route   PUT /api/categories/:id
@@ -38,7 +38,7 @@ export const categoryController = {
     const title = req.params.title as string;
     const updatedData = req.body;
     const category = await categoryService.updateCategory(title, updatedData);
-    res.status(200).json({ success: true, data: category });
+    res.status(200).json({ status: "success", data: category });
   }),
   // @desc    Delete a category
   // @route   DELETE /api/categories/:id
@@ -46,6 +46,6 @@ export const categoryController = {
   delete: expressAsyncHandler(async (req: Request, res: Response) => {
     const title = req.params.title as string;
     const category = await categoryService.deleteCategory(title);
-    res.status(200).json({ success: true, data: category });
+    res.status(200).json({ status: "success", data: category });
   }),
 };
