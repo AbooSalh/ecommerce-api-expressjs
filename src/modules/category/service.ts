@@ -1,5 +1,6 @@
 import slugify from "slugify";
 import Category from "./model";
+import ApiError from "@/common/utils/ApiError";
 
 interface CreateCategory {
   title: string;
@@ -27,14 +28,18 @@ export const categoryService = {
   },
   // Get one category
   getCategoryByTitle: async (title: string) => {
+    if (!title) {
+      throw new ApiError("Category title is required", 400);
+    }
     const category = await Category.find({ title });
+    if (category.length === 0) {
+      throw new ApiError("Category not found", 404);
+    }
     return category;
   },
   // Create a new category
   createCategory: async (categoryData: CreateCategory) => {
     const { title, image } = categoryData;
-    console.log(title);
-    
     const category = await Category.create({
       title,
       slug: slugify(title, { lower: true }),
