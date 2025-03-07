@@ -13,6 +13,9 @@ export const categoryValidator = {
     // rules
     // at least one exists
     param("title").exists().withMessage("Category title is required"),
+    body("title")
+      .isLength({ min: 3, max: 32 })
+      .withMessage("Category title is too short at least 3 characters"),
     oneOf([
       body("title").exists().withMessage("at least update one value"),
       body("image").exists().withMessage("at least update one value"),
