@@ -1,4 +1,5 @@
 import mongoose, { Schema } from "mongoose";
+import slugify from "slugify";
 
 const categorySchema = new Schema(
   {
@@ -26,5 +27,14 @@ const categorySchema = new Schema(
   }
 );
 
+// Pre-save hook to generate slug from title
+categorySchema.pre("save", function (next) {
+  if (this.isModified("title")) {
+    this.slug = slugify(this.title, { lower: true, strict: true });
+  }
+  next();
+});
+
 const Category = mongoose.model("Category", categorySchema);
+
 export default Category;

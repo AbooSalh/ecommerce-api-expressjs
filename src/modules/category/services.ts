@@ -1,4 +1,3 @@
-import slugify from "slugify";
 import Category from "./model";
 import ApiError from "@/common/utils/ApiError";
 
@@ -36,20 +35,12 @@ export const categoryService = {
     const { title, image } = categoryData;
     const data = await Category.create({
       title,
-      slug: slugify(title, { lower: true }),
       image,
     });
     return data;
   },
   // Update a category
   updateCategory: async (title: string, updatedData: CreateCategory) => {
-    // Generate a new slug only if the title is being updated
-    if (updatedData.title) {
-      updatedData = {
-        ...updatedData,
-        slug: slugify(updatedData.title, { lower: true }),
-      };
-    }
 
     const data = await Category.findOneAndUpdate(
       { title: title },
