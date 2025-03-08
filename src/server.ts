@@ -17,7 +17,7 @@ dbConnection();
 app.use("/api", [categoryRouter]);
 // handle all other unhandled routes
 app.all("*", (req: Request, res: Response, next: NextFunction) => {
-  next(new ApiError(`Route ${req.originalUrl} not found`, "NOT_FOUND"));
+  next(new ApiError(`Route ${req.originalUrl} not found` , "NOT_FOUND"));
 });
 app.use(globalError);
 const server = app.listen(PORT, () => {

@@ -15,7 +15,7 @@ class ApiError extends Error {
   } as const;
 
   constructor(
-    errors: string[] | string, // Accepts either a string or an array of errors
+    errors: string[] | string = [], // Default to an empty array
     statusCode: number | keyof typeof ApiError.statusCodes = 500
   ) {
     super(typeof errors === "string" ? errors : errors[0]); // Set first error as main message
