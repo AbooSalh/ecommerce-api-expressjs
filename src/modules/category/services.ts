@@ -54,6 +54,9 @@ export const categoryService = {
   // Delete a category
   deleteCategory: async (title: string) => {
     const data = await Category.findOneAndDelete({ title });
+    if (!data) {
+      throw new ApiError("Category not found", "NOT_FOUND");
+    }
     return data;
   },
 };

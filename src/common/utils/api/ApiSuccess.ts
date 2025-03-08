@@ -1,4 +1,5 @@
 import { Response } from "express";
+import { HTTP_STATUS } from "@/common/constants/httpStatus"; // Import status constants
 
 class ApiSuccess {
   public statusCode: number;
@@ -7,43 +8,31 @@ class ApiSuccess {
   public data: object | null;
   public timestamp: string;
 
-  private static statusCodes = {
-    OK: 200,
-    CREATED: 201,
-    ACCEPTED: 202,
-    NO_CONTENT: 204,
-  } as const;
-
   constructor(
-    statusCode: number | keyof typeof ApiSuccess.statusCodes = 200,
+    status: keyof (typeof HTTP_STATUS)["SUCCESS"],
     message: string,
     data: object | null = null
   ) {
-    this.statusCode =
-      typeof statusCode === "string"
-        ? ApiSuccess.statusCodes[statusCode]
-        : statusCode;
-
-    this.status =
-      this.statusCode >= 200 && this.statusCode < 300 ? "success" : "info";
+    this.statusCode = HTTP_STATUS.SUCCESS[status]; // Convert string to number
+    this.status = "success";
     this.message = message;
     this.data = data;
     this.timestamp = new Date().toISOString();
   }
 
-  /**  Sends response directly using Express `res` */
-  send(res: Response): void {
+  /** Sends response directly using Express `res` */
+  private send(res: Response): void {
     res.status(this.statusCode).json(this);
   }
 
-  /**  Static method for convenience */
+  /** Static method for convenience */
   static send(
     res: Response,
-    statusCode: number | keyof typeof ApiSuccess.statusCodes,
+    status: keyof (typeof HTTP_STATUS)["SUCCESS"],
     message: string,
     data: object | null = null
   ) {
-    new ApiSuccess(statusCode, message, data).send(res);
+    new ApiSuccess(status, message, data).send(res);
   }
 }
 

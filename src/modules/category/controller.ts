@@ -18,7 +18,7 @@ export const categoryController = {
   getOne: expressAsyncHandler(async (req: Request, res: Response) => {
     const title = req.params.title as string;
     const category = await categoryService.getCategoryByTitle(title);
-    res.status(200).json(new ApiSuccess("OK", "Category found", category));
+    ApiSuccess.send(res, "OK", "Category found", category);
   }),
   // @desc    Create a new category
   // @route   POST /api/categories
@@ -29,10 +29,7 @@ export const categoryController = {
       title,
       image,
     });
-
-    res
-      .status(201)
-      .json(new ApiSuccess("CREATED", "Category created", newCategory));
+    ApiSuccess.send(res, "OK", "Category created", newCategory);
   }),
   // @desc    Update a category
   // @route   PUT /api/categories/:id
@@ -41,7 +38,7 @@ export const categoryController = {
     const title = req.params.title as string;
     const updatedData = req.body;
     const category = await categoryService.updateCategory(title, updatedData);
-    res.status(200).json(new ApiSuccess("OK", "Category updated", category));
+    ApiSuccess.send(res, "OK", "Category updated", category);
   }),
   // @desc    Delete a category
   // @route   DELETE /api/categories/:id
