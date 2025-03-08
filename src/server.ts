@@ -1,7 +1,7 @@
 import express, { NextFunction, Request, Response } from "express";
 import dotenv from "dotenv";
 import dbConnection from "./common/config/database.config";
-import categoryRouter from "./modules/category/route";
+import categoryRouter from "./modules/category/routes";
 import ApiError from "./common/utils/ApiError";
 import globalError from "./common/middleware/globalError";
 

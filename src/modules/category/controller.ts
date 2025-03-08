@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import expressAsyncHandler from "express-async-handler";
-import { categoryService } from "./service";
+import { categoryService } from "./services";
 
 export const categoryController = {
   // @desc    Get all categories
