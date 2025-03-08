@@ -1,11 +1,10 @@
-import type { NextFunction, Request, Response } from "express";
-import ApiError from "../utils/ApiError";
+import type {  Request, Response } from "express";
+import ApiError from "../utils/api/ApiError";
 
 const globalError = (
   err: ApiError,
   req: Request,
   res: Response,
-  next: NextFunction
 ) => {
   const statusCode = err.statusCode || 500;
   const status = err.status || "error";

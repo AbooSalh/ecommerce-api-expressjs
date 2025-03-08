@@ -1,5 +1,5 @@
 import Category from "./model";
-import ApiError from "@/common/utils/ApiError";
+import ApiError from "@/common/utils/api/ApiError";
 
 interface CreateCategory {
   title: string;
@@ -41,7 +41,6 @@ export const categoryService = {
   },
   // Update a category
   updateCategory: async (title: string, updatedData: CreateCategory) => {
-
     const data = await Category.findOneAndUpdate(
       { title: title },
       { $set: updatedData },
