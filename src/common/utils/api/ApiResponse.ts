@@ -5,23 +5,29 @@ export interface ApiResponseI {
   message: string;
   timestamp: string;
 }
+
 export default class ApiResponse implements ApiResponseI {
   public statusCode: number;
   public statusMessage: string;
   public status: "success" | "fail" | "error";
   public message: string;
   public timestamp: string;
+
   constructor(statusCode: number, statusMessage: string, message: string) {
     this.statusCode = statusCode;
     this.statusMessage = statusMessage;
     this.message = message;
     this.timestamp = new Date().toISOString();
+    this.status = this.determineStatus(statusCode);
+  }
+
+  private determineStatus(statusCode: number): "success" | "fail" | "error" {
     if (statusCode >= 200 && statusCode < 300) {
-      this.status = "success";
+      return "success";
     } else if (statusCode >= 400 && statusCode < 500) {
-      this.status = "fail";
+      return "fail";
     } else {
-      this.status = "error";
+      return "error";
     }
   }
 }
