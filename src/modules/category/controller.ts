@@ -29,7 +29,7 @@ export const categoryController = {
       title,
       image,
     });
-    ApiSuccess.send(res, "OK", "Category created", newCategory);
+    ApiSuccess.send(res, "CREATED", "Category created", newCategory);
   }),
   // @desc    Update a category
   // @route   PUT /api/categories/:id
