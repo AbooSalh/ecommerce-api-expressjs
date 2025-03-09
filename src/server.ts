@@ -12,7 +12,7 @@ const PORT = process.env.PORT || 5000;
 
 app.use(express.json()); // ✅ Middleware for parsing JSON
 
-dbConnection();
+dbConnection.connect();
 
 app.use("/api", [categoryRouter]);
 // handle all other unhandled routes
