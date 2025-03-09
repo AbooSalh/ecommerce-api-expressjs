@@ -32,3 +32,5 @@ process.on("unhandledRejection", (err: Error) => {
   console.error("shutting down...");
   server.close(() => process.exit(1));
 });
+
+export default app;
