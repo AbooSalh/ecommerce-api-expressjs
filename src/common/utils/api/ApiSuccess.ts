@@ -1,28 +1,23 @@
 import { Response } from "express";
 import { HTTP_STATUS } from "@/common/constants/httpStatus"; // Import status constants
+import ApiResponse from "@/common/utils/api/ApiResponse";
 
 class ApiSuccess {
-  public statusCode: number;
-  public status: string;
-  public message: string;
+  public response: ApiResponse;
   public data: object | null;
-  public timestamp: string;
 
   constructor(
     status: keyof (typeof HTTP_STATUS)["SUCCESS"],
     message: string,
     data: object | null = null
   ) {
-    this.statusCode = HTTP_STATUS.SUCCESS[status]; // Convert string to number
-    this.status = "success";
-    this.message = message;
+    this.response = new ApiResponse(HTTP_STATUS.SUCCESS[status], "OK", message);
     this.data = data;
-    this.timestamp = new Date().toISOString();
   }
 
   /** Sends response directly using Express `res` */
   private send(res: Response): void {
-    res.status(this.statusCode).json(this);
+    res.status(this.response.statusCode).json(this);
   }
 
   /** Static method for convenience */

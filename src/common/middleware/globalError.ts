@@ -7,18 +7,12 @@ const globalError = (
   res: Response,
   next: NextFunction
 ) => {
-  const statusCode = err.statusCode || 500;
-  const status = err.status || "error";
+  const { response, errors, stack } = err;
 
-  res.status(statusCode).json({
-    statusCode,
-    status,
-    message:
-      err.errors && err.errors.length > 1
-        ? "Multiple errors occurred"
-        : err.message,
-    errors: err.errors && err.errors.length > 0 ? err.errors : undefined,
-    ...(process.env.NODE_ENV === "development" && { stack: err.stack }),
+  res.status(response.statusCode).json({
+    response,
+    errors,
+    ...(process.env.NODE_ENV === "development" && { stack }),
   });
   next();
 };
