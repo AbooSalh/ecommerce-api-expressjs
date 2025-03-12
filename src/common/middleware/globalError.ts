@@ -1,33 +1,51 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import type { NextFunction, Request, Response } from "express";
+import { Error as MongooseError } from "mongoose";
 import ApiError from "../utils/api/ApiError";
 
+class ErrorHandler {
+  private static handleMongooseValidationError(
+    err: MongooseError.ValidationError
+  ): ApiError {
+    const message = Object.values(err.errors)
+      .map((error) => error.message)
+      .join(", ");
+    return new ApiError(message, "UNPROCESSABLE_ENTITY");
+  }
+
+  private static handleMongooseCastError(
+    err: MongooseError.CastError
+  ): ApiError {
+    const message = `Invalid ${err.path}: ${err.value}`;
+    return new ApiError(message, "UNPROCESSABLE_ENTITY");
+  }
+
+  public static handleError(err: any): ApiError {
+    if (err instanceof ApiError) {
+      return err;
+    }
+
+    if (err instanceof MongooseError.ValidationError) {
+      return this.handleMongooseValidationError(err);
+    }
+
+    if (err instanceof MongooseError.CastError) {
+      return this.handleMongooseCastError(err);
+    }
+
+    return new ApiError(err.message, "INTERNAL_SERVER_ERROR");
+  }
+}
+
 const globalError = (
-  err: ApiError | Error,
+  err: Error | ApiError,
   req: Request,
   res: Response,
   next: NextFunction
 ) => {
-  if (err instanceof ApiError) {
-    const { response, errors, stack } = err;
-    res.status(response.statusCode).json({
-      response,
-      errors,
-      ...(process.env.NODE_ENV === "development" && { stack }),
-    });
-  } else {
-    res.status(500).json({
-      response: {
-        statusCode: 500,
-        statusMessage: "Internal Server Error",
-        status: "error",
-        message: err.message,
-        timestamp: new Date().toISOString(),
-      },
-      errors: [{ message: err.message }],
-      ...(process.env.NODE_ENV === "development" && { stack: err.stack }),
-    });
-  }
+  const error = ErrorHandler.handleError(err);
+  error.send(res);
+  next();
 };
 
 export default globalError;
