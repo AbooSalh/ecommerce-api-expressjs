@@ -9,7 +9,7 @@ export const categoryController = {
   // @access  Public
   getAll: expressAsyncHandler(async (req: Request, res: Response) => {
     const page = parseInt(req.query.page as string) || 1;
-    const result = await categoryService.getAllCategories(page);
+    const result = await categoryService.getAll(page);
     ApiSuccess.send(res, "OK", "Categories found", result);
   }),
   // @desc    Get one category
@@ -17,7 +17,7 @@ export const categoryController = {
   // @access  Public
   getOne: expressAsyncHandler(async (req: Request, res: Response) => {
     const title = req.params.title as string;
-    const category = await categoryService.getCategoryByTitle(title);
+    const category = await categoryService.getOne(title);
     ApiSuccess.send(res, "OK", "Category found", category);
   }),
   // @desc    Create a new category
@@ -25,7 +25,7 @@ export const categoryController = {
   // @access  Private
   create: expressAsyncHandler(async (req: Request, res: Response) => {
     const { title, image } = req.body;
-    const newCategory = await categoryService.createCategory({
+    const newCategory = await categoryService.create({
       title,
       image,
     });
@@ -37,7 +37,7 @@ export const categoryController = {
   update: expressAsyncHandler(async (req: Request, res: Response) => {
     const title = req.params.title as string;
     const updatedData = req.body;
-    const category = await categoryService.updateCategory(title, updatedData);
+    const category = await categoryService.update(title, updatedData);
     ApiSuccess.send(res, "OK", "Category updated", category);
   }),
   // @desc    Delete a category
@@ -45,7 +45,7 @@ export const categoryController = {
   // @access  Private
   delete: expressAsyncHandler(async (req: Request, res: Response) => {
     const title = req.params.title as string;
-    const category = await categoryService.deleteCategory(title);
+    const category = await categoryService.delete(title);
     ApiSuccess.send(res, "OK", "Category deleted", category);
   }),
 };

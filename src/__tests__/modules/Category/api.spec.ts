@@ -1,5 +1,5 @@
 import request from "supertest";
-import Category from "@/modules/category/model";
+import Category from "@/modules/Category/model";
 import dbConnection from "@/common/config/database.config";
 import { validateResponse } from "@/__tests__/__utils__/validateResponse";
 import app from "@/server";

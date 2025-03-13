@@ -9,7 +9,7 @@ interface CreateCategory {
 
 export const categoryService = {
   // Get all categories
-  getAllCategories: async (page = 1) => {
+  getAll: async (page = 1) => {
     const limit = 5;
     const skip = (page - 1) * limit;
     const results = await Category.find({}).limit(limit).skip(skip);
@@ -23,7 +23,7 @@ export const categoryService = {
     return data;
   },
   // Get one category
-  getCategoryByTitle: async (title: string) => {
+  getOne: async (title: string) => {
     const data = await Category.find({ title });
     if (data.length === 0) {
       throw new ApiError("Category not found", "NOT_FOUND");
@@ -31,7 +31,7 @@ export const categoryService = {
     return data;
   },
   // Create a new category
-  createCategory: async (categoryData: CreateCategory) => {
+  create: async (categoryData: CreateCategory) => {
     const { title, image } = categoryData;
     const data = await Category.create({
       title,
@@ -40,7 +40,7 @@ export const categoryService = {
     return data;
   },
   // Update a category
-  updateCategory: async (title: string, updatedData: CreateCategory) => {
+  update: async (title: string, updatedData: CreateCategory) => {
     const data = await Category.findOneAndUpdate(
       { title: title },
       { $set: updatedData },
@@ -52,7 +52,7 @@ export const categoryService = {
     return data;
   },
   // Delete a category
-  deleteCategory: async (title: string) => {
+  delete: async (title: string) => {
     const data = await Category.findOneAndDelete({ title });
     if (!data) {
       throw new ApiError("Category not found", "NOT_FOUND");
