@@ -1,17 +1,11 @@
-export interface ApiResponseI {
-  statusCode: number;
-  statusMessage: string;
-  status: "success" | "fail" | "error";
-  message: string;
-  timestamp: string;
-}
+import { ApiResponseBase, ApiStatus } from "@/common/types/api.types";
 
-export default class ApiResponse implements ApiResponseI {
-  public statusCode: number;
-  public statusMessage: string;
-  public status: "success" | "fail" | "error";
-  public message: string;
-  public timestamp: string;
+export default class ApiResponse implements ApiResponseBase {
+  public readonly statusCode: number;
+  public readonly statusMessage: string;
+  public readonly status: ApiStatus;
+  public readonly message: string;
+  public readonly timestamp: string;
 
   constructor(statusCode: number, statusMessage: string, message: string) {
     this.statusCode = statusCode;
@@ -21,13 +15,9 @@ export default class ApiResponse implements ApiResponseI {
     this.status = this.determineStatus(statusCode);
   }
 
-  private determineStatus(statusCode: number): "success" | "fail" | "error" {
-    if (statusCode >= 200 && statusCode < 300) {
-      return "success";
-    } else if (statusCode >= 400 && statusCode < 500) {
-      return "fail";
-    } else {
-      return "error";
-    }
+  private determineStatus(statusCode: number): ApiStatus {
+    if (statusCode >= 200 && statusCode < 300) return "success";
+    if (statusCode >= 400 && statusCode < 500) return "fail";
+    return "error";
   }
 }

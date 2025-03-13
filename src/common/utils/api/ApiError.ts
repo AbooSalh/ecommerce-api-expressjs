@@ -1,41 +1,47 @@
+import type { Response } from "express";
 import { HTTP_STATUS } from "@/common/constants/httpStatus";
-import ApiResponse, { ApiResponseI } from "./ApiResponse";
-import { Response } from "express";
+import {
+  ApiErrorDetail,
+  ApiErrorResponse,
+  HttpErrorStatus,
+} from "@/common/types/api.types";
+import ApiResponse from "./ApiResponse";
 
-interface ApiErrorDetail {
-  message: string;
-  field?: string;
-}
-
-class ApiError extends Error {
-  public response: ApiResponseI;
-  public errors: ApiErrorDetail[];
+export default class ApiError extends Error {
+  public readonly response: ApiResponse;
+  public readonly errors: ApiErrorDetail[];
 
   constructor(
-    errors: ApiErrorDetail[] | string = [],
-    status: keyof (typeof HTTP_STATUS)["ERROR"] = "INTERNAL_SERVER_ERROR"
+    errors: ApiErrorDetail[] | string,
+    status: HttpErrorStatus = "INTERNAL_SERVER_ERROR"
   ) {
-    super(typeof errors === "string" ? errors : errors[0].message); // Set first error message as main message
+    const errorDetails = Array.isArray(errors) ? errors : [{ message: errors }];
+    super(errorDetails[0].message);
 
     const statusCode = HTTP_STATUS.ERROR[status];
-    const statusMessage = status.replace(/_/g, " "); // Convert ENUM-style to readable format
-    const message = typeof errors === "string" ? errors : errors[0].message;
+    const statusMessage = status.replace(/_/g, " ");
 
-    this.response = new ApiResponse(statusCode, statusMessage, message);
+    this.response = new ApiResponse(
+      statusCode,
+      statusMessage,
+      errorDetails[0].message
+    );
+    this.errors = errorDetails;
 
-    this.errors = Array.isArray(errors) ? errors : [{ message: errors }];
-
-    Object.setPrototypeOf(this, new.target.prototype); // Ensures `instanceof` works
+    Error.captureStackTrace(this, this.constructor);
   }
 
-  /** Sends response directly using Express `res` */
   public send(res: Response): void {
-    res.status(this.response.statusCode).json({
-      response: this.response,
-      data: this.errors,
+    const response: ApiErrorResponse = {
+      ...this.response,
+      errors: this.errors,
       ...(process.env.NODE_ENV === "development" && { stack: this.stack }),
-    });
+    };
+
+    res.status(this.response.statusCode).json(response);
+  }
+
+  public static fromError(error: Error): ApiError {
+    return new ApiError(error.message);
   }
 }
-
-export default ApiError;
