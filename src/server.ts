@@ -4,6 +4,7 @@ import dbConnection from "./common/config/database.config";
 import categoryRouter from "./modules/Category/routes";
 import ApiError from "./common/utils/api/ApiError";
 import globalError from "./common/middleware/globalError";
+import subCategoryR from "./modules/SubCategory/routes";
 // import subCategoryRoutes from "./modules/SubCategory/routes";
 
 dotenv.config();
@@ -16,6 +17,8 @@ app.use(express.json()); // ✅ Middleware for parsing JSON
 dbConnection.connect();
 
 app.use("/api", categoryRouter);
+app.use("/api", subCategoryR);
+
 // handle all other unhandled routes
 app.all("*", (req: Request, res: Response, next: NextFunction) => {
   next(new ApiError("Route not found", "NOT_FOUND"));

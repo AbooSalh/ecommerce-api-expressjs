@@ -40,7 +40,12 @@ export const subCategoryService = {
   // Create a new category
   create: async (categoryData: ICreate) => {
     const { title, image, categoryTitle } = categoryData;
-    const category = await Category.find({ categoryTitle });
+    const category = await Category.findOne({ title: categoryTitle });
+    if (!category) {
+      throw new ApiError("Category not found", "NOT_FOUND");
+    }
+    console.log(categoryTitle);
+
     const data = await model.create({
       title,
       image,
