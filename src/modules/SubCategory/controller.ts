@@ -21,7 +21,6 @@ export const subCategoryC = {
   getOne: {
     handler: expressAsyncHandler(async (req: Request, res: Response) => {
       const {title} = req.params 
-      console.log(req.params);
       
       const category = await s.getOne(title);
       ApiSuccess.send(res, "OK", "Sub Category found", category);
