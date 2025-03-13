@@ -10,7 +10,7 @@ export const subCategoryC = {
   // @access  Public
   getAll: {
     handler: expressAsyncHandler(async (req: Request, res: Response) => {
-      const { page, limit , categoryId } = req.params;
+      const { page, limit, categoryId } = req.params;
       let filters = {};
       if (categoryId) {
         filters = { category: categoryId };
@@ -25,12 +25,14 @@ export const subCategoryC = {
   // @access  Public
   getOne: {
     handler: expressAsyncHandler(async (req: Request, res: Response) => {
-      const { title } = req.params;
-      const category = await s.getOne(title);
+      const { subCategorySlug } = req.params;
+      const category = await s.getOne(subCategorySlug);
       ApiSuccess.send(res, "OK", "Sub Category found", category);
     }),
     validator: [
-      param("title").exists().withMessage("Sub Category title is required"),
+      param("subCategorySlug")
+        .exists()
+        .withMessage("Sub Category title is required"),
       validatorMiddleware,
     ],
   },
@@ -39,18 +41,18 @@ export const subCategoryC = {
   // @access  Private
   create: {
     handler: expressAsyncHandler(async (req: Request, res: Response) => {
-      const { title, image, categoryId } = req.body;
+      const { title, image, categorySlug } = req.body;
       const newSubCategory = await s.create({
         title,
         image,
-        categoryId,
+        categorySlug,
       });
       ApiSuccess.send(res, "CREATED", "Sub Category created", newSubCategory);
     }),
     validator: [
       body("title").exists().withMessage("Sub Category title is required"),
       body("image").exists().withMessage("Sub Category image is required"),
-      body("categoryId").exists().withMessage("Category title is required"),
+      body("categorySlug").exists().withMessage("Category title is required"),
       validatorMiddleware,
     ],
   },
@@ -59,19 +61,19 @@ export const subCategoryC = {
   // @access  Private
   update: {
     handler: expressAsyncHandler(async (req: Request, res: Response) => {
-      const title = req.params.title as string;
+      const { subCategorySlug } = req.params;
       const updatedData = req.body;
-      const category = await s.update(title, updatedData);
+      const category = await s.update(subCategorySlug, updatedData);
       ApiSuccess.send(res, "OK", "Sub Category updated", category);
     }),
     validator: [
-      param("subCategoryId")
+      param("subCategorySlug")
         .exists()
         .withMessage("Sub Category title is required"),
       oneOf([
         body("title").exists().withMessage("at least update one value"),
         body("image").exists().withMessage("at least update one value"),
-        body("categoryId").exists().withMessage("at least update one value"),
+        body("categorySlug").exists().withMessage("at least update one value"),
       ]),
       validatorMiddleware,
     ],
@@ -81,12 +83,12 @@ export const subCategoryC = {
   // @access  Private
   delete: {
     handler: expressAsyncHandler(async (req: Request, res: Response) => {
-      const title = req.params.title as string;
-      const category = await s.delete(title);
+      const { subCategorySlug } = req.params;
+      const category = await s.delete(subCategorySlug);
       ApiSuccess.send(res, "OK", "Sub Category deleted", category);
     }),
     validator: [
-      param("subCategoryId")
+      param("subCategorySlug")
         .exists()
         .withMessage("Sub Category title is required"),
       validatorMiddleware,

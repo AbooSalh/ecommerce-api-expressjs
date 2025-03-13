@@ -12,7 +12,7 @@ export const categoryValidator = {
   updateCategory: [
     // rules
     // at least one exists
-    param("categoryId").exists().withMessage("Category title is required"),
+    param("categorySlug").exists().withMessage("Category title is required"),
     body("title")
       .isLength({ min: 3, max: 32 })
       .withMessage("Category title is too short at least 3 characters"),
@@ -25,13 +25,13 @@ export const categoryValidator = {
   ],
   deleteCategory: [
     // rules
-    param("categoryId").exists().withMessage("Category title is required"),
+    param("categorySlug").exists().withMessage("Category title is required"),
     // middleware catch
     validatorMiddleware,
   ],
   getCategoryByTitle: [
     // rules
-    param("categoryId").exists().withMessage("Category title is required"),
+    param("categorySlug").exists().withMessage("Category title is required"),
     // middleware catch
     validatorMiddleware,
   ],

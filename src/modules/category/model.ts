@@ -37,7 +37,22 @@ categorySchema.pre("save", function (next) {
   }
   next();
 });
+categorySchema.pre("findOneAndUpdate", async function (next) {
+  const update = this.getUpdate() as {
+    $set?: {
+      slug: string;
+      title?: string;
+    };
+  };
 
+  if (update.$set?.title) {
+    update.$set.slug = slugify(update.$set.title, {
+      lower: true,
+      strict: true,
+    });
+  }
+  next();
+});
 const Category = mongoose.model("Category", categorySchema);
 
 export default Category;

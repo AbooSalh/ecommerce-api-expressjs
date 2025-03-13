@@ -8,9 +8,9 @@ categoryRouter
   .get(controller.getAll)
   .post(validator.createCategory, controller.create);
 categoryRouter
-  .route("/:categoryId")
+  .route("/:categorySlug")
   .get(validator.getCategoryByTitle, controller.getOne)
   .put(validator.updateCategory, controller.update)
   .delete(validator.deleteCategory, controller.delete);
-categoryRouter.use("/:categoryId/sub-categories", subCategoryR);
+categoryRouter.use("/:categorySlug/sub-categories", subCategoryR);
 export default categoryRouter;

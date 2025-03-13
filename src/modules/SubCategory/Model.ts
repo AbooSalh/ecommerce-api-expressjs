@@ -44,7 +44,22 @@ subCategorySchema.pre("save", function (next) {
   }
   next();
 });
+subCategorySchema.pre("findOneAndUpdate", async function (next) {
+  const update = this.getUpdate() as {
+    $set?: {
+      slug: string;
+      title?: string;
+    };
+  };
 
+  if (update.$set?.title) {
+    update.$set.slug = slugify(update.$set.title, {
+      lower: true,
+      strict: true,
+    });
+  }
+  next();
+});
 const SubCategoryModel = mongoose.model<ISubCategory>(
   "SubCategory",
   subCategorySchema

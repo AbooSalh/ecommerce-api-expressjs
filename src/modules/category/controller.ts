@@ -16,8 +16,8 @@ export const categoryController = {
   // @route   GET /api/categories/:id
   // @access  Public
   getOne: expressAsyncHandler(async (req: Request, res: Response) => {
-    const { subCategoryId } = req.params;
-    const category = await categoryService.getOne(subCategoryId);
+    const { categorySlug } = req.params;
+    const category = await categoryService.getOne(categorySlug);
     ApiSuccess.send(res, "OK", "Category found", category);
   }),
   // @desc    Create a new category
@@ -35,17 +35,17 @@ export const categoryController = {
   // @route   PUT /api/categories/:id
   // @access  Private
   update: expressAsyncHandler(async (req: Request, res: Response) => {
-    const { subCategoryId } = req.params;
+    const { categorySlug } = req.params;
     const updatedData = req.body;
-    const category = await categoryService.update(subCategoryId, updatedData);
+    const category = await categoryService.update(categorySlug, updatedData);
     ApiSuccess.send(res, "OK", "Category updated", category);
   }),
   // @desc    Delete a category
   // @route   DELETE /api/categories/:id
   // @access  Private
   delete: expressAsyncHandler(async (req: Request, res: Response) => {
-    const { subCategoryId } = req.params;
-    const category = await categoryService.delete(subCategoryId);
+    const { categorySlug } = req.params;
+    const category = await categoryService.delete(categorySlug);
     ApiSuccess.send(res, "OK", "Category deleted", category);
   }),
 };

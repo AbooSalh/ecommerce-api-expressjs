@@ -23,8 +23,8 @@ export const categoryService = {
     return data;
   },
   // Get one category
-  getOne: async (categoryId: string) => {
-    const data = await Category.findById(categoryId);
+  getOne: async (slug: string) => {
+    const data = await Category.findOne({ slug });
     if (!data) {
       throw new ApiError("Category not found", "NOT_FOUND");
     }
@@ -40,9 +40,9 @@ export const categoryService = {
     return data;
   },
   // Update a category
-  update: async (categoryId: string, updatedData: CreateCategory) => {
+  update: async (slug: string, updatedData: CreateCategory) => {
     const data = await Category.findOneAndUpdate(
-      { _id: categoryId },
+      { slug },
       { $set: updatedData },
       { new: true, runValidators: true } // Ensures validation runs on update
     );
@@ -52,8 +52,8 @@ export const categoryService = {
     return data;
   },
   // Delete a category
-  delete: async (categoryId: string) => {
-    const data = await Category.findByIdAndDelete(categoryId);
+  delete: async (slug: string) => {
+    const data = await Category.findOneAndDelete({slug});
     if (!data) {
       throw new ApiError("Category not found", "NOT_FOUND");
     }
