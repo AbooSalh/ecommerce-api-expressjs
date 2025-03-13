@@ -16,8 +16,8 @@ app.use(express.json()); // ✅ Middleware for parsing JSON
 
 dbConnection.connect();
 
-app.use("/api", categoryRouter);
-app.use("/api", subCategoryR);
+app.use("/api/categories", categoryRouter);
+app.use("/api/sub-categories", subCategoryR);
 
 // handle all other unhandled routes
 app.all("*", (req: Request, res: Response, next: NextFunction) => {

@@ -1,4 +1,3 @@
-import Category from "../Category/model";
 import subCategory from "./model";
 const model = subCategory;
 import ApiError from "@/common/utils/api/ApiError";
@@ -7,21 +6,21 @@ interface ICreate {
   title: string;
   slug?: string;
   image?: string;
-  categoryTitle: string;
+  categoryId: string;
 }
 interface IUpdate {
   title?: string;
   slug?: string;
   image?: string;
-  categoryTitle?: string;
+  categoryId?: string;
 }
 export const subCategoryService = {
   // Get all categories
-  getAll: async (page = 1, limit = 10) => {
+  getAll: async (filters: Record<string, unknown>, page = 1, limit = 10) => {
     const skip = (page - 1) * limit;
-    const results = await model.find({}).limit(limit).skip(skip);
+    const results = await model.find(filters).limit(limit).skip(skip);
     const data = {
-      categories: results,
+      subCategories: results,
       currentPage: page,
       hasPrevPage: page > 1,
       hasNextPage: results.length === limit,
@@ -30,32 +29,28 @@ export const subCategoryService = {
     return data;
   },
   // Get one category
-  getOne: async (title: string) => {
-    const data = await model.findOne({ title });
+  getOne: async (subCategoryId: string) => {
+    const data = await model.findById(subCategoryId);
 
-    if ( !data) {
+    if (!data) {
       throw new ApiError("Sub Category not found", "NOT_FOUND");
     }
     return data;
   },
   // Create a new category
   create: async (categoryData: ICreate) => {
-    const { title, image, categoryTitle } = categoryData;
-    const category = await Category.findOne({ title: categoryTitle });
-    if (!category) {
-      throw new ApiError("Category not found", "NOT_FOUND");
-    }
+    const { title, image, categoryId } = categoryData;
     const data = await model.create({
       title,
       image,
-      category,
+      category: categoryId,
     });
     return data;
   },
   // Update a category
-  update: async (title: string, updatedData: IUpdate) => {
+  update: async (subCategoryId: string, updatedData: IUpdate) => {
     const data = await model.findOneAndUpdate(
-      { title: title },
+      { _id: subCategoryId },
       { $set: updatedData },
       { new: true, runValidators: true } // Ensures validation runs on update
     );
@@ -65,8 +60,8 @@ export const subCategoryService = {
     return data;
   },
   // Delete a category
-  delete: async (title: string) => {
-    const data = await model.findOneAndDelete({ title });
+  delete: async (subCategoryId: string) => {
+    const data = await model.findByIdAndDelete(subCategoryId);
     if (!data) {
       throw new ApiError("Sub Category not found", "NOT_FOUND");
     }
