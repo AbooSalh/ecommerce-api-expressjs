@@ -31,8 +31,10 @@ export const subCategoryService = {
   },
   // Get one category
   getOne: async (title: string) => {
-    const data = await model.find({ title });
-    if (data.length === 0) {
+    const data = await model.findOne({ title });
+    console.log(data, title);
+
+    if ( !data) {
       throw new ApiError("Sub Category not found", "NOT_FOUND");
     }
     return data;
@@ -44,8 +46,6 @@ export const subCategoryService = {
     if (!category) {
       throw new ApiError("Category not found", "NOT_FOUND");
     }
-    console.log(categoryTitle);
-
     const data = await model.create({
       title,
       image,

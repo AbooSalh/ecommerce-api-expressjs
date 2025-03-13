@@ -20,7 +20,9 @@ export const subCategoryC = {
   // @access  Public
   getOne: {
     handler: expressAsyncHandler(async (req: Request, res: Response) => {
-      const title = req.params.title as string;
+      const {title} = req.params 
+      console.log(req.params);
+      
       const category = await s.getOne(title);
       ApiSuccess.send(res, "OK", "Sub Category found", category);
     }),
