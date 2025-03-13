@@ -51,7 +51,9 @@ export const subCategoryService = {
   },
   // Update a category by slug
   update: async (slug: string, updatedData: IUpdate) => {
-    const categoryId = await Category.findOne({ slug: updatedData.categorySlug });
+    const categoryId = await Category.findOne({
+      slug: updatedData.categorySlug,
+    });
     if (!categoryId) {
       throw new ApiError("Category not found", "NOT_FOUND");
     }

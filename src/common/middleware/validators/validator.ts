@@ -1,6 +1,6 @@
+import ApiError from "@/common/utils/api/ApiError";
 import type { Request, Response, NextFunction } from "express";
 import { validationResult, ValidationError } from "express-validator";
-import ApiError from "../utils/api/ApiError";
 
 interface ApiErrorDetail {
   message: string;

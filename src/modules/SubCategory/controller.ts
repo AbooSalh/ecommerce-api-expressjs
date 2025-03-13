@@ -3,7 +3,7 @@ import expressAsyncHandler from "express-async-handler";
 import ApiSuccess from "@/common/utils/api/ApiSuccess";
 import { subCategoryService as s } from "./services";
 import { body, param, oneOf } from "express-validator";
-import validatorMiddleware from "@/common/middleware/validator";
+import validatorMiddleware from "@/common/middleware/validators/validator";
 export const subCategoryC = {
   // @desc    Get all categories
   // @route   GET /api/categories
@@ -41,7 +41,12 @@ export const subCategoryC = {
   // @access  Private
   create: {
     handler: expressAsyncHandler(async (req: Request, res: Response) => {
+      if (!req.body.categorySlug) {
+        req.body.categorySlug = req.params.categorySlug;
+      }
+
       const { title, image, categorySlug } = req.body;
+
       const newSubCategory = await s.create({
         title,
         image,
@@ -52,7 +57,12 @@ export const subCategoryC = {
     validator: [
       body("title").exists().withMessage("Sub Category title is required"),
       body("image").exists().withMessage("Sub Category image is required"),
-      body("categorySlug").exists().withMessage("Category title is required"),
+      oneOf([
+        body("categorySlug").exists().withMessage("Category title is required"),
+        param("categorySlug")
+          .exists()
+          .withMessage("Category title is required"),
+      ]),
       validatorMiddleware,
     ],
   },

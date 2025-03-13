@@ -1,4 +1,4 @@
-import validatorMiddleware from "@/common/middleware/validator";
+import validatorMiddleware from "@/common/middleware/validators/validator";
 import { body, oneOf, param } from "express-validator";
 
 export const categoryValidator = {
