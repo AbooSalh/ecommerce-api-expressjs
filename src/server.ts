@@ -5,6 +5,7 @@ import categoryRouter from "./modules/Category/routes";
 import ApiError from "./common/utils/api/ApiError";
 import globalError from "./common/middleware/globalError";
 import subCategoryR from "./modules/SubCategory/routes";
+import brandR from "./modules/Brands/routes";
 // import subCategoryRoutes from "./modules/SubCategory/routes";
 
 dotenv.config();
@@ -18,7 +19,7 @@ dbConnection.connect();
 
 app.use("/api/categories", categoryRouter);
 app.use("/api/sub-categories", subCategoryR);
-
+app.use("/api/brands", brandR);
 // handle all other unhandled routes
 app.all("*", (req: Request, res: Response, next: NextFunction) => {
   next(new ApiError("Route not found", "NOT_FOUND"));

@@ -1,19 +1,19 @@
-import Category from "./model";
+import BrandM from "./model";
 import ApiError from "@/common/utils/api/ApiError";
-const model = Category;
-interface CreateCategory {
+const model = BrandM;
+interface ICreateBrand {
   title: string;
   slug?: string;
   image?: string;
 }
 
-export const categoryS = {
+export const brandS = {
   // Get all categories
   getAll: async (page = 1 , limit = 10) => {
     const skip = (page - 1) * limit;
     const results = await model.find({}).limit(limit).skip(skip);
     const data = {
-      categories: results,
+      brands: results,
       currentPage: page,
       hasPrevPage: page > 1,
       hasNextPage: results.length === limit,
@@ -25,13 +25,13 @@ export const categoryS = {
   getOne: async (slug: string) => {
     const data = await model.findOne({ slug });
     if (!data) {
-      throw new ApiError("Category not found", "NOT_FOUND");
+      throw new ApiError("brand not found", "NOT_FOUND");
     }
     return data;
   },
   // Create a new category
-  create: async (categoryData: CreateCategory) => {
-    const { title, image } = categoryData;
+  create: async (brandData: ICreateBrand) => {
+    const { title, image } = brandData;
     const data = await model.create({
       title,
       image,
@@ -39,22 +39,22 @@ export const categoryS = {
     return data;
   },
   // Update a category
-  update: async (slug: string, updatedData: CreateCategory) => {
+  update: async (slug: string, updatedData: ICreateBrand) => {
     const data = await model.findOneAndUpdate(
       { slug },
       { $set: updatedData },
       { new: true, runValidators: true } // Ensures validation runs on update
     );
     if (!data) {
-      throw new ApiError("Category not found", "NOT_FOUND");
+      throw new ApiError("brand not found", "NOT_FOUND");
     }
     return data;
   },
   // Delete a category
   delete: async (slug: string) => {
-    const data = await Category.findOneAndDelete({ slug });
+    const data = await model.findOneAndDelete({ slug });
     if (!data) {
-      throw new ApiError("Category not found", "NOT_FOUND");
+      throw new ApiError("brand not found", "NOT_FOUND");
     }
     return data;
   },

@@ -1,16 +1,15 @@
 import express from "express";
-import { categoryController as controller } from "./controller";
-import { categoryValidator as validator } from "./validators";
+import { categoryC as c } from "./controller";
 import subCategoryR from "../SubCategory/routes";
 const categoryRouter = express.Router();
 categoryRouter
   .route("/")
-  .get(controller.getAll)
-  .post(validator.createCategory, controller.create);
+  .get(c.getAll.handler)
+  .post(c.create.validator, c.create.handler);
 categoryRouter
   .route("/:categorySlug")
-  .get(validator.getCategoryByTitle, controller.getOne)
-  .put(validator.updateCategory, controller.update)
-  .delete(validator.deleteCategory, controller.delete);
+  .get(c.getOne.validator, c.getOne.handler)
+  .put(c.update.validator, c.update.handler)
+  .delete(c.delete.validator, c.delete.handler);
 categoryRouter.use("/:categorySlug/sub-categories", subCategoryR);
 export default categoryRouter;

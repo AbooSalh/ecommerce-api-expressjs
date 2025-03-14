@@ -1,11 +1,11 @@
 import { Request, Response } from "express";
 import expressAsyncHandler from "express-async-handler";
-import { categoryS as s } from "./services";
+import { brandS as s } from "./service";
 import ApiSuccess from "@/common/utils/api/ApiSuccess";
 import validatorMiddleware from "@/common/middleware/validators/validator";
 import { body, param, oneOf } from "express-validator";
 
-export const categoryC = {
+export const brandC = {
   // @desc    Get all categories
   // @route   GET /api/categories
   // @access  Public
@@ -13,12 +13,10 @@ export const categoryC = {
     handler: expressAsyncHandler(async (req: Request, res: Response) => {
       const { page, limit } = req.params;
       const result = await s.getAll(+page, +limit);
-      ApiSuccess.send(res, "OK", "Categories found", result);
+      ApiSuccess.send(res, "OK", "Brands found", result);
     }),
     validator: [
       // rules
-      body("title").exists().withMessage("Category title is required"),
-      body("image").exists().withMessage("Category image is required"),
       param("page").isInt().withMessage("Page must be an integer"),
       param("limit").isInt().withMessage("Limit must be an integer"),
       // middleware catch
@@ -30,9 +28,9 @@ export const categoryC = {
   // @access  Public
   getOne: {
     handler: expressAsyncHandler(async (req: Request, res: Response) => {
-      const { categorySlug } = req.params;
-      const category = await s.getOne(categorySlug);
-      ApiSuccess.send(res, "OK", "Category found", category);
+      const { brandSlug } = req.params;
+      const result = await s.getOne(brandSlug);
+      ApiSuccess.send(res, "OK", "Brand found", result);
     }),
     validator: [],
   },
@@ -42,15 +40,16 @@ export const categoryC = {
   create: {
     handler: expressAsyncHandler(async (req: Request, res: Response) => {
       const { title, image } = req.body;
-      const newCategory = await s.create({
+      const result = await s.create({
         title,
         image,
       });
-      ApiSuccess.send(res, "CREATED", "Category created", newCategory);
+      ApiSuccess.send(res, "CREATED", "Brand created", result);
     }),
     validator: [
       // rules
-      param("categorySlug").exists().withMessage("Category title is required"),
+      body("title").exists().withMessage("brand title is required"),
+      body("image").exists().withMessage("brand image is required"),
       // middleware catch
       validatorMiddleware,
     ],
@@ -60,18 +59,18 @@ export const categoryC = {
   // @access  Private
   update: {
     handler: expressAsyncHandler(async (req: Request, res: Response) => {
-      const { categorySlug } = req.params;
+      const { brandSlug } = req.params;
       const updatedData = req.body;
-      const category = await s.update(categorySlug, updatedData);
-      ApiSuccess.send(res, "OK", "Category updated", category);
+      const result = await s.update(brandSlug, updatedData);
+      ApiSuccess.send(res, "OK", "Brand updated", result);
     }),
     validator: [
       // rules
       // at least one exists
-      param("categorySlug").exists().withMessage("Category title is required"),
+      param("brandSlug").exists().withMessage("brand title is required"),
       body("title")
         .isLength({ min: 3, max: 32 })
-        .withMessage("Category title is too short at least 3 characters"),
+        .withMessage("brand title is too short at least 3 characters"),
       oneOf([
         body("title").exists().withMessage("at least update one value"),
         body("image").exists().withMessage("at least update one value"),
@@ -85,13 +84,13 @@ export const categoryC = {
   // @access  Private
   delete: {
     handler: expressAsyncHandler(async (req: Request, res: Response) => {
-      const { categorySlug } = req.params;
-      const category = await s.delete(categorySlug);
-      ApiSuccess.send(res, "OK", "Category deleted", category);
+      const { brandSlug } = req.params;
+      const result = await s.delete(brandSlug);
+      ApiSuccess.send(res, "OK", "Brand deleted", result);
     }),
     validator: [
       // rules
-      param("categorySlug").exists().withMessage("Category title is required"),
+      param("brandSlug").exists().withMessage("brand title is required"),
       // middleware catch
       validatorMiddleware,
     ],
