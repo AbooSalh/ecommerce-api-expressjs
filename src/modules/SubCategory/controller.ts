@@ -4,21 +4,30 @@ import ApiSuccess from "@/common/utils/api/ApiSuccess";
 import { subCategoryService as s } from "./services";
 import { body, param, oneOf } from "express-validator";
 import validatorMiddleware from "@/common/middleware/validators/validator";
+import Category from "../Category/model";
+import ApiError from "@/common/utils/api/ApiError";
 export const subCategoryC = {
   // @desc    Get all categories
   // @route   GET /api/categories
   // @access  Public
   getAll: {
     handler: expressAsyncHandler(async (req: Request, res: Response) => {
-      const { page, limit, categoryId } = req.params;
+      const { page, limit, categorySlug } = req.params;
       let filters = {};
-      if (categoryId) {
-        filters = { category: categoryId };
+      if (categorySlug) {
+        const catId = await Category.findOne({ slug: categorySlug });
+        if(!catId){
+          throw new ApiError("Category Not Found" , "NOT_FOUND");
+        }
+        filters = { category: catId };
       }
       const result = await s.getAll(filters, +page, +limit);
       ApiSuccess.send(res, "OK", "Sub Categories found", result);
     }),
-    validator: [],
+    validator: [
+      param("page").isInt().withMessage("Page must be an integer"),
+      param("limit").isInt().withMessage("Limit must be an integer"),
+    ],
   },
   // @desc    Get one category
   // @route   GET /api/categories/:id
