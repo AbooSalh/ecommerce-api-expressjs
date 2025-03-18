@@ -1,9 +1,5 @@
 import mongoose, { Schema } from "mongoose";
 import slugify from "slugify";
-export interface ICategory {
-  title: string;
-  image: string;
-}
 const brandSchema = new Schema(
   {
     title: {
