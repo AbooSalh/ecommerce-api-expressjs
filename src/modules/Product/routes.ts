@@ -9,7 +9,7 @@ productR
   .post(c.create.validator, c.create.handler);
 
 productR
-  .route("/:slug")
+  .route("/:id")
   .get(c.getOne.validator, c.getOne.handler)
   .put(c.update.validator, c.update.handler)
   .delete(c.delete.validator, c.delete.handler);
