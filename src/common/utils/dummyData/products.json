@@ -1,0 +1,160 @@
+[
+    {
+        "title": "Gaming Laptop Asus ROG",
+        "description": "High-performance gaming laptop with RTX 4090, 32GB RAM, and 2TB SSD storage. Perfect for hardcore gamers.",
+        "quantity": 50,
+        "sold": 15,
+        "price": 2499.99,
+        "discount": 10,
+        "colors": [
+            "black",
+            "red"
+        ],
+        "imageCover": "asus-rog-cover.jpg",
+        "images": [
+            "asus-rog-1.jpg",
+            "asus-rog-2.jpg",
+            "asus-rog-3.jpg"
+        ],
+        "category": "65f1d44b47e8fff4792d03c4", 
+        "subCategories": [
+            "65f1d44b47e8fff4792d03c5"
+        ], 
+        "brand": "65f1d44b47e8fff4792d03c6",
+        "ratings": [
+            4.5,
+            5,
+            4,
+            4.5,
+            5
+        ],
+        "ratingAvg": 4.6
+    },
+    {
+        "title": "Nike Air Max 2024",
+        "description": "Latest edition of Nike Air Max featuring advanced cushioning technology and breathable mesh upper design.",
+        "quantity": 100,
+        "sold": 45,
+        "price": 199.99,
+        "discount": 0,
+        "colors": [
+            "white",
+            "black",
+            "red",
+            "blue"
+        ],
+        "imageCover": "nike-airmax-cover.jpg",
+        "images": [
+            "nike-airmax-1.jpg",
+            "nike-airmax-2.jpg",
+            "nike-airmax-3.jpg"
+        ],
+        "category": "65f1d44b47e8fff4792d03c7", 
+        "subCategories": [
+            "65f1d44b47e8fff4792d03c8"
+        ], 
+        "brand": "65f1d44b47e8fff4792d03c9",
+        "ratings": [
+            4,
+            4.5,
+            5,
+            4,
+            4.5
+        ],
+        "ratingAvg": 4.4
+    },
+    {
+        "title": "Samsung QLED 4K TV",
+        "description": "65-inch QLED TV with quantum dot technology, HDR, and smart features for ultimate home entertainment.",
+        "quantity": 30,
+        "sold": 8,
+        "price": 1299.99,
+        "discount": 15,
+        "colors": [
+            "black"
+        ],
+        "imageCover": "samsung-tv-cover.jpg",
+        "images": [
+            "samsung-tv-1.jpg",
+            "samsung-tv-2.jpg",
+            "samsung-tv-3.jpg"
+        ],
+        "category": "65f1d44b47e8fff4792d03c4", 
+        "subCategories": [
+            "65f1d44b47e8fff4792d03ca"
+        ], 
+        "brand": "65f1d44b47e8fff4792d03cb", 
+        "ratings": [
+            5,
+            4.5,
+            4.5,
+            5,
+            4
+        ],
+        "ratingAvg": 4.6
+    },
+    {
+        "title": "iPhone 15 Pro Max",
+        "description": "Latest iPhone featuring A17 Pro chip, 48MP camera system, and titanium design. Available in multiple storage options.",
+        "quantity": 75,
+        "sold": 25,
+        "price": 1299.99,
+        "discount": 0,
+        "colors": [
+            "natural",
+            "blue",
+            "white",
+            "black"
+        ],
+        "imageCover": "iphone15-cover.jpg",
+        "images": [
+            "iphone15-1.jpg",
+            "iphone15-2.jpg",
+            "iphone15-3.jpg"
+        ],
+        "category": "65f1d44b47e8fff4792d03c4", 
+        "subCategories": [
+            "65f1d44b47e8fff4792d03cc"
+        ], 
+        "brand": "65f1d44b47e8fff4792d03cd", 
+        "ratings": [
+            5,
+            5,
+            4.5,
+            5,
+            4.5
+        ],
+        "ratingAvg": 4.8
+    },
+    {
+        "title": "Leather Office Chair",
+        "description": "Ergonomic office chair with genuine leather, adjustable height, and lumbar support for comfortable work sessions.",
+        "quantity": 40,
+        "sold": 12,
+        "price": 299.99,
+        "discount": 20,
+        "colors": [
+            "brown",
+            "black"
+        ],
+        "imageCover": "office-chair-cover.jpg",
+        "images": [
+            "office-chair-1.jpg",
+            "office-chair-2.jpg",
+            "office-chair-3.jpg"
+        ],
+        "category": "65f1d44b47e8fff4792d03ce", 
+        "subCategories": [
+            "65f1d44b47e8fff4792d03cf"
+        ], 
+        "brand": "65f1d44b47e8fff4792d03d0", 
+        "ratings": [
+            4,
+            4.5,
+            4,
+            4.5,
+            4
+        ],
+        "ratingAvg": 4.2
+    }
+]
