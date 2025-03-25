@@ -31,12 +31,12 @@ export const productC = {
   // @access  Public
   getOne: {
     handler: expressAsyncHandler(async (req: Request, res: Response) => {
-      const { id } = req.params ;
+      const { id } = req.params;
       const result = await s.getOne(id);
       ApiSuccess.send(res, "OK", "Product found", result);
     }),
     validator: [
-      param("slug").exists().withMessage("Product slug is required"),
+      param("id").exists().withMessage("Product slug is required"),
       validatorMiddleware,
     ],
   },
@@ -77,7 +77,7 @@ export const productC = {
       ApiSuccess.send(res, "OK", "Product updated", result);
     }),
     validator: [
-      param("slug").exists().withMessage("Product slug is required"),
+      param("id").exists().withMessage("Product id is required"),
       oneOf([
         body("title")
           .exists()
@@ -111,7 +111,7 @@ export const productC = {
       ApiSuccess.send(res, "OK", "Product deleted", result);
     }),
     validator: [
-      param("slug").exists().withMessage("Product slug is required"),
+      param("id").exists().withMessage("Product id is required"),
       validatorMiddleware,
     ],
   },
