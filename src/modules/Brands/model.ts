@@ -49,6 +49,6 @@ brandSchema.pre("findOneAndUpdate", async function (next) {
   }
   next();
 });
-const BrandM = mongoose.model("brand", brandSchema);
+const BrandM = mongoose.model("Brand", brandSchema);
 
 export default BrandM;
