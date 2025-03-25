@@ -1,0 +1,17 @@
+import express from "express";
+import { productC as c } from "./controller";
+
+const productR = express.Router();
+
+productR
+  .route("/")
+  .get(c.getAll.validator, c.getAll.handler)
+  .post(c.create.validator, c.create.handler);
+
+productR
+  .route("/:slug")
+  .get(c.getOne.validator, c.getOne.handler)
+  .put(c.update.validator, c.update.handler)
+  .delete(c.delete.validator, c.delete.handler);
+
+export default productR;
