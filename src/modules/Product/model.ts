@@ -40,9 +40,6 @@ const productSchema = new mongoose.Schema(
       min: [1, "discount at least 1%"],
       max: [100, "discount at most 100%"],
     },
-    priceAfterDiscount: {
-      type: Number,
-    },
     colors: [String],
 
     imageCover: {
