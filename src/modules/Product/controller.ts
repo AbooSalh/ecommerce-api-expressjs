@@ -36,7 +36,7 @@ export const productC = {
       ApiSuccess.send(res, "OK", "Product found", result);
     }),
     validator: [
-      param("id").exists().withMessage("Product slug is required"),
+      param("id").exists().withMessage("Product slug is required").isMongoId(),
       validatorMiddleware,
     ],
   },
@@ -77,7 +77,7 @@ export const productC = {
       ApiSuccess.send(res, "OK", "Product updated", result);
     }),
     validator: [
-      param("id").exists().withMessage("Product id is required"),
+      param("id").exists().withMessage("Product id is required").isMongoId(),
       oneOf([
         body("title")
           .exists()
@@ -96,7 +96,19 @@ export const productC = {
           .withMessage("At least one field must be updated"),
         body("category")
           .exists()
-          .withMessage("At least one field must be updated"),
+          .withMessage("At least one field must be updated")
+          .isMongoId()
+          .withMessage("category must be valid id"),
+        body("subCategories")
+          .exists()
+          .withMessage("Sub Categories required")
+          .isMongoId()
+          .withMessage("subCategories must be valid id"),
+        body("brand")
+          .exists()
+          .withMessage("brand required")
+          .isMongoId()
+          .withMessage("brand  must be valid id"),
       ]),
       validatorMiddleware,
     ],
