@@ -1,63 +1,82 @@
+import mongoose from "mongoose";
 import Category from "../Category/model";
 import SubCategory from "../SubCategory/model";
-import { CustomValidator } from "express-validator";
 import BrandM from "../Brands/model";
-import mongoose from "mongoose";
+import { CustomValidator } from "express-validator";
 
-export const checkIfCategoryExists: CustomValidator = async (categoryId: string) => {
-  try {
-    if (!mongoose.Types.ObjectId.isValid(categoryId)) {
-      throw new Error("Invalid category ID format");
-    }
-    const category = await Category.findById(categoryId);
-    if (!category) {
-      throw new Error("Category not found");
-    }
-    return true;
-  } catch (error) {
-    throw new Error(error instanceof Error ? error.message : "Invalid category");
-  }
+// Helper function to validate ObjectId
+const isValidObjectId = (id: string): boolean => {
+  return mongoose.Types.ObjectId.isValid(id);
 };
 
-export const checkIfSubCategoriesExist: CustomValidator = async (subCategoryIds: string[]) => {
-  try {
-    if (!Array.isArray(subCategoryIds)) {
-      throw new Error("Sub categories must be an array");
-    }
-
-    // Validate all IDs first
-    const invalidIds = subCategoryIds.filter(id => !mongoose.Types.ObjectId.isValid(id));
-    if (invalidIds.length > 0) {
-      throw new Error(`Invalid subcategory ID format: ${invalidIds.join(', ')}`);
-    }
-
-    const subCategories = await SubCategory.find({
-      _id: { $in: subCategoryIds },
-    });
-
-    if (subCategories.length !== subCategoryIds.length) {
-      const foundIds = subCategories.map(sub => sub._id.toString());
-      const notFound = subCategoryIds.filter(id => !foundIds.includes(id));
-      throw new Error(`Sub categories not found: ${notFound.join(', ')}`);
-    }
-
-    return true;
-  } catch (error) {
-    throw new Error(error instanceof Error ? error.message : "Invalid subcategories");
-  }
+// Helper function to throw an error with a custom message
+const throwValidationError = (message: string): never => {
+  throw new Error(message);
 };
 
+// Validator to check if a category exists
+export const checkIfCategoryExists: CustomValidator = async (
+  categoryId: string
+) => {
+  if (!isValidObjectId(categoryId)) {
+    throwValidationError("Invalid category ID format");
+  }
+
+  const category = await Category.findById(categoryId);
+  if (!category) {
+    throwValidationError("Category not found");
+  }
+
+  return true;
+};
+
+// Validator to check if subcategories exist and belong to the specified category
+export const checkIfSubCategoriesExist: CustomValidator = async (
+  subCategoryIds: string[],
+  { req }
+) => {
+  if (!Array.isArray(subCategoryIds)) {
+    throwValidationError("Sub categories must be an array");
+  }
+
+  const categoryId = req.body.category;
+  if (!categoryId) {
+    throwValidationError("Category ID is required to validate subcategories");
+  }
+
+  // Validate all subcategory IDs
+  const invalidIds = subCategoryIds.filter((id) => !isValidObjectId(id));
+  if (invalidIds.length > 0) {
+    throwValidationError(
+      `Invalid subcategory ID format: ${invalidIds.join(", ")}`
+    );
+  }
+
+  // Find subcategories and ensure they belong to the specified category
+  const subCategories = await SubCategory.find({
+    _id: { $in: subCategoryIds },
+    category: categoryId,
+  });
+
+  if (subCategories.length !== subCategoryIds.length) {
+    throwValidationError(
+      `Some subcategories either don't exist or don't belong to the specified category`
+    );
+  }
+
+  return true;
+};
+
+// Validator to check if a brand exists
 export const checkIfBrandExists: CustomValidator = async (brandId: string) => {
-  try {
-    if (!mongoose.Types.ObjectId.isValid(brandId)) {
-      throw new Error("Invalid brand ID format");
-    }
-    const brand = await BrandM.findById(brandId);
-    if (!brand) {
-      throw new Error("Brand not found");
-    }
-    return true;
-  } catch (error) {
-    throw new Error(error instanceof Error ? error.message : "Invalid brand");
+  if (!isValidObjectId(brandId)) {
+    throwValidationError("Invalid brand ID format");
   }
+
+  const brand = await BrandM.findById(brandId);
+  if (!brand) {
+    throwValidationError("Brand not found");
+  }
+
+  return true;
 };
