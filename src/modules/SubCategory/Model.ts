@@ -2,6 +2,7 @@ import mongoose, { Schema, Document, ObjectId } from "mongoose";
 import slugify from "slugify";
 
 export interface ISubCategory extends Document {
+  _id: ObjectId;
   title: string;
   category: ObjectId;
   slug?: string;

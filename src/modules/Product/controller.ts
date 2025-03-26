@@ -4,11 +4,12 @@ import { productService as s } from "./service";
 import ApiSuccess from "@/common/utils/api/ApiSuccess";
 import validatorMiddleware from "@/common/middleware/validators/validator";
 import { body, param, oneOf } from "express-validator";
-
+import {
+  checkIfBrandExists,
+  checkIfCategoryExists,
+  checkIfSubCategoriesExist,
+} from "./utils";
 export const productC = {
-  // @desc    Get all products
-  // @route   GET /api/products
-  // @access  Public
   getAll: {
     handler: expressAsyncHandler(async (req: Request, res: Response) => {
       const { page, limit } = req.query;
@@ -26,9 +27,7 @@ export const productC = {
       validatorMiddleware,
     ],
   },
-  // @desc    Get one product
-  // @route   GET /api/products/:slug
-  // @access  Public
+
   getOne: {
     handler: expressAsyncHandler(async (req: Request, res: Response) => {
       const { id } = req.params;
@@ -40,9 +39,6 @@ export const productC = {
       validatorMiddleware,
     ],
   },
-  // @desc    Create a new product
-  // @route   POST /api/products
-  // @access  Private
   create: {
     handler: expressAsyncHandler(async (req: Request, res: Response) => {
       const result = await s.create(req.body);
@@ -62,13 +58,25 @@ export const productC = {
       body("imageCover")
         .exists()
         .withMessage("Product image cover is required"),
-      body("category").exists().withMessage("Product category is required"),
+      body("category")
+        .exists()
+        .withMessage("Product category is required")
+        .custom(checkIfCategoryExists),
+      body("subCategories")
+        .exists()
+        .withMessage("Sub Categories required")
+        .isMongoId()
+        .withMessage("subCategories must be valid id")
+        .custom(checkIfSubCategoriesExist),
+      body("brand")
+        .exists()
+        .withMessage("Product brand is required")
+        .isMongoId()
+        .withMessage("brand  must be valid id")
+        .custom(checkIfBrandExists),
       validatorMiddleware,
     ],
   },
-  // @desc    Update a product
-  // @route   PUT /api/products/:slug
-  // @access  Private
   update: {
     handler: expressAsyncHandler(async (req: Request, res: Response) => {
       const { id } = req.params;
@@ -98,24 +106,24 @@ export const productC = {
           .exists()
           .withMessage("At least one field must be updated")
           .isMongoId()
-          .withMessage("category must be valid id"),
+          .withMessage("category must be valid id")
+          .custom(checkIfCategoryExists),
         body("subCategories")
           .exists()
           .withMessage("Sub Categories required")
           .isMongoId()
-          .withMessage("subCategories must be valid id"),
+          .withMessage("subCategories must be valid id")
+          .custom(checkIfSubCategoriesExist),
         body("brand")
           .exists()
           .withMessage("brand required")
           .isMongoId()
-          .withMessage("brand  must be valid id"),
+          .withMessage("brand  must be valid id")
+          .custom(checkIfBrandExists),
       ]),
       validatorMiddleware,
     ],
   },
-  // @desc    Delete a product
-  // @route   DELETE /api/products/:slug
-  // @access  Private
   delete: {
     handler: expressAsyncHandler(async (req: Request, res: Response) => {
       const { id } = req.params;
