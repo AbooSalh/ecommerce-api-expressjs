@@ -1,3 +1,4 @@
+import { filterExcludedKeys } from "@/common/utils/filterExcludedKeys";
 import { ICreateProduct } from "./interfaces";
 import ProductM from "./model";
 import ApiError from "@/common/utils/api/ApiError";
@@ -36,15 +37,19 @@ export const productService = {
 
   // Create a new product
   create: async (productData: ICreateProduct) => {
-    const product = await ProductM.create(productData);
+    // Filter the data to only include the fields we want to save
+    const filteredData = filterExcludedKeys(productData, ["ratings", "sold"]);
+    const product = await ProductM.create(filteredData);
     return product;
   },
 
   // Update a product by slug
   update: async (id: string, updatedData: Partial<ICreateProduct>) => {
+    const filteredData = filterExcludedKeys(updatedData, ["ratings", "sold"]);
+
     const product = await ProductM.findByIdAndUpdate(
       id,
-      { $set: updatedData },
+      { $set: filteredData },
       { new: true, runValidators: true }
     );
     if (!product) {
