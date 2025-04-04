@@ -12,7 +12,6 @@ const productSchema = new mongoose.Schema(
     },
     slug: {
       type: String,
-      required: true,
       lowercase: true,
     },
     description: {
@@ -37,20 +36,19 @@ const productSchema = new mongoose.Schema(
       type: Number,
       trim: true,
       default: 0,
-      min: [1, "discount at least 1%"],
-      max: [100, "discount at most 100%"],
+      min: [1, "Discount must be at least 1%"],
+      max: [100, "Discount must be at most 100%"],
     },
     colors: [String],
-
     imageCover: {
       type: String,
-      required: [true, "Product Image cover is required"],
+      required: [true, "Product image cover is required"],
     },
     images: [String],
     category: {
       type: mongoose.Schema.ObjectId,
       ref: "Category",
-      required: [true, "Product must be belong to category"],
+      required: [true, "Product must belong to a category"],
     },
     subCategories: [
       {
@@ -65,31 +63,31 @@ const productSchema = new mongoose.Schema(
     ratings: [
       {
         type: Number,
-        min: [1, "Rating must be above or equal 1.0"],
-        max: [5, "Rating must be below or equal 5.0"],
+        min: [1, "Rating must be at least 1.0"],
+        max: [5, "Rating must be at most 5.0"],
       },
     ],
-    ratingAvg:{
-        type:Number,
-    }
-
+    ratingAvg: {
+      type: Number,
+    },
   },
   { timestamps: true }
 );
 
 // Pre-save hook to generate slug from title
 productSchema.pre("save", function (next) {
-  if (this.isModified("title")) {
+  if (this.isModified("title") && this.title) {
     this.slug = slugify(this.title, { lower: true, strict: true });
   }
   next();
 });
 
+// Pre-update hook to generate slug from title
 productSchema.pre("findOneAndUpdate", async function (next) {
   const update = this.getUpdate() as {
     $set?: {
-      slug: string;
       title?: string;
+      slug?: string;
     };
   };
 
