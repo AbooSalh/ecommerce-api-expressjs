@@ -7,7 +7,7 @@ export default [
   {
     files: ["**/*.{js,mjs,cjs,ts}"],
     rules: {
-      "no-console": ["warn", { allow: ["warn", "error"] }],
+      // "no-console": ["warn", { allow: ["warn", "error"] }],
     },
   },
   { languageOptions: { globals: globals.browser } },
