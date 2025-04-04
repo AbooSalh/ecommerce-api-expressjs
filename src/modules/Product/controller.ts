@@ -15,9 +15,11 @@ export const productC = {
       const { page, limit } = req.query;
       const filters = req.body.filters || {};
       const sort = req.body.sort || "createdAt";
+      const fields = req.body.fields || "title description price imageCover";
       const result = await s.getAll(
         filters,
         sort,
+        fields,
         +(page as string) || 1,
         +(limit as string) || 10
       );

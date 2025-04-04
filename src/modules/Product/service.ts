@@ -8,15 +8,14 @@ export const productService = {
   getAll: async (
     filters: object,
     sort: string,
+    fields: string,
     page = 1,
     limit = 10
   ) => {
     const skip = (page - 1) * limit;
     const results = await ProductM.find(filters)
-      .populate("category")
-      .populate("subCategories")
-      .populate("brand")
       .limit(limit)
+      .select(fields)
       .skip(skip)
       .sort(sort);
     const data = {
