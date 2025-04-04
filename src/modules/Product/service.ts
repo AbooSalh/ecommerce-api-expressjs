@@ -9,11 +9,18 @@ export const productService = {
     filters: object,
     sort: string,
     fields: string,
+    keywords: string,
     page = 1,
     limit = 10
   ) => {
     const skip = (page - 1) * limit;
-    const results = await ProductM.find(filters)
+    const results = await ProductM.find({
+      ...filters,
+      $or: [
+        { title: { $regex: keywords, $options: "i" } },
+        { description: { $regex: keywords, $options: "i" } },
+      ],
+    })
       .limit(limit)
       .select(fields)
       .skip(skip)
