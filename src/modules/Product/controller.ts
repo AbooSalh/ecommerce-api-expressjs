@@ -14,8 +14,10 @@ export const productC = {
     handler: expressAsyncHandler(async (req: Request, res: Response) => {
       const { page, limit } = req.query;
       const filters = req.body.filters || {};
+      const sort = req.body.sort || "createdAt";
       const result = await s.getAll(
         filters,
+        sort,
         +(page as string) || 1,
         +(limit as string) || 10
       );

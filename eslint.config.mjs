@@ -8,6 +8,7 @@ export default [
     files: ["**/*.{js,mjs,cjs,ts}"],
     rules: {
       // "no-console": ["warn", { allow: ["warn", "error"] }],
+      "@typescript-eslint/no-empty-object-type": "off",
     },
   },
   { languageOptions: { globals: globals.browser } },

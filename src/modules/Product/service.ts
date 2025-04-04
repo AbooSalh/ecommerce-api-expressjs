@@ -5,14 +5,20 @@ import ApiError from "@/common/utils/api/ApiError";
 
 export const productService = {
   // Get all products
-  getAll: async (filters: Record<string, unknown>, page = 1, limit = 10) => {
+  getAll: async (
+    filters: object,
+    sort: string,
+    page = 1,
+    limit = 10
+  ) => {
     const skip = (page - 1) * limit;
     const results = await ProductM.find(filters)
       .populate("category")
       .populate("subCategories")
       .populate("brand")
       .limit(limit)
-      .skip(skip);
+      .skip(skip)
+      .sort(sort);
     const data = {
       products: results,
       currentPage: page,
