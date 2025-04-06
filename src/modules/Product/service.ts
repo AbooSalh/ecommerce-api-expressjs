@@ -2,36 +2,18 @@ import { filterExcludedKeys } from "@/common/utils/filterExcludedKeys";
 import { ICreateProduct } from "./interfaces";
 import ProductM from "./model";
 import ApiError from "@/common/utils/api/ApiError";
+import { ApiFeatures } from "@/common/utils/api/ApiFeatures";
 
 export const productService = {
   // Get all products
-  getAll: async (
-    filters: object,
-    sort: string,
-    fields: string,
-    keywords: string,
-    page = 1,
-    limit = 10
-  ) => {
-    const skip = (page - 1) * limit;
-    const results = await ProductM.find({
-      ...filters,
-      $or: [
-        { title: { $regex: keywords, $options: "i" } },
-        { description: { $regex: keywords, $options: "i" } },
-      ],
-    })
-      .limit(limit)
-      .select(fields)
-      .skip(skip)
-      .sort(sort);
-    const data = {
-      products: results,
-      currentPage: page,
-      hasPrevPage: page > 1,
-      hasNextPage: results.length === limit,
-      lastPage: Math.ceil((await ProductM.countDocuments(filters)) / limit),
-    };
+  getAll: async (reqQuery: { [key: string]: string }) => {
+    const apiFeatures = new ApiFeatures(ProductM.find(), reqQuery)
+      .filter()
+      .search()
+      .sort()
+      .paginate()
+      .limitFields();
+    const data = await apiFeatures.mongooseQuery;
     return data;
   },
 
