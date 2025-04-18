@@ -1,3 +1,4 @@
+import { ApiFeatures } from "@/common/utils/api/ApiFeatures";
 import Category from "../Category/model";
 import subCategory from "./model";
 const model = subCategory;
@@ -17,17 +18,16 @@ interface IUpdate {
 }
 export const subCategoryService = {
   // Get all categories
-  getAll: async (filters: Record<string, unknown>, page = 1, limit = 10) => {
-    const skip = (page - 1) * limit;
-    const results = await model.find(filters).limit(limit).skip(skip);
-    const data = {
-      subCategories: results,
-      currentPage: page,
-      hasPrevPage: page > 1,
-      hasNextPage: results.length === limit,
-      lastPage: Math.ceil((await model.countDocuments()) / limit),
-    };
-    return data;
+  getAll: async (reqQuery: { [key: string]: string }) => {
+    const apiFeatures = new ApiFeatures(model.find(), reqQuery)
+      .filter()
+      .search()
+      .sort()
+      .paginate(await model.countDocuments())
+      .limitFields();
+    const { mongooseQuery, pagination } = await apiFeatures;
+    const data = await mongooseQuery;
+    return { data, pagination };
   },
   // Get one category by slug
   getOne: async (slug: string) => {

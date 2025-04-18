@@ -1,3 +1,4 @@
+import { ApiFeatures } from "@/common/utils/api/ApiFeatures";
 import Category from "./model";
 import ApiError from "@/common/utils/api/ApiError";
 const model = Category;
@@ -9,17 +10,16 @@ interface CreateCategory {
 
 export const categoryS = {
   // Get all categories
-  getAll: async (page = 1 , limit = 10) => {
-    const skip = (page - 1) * limit;
-    const results = await model.find({}).limit(limit).skip(skip);
-    const data = {
-      categories: results,
-      currentPage: page,
-      hasPrevPage: page > 1,
-      hasNextPage: results.length === limit,
-      lastPage: Math.ceil((await model.countDocuments()) / limit),
-    };
-    return data;
+  getAll: async (reqQuery: { [key: string]: string }) => {
+    const apiFeatures = new ApiFeatures(model.find(), reqQuery)
+      .filter()
+      .search()
+      .sort()
+      .paginate(await model.countDocuments())
+      .limitFields();
+    const { mongooseQuery, pagination } = await apiFeatures;
+    const data = await mongooseQuery;
+    return { data, pagination };
   },
   // Get one category
   getOne: async (slug: string) => {

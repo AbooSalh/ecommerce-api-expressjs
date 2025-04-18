@@ -11,8 +11,7 @@ export const categoryC = {
   // @access  Public
   getAll: {
     handler: expressAsyncHandler(async (req: Request, res: Response) => {
-      const { page, limit } = req.params;
-      const result = await s.getAll(+page, +limit);
+      const result = await s.getAll(req.body);
       ApiSuccess.send(res, "OK", "Categories found", result);
     }),
     validator: [
