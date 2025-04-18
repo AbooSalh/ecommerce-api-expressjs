@@ -8,14 +8,26 @@ export interface IRequestBody {
   limit?: string;
   populate?: string;
 }
-
+interface IPagination {
+  currentPage: number;
+  limit: number;
+  totalPages: number;
+  totalResults: number;
+}
 export class ApiFeatures {
   mongooseQuery;
   reqBody: IRequestBody;
+  pagination: IPagination;
 
   constructor(mongooseQuery: any, reqBody: IRequestBody) {
     this.mongooseQuery = mongooseQuery;
     this.reqBody = reqBody;
+    this.pagination = {
+      currentPage: 1,
+      limit: 20,
+      totalPages: 0,
+      totalResults: 0,
+    };
   }
 
   filter() {
@@ -67,12 +79,19 @@ export class ApiFeatures {
     return this;
   }
 
-  paginate() {
+  paginate(documentsCount?: number) {
     const page = parseInt(this.reqBody.page || "1") * 1 || 1;
     const limit = parseInt(this.reqBody.limit || "20") || 20;
     const skip = (page - 1) * limit;
-
     this.mongooseQuery = this.mongooseQuery.skip(skip).limit(limit);
+    this.pagination.currentPage = page;
+    this.pagination.limit = limit;
+    this.pagination.totalResults = documentsCount || 0;
+    this.pagination.totalPages = Math.ceil(
+      this.pagination.totalResults / this.pagination.limit
+    );
+    
+
     return this;
   }
 

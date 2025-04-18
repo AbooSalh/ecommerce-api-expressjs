@@ -11,10 +11,12 @@ export const productService = {
       .filter()
       .search()
       .sort()
-      .paginate()
+      .paginate(await ProductM.countDocuments())
       .limitFields();
-    const data = await apiFeatures.mongooseQuery;
-    return data;
+    const { mongooseQuery, pagination } = await apiFeatures;
+    const data = await mongooseQuery;
+
+    return { data, pagination };
   },
 
   // Get one product by slug
