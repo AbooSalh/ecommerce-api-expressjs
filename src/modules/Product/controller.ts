@@ -9,6 +9,9 @@ import {
   checkIfCategoryExists,
   checkIfSubCategoriesExist,
 } from "./utils";
+import baseController from "@/common/controllers/handlers";
+import ProductM from "./model";
+const { deleteOne } = baseController(ProductM);
 export const productC = {
   getAll: {
     handler: expressAsyncHandler(async (req: Request, res: Response) => {
@@ -118,15 +121,6 @@ export const productC = {
       validatorMiddleware,
     ],
   },
-  delete: {
-    handler: expressAsyncHandler(async (req: Request, res: Response) => {
-      const { id } = req.params;
-      const result = await s.delete(id);
-      ApiSuccess.send(res, "OK", "Product deleted", result);
-    }),
-    validator: [
-      param("id").exists().withMessage("Product id is required"),
-      validatorMiddleware,
-    ],
-  },
+  deleteOne,
+
 };
