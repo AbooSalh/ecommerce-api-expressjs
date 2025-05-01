@@ -66,5 +66,30 @@ export default function baseControllers(
         validatorMiddleware,
       ],
     },
+    getOne: {
+      handler: expressAsyncHandler(async (req: Request, res: Response) => {
+        const { id } = req.params;
+        const result = await s.getOne(id);
+        ApiSuccess.send(res, "OK", "document found", result);
+      }),
+      validator: [
+        param("id").exists().withMessage("id is required").isMongoId(),
+        validatorMiddleware,
+      ],
+    },
+    getAll: {
+      handler: expressAsyncHandler(async (req: Request, res: Response) => {
+        const result = await s.getAll(req.body);
+        ApiSuccess.send(res, "OK", "documents found", result);
+      }),
+      validator: [
+        param("page").optional().isInt().withMessage("Page must be an integer"),
+        param("limit")
+          .optional()
+          .isInt()
+          .withMessage("Limit must be an integer"),
+        validatorMiddleware,
+      ],
+    },
   };
 }
