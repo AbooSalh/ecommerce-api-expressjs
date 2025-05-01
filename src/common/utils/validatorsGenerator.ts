@@ -24,12 +24,19 @@ export default function generateValidator(
 
     let validator = body(key);
 
+    // Handle create vs update mode
     if (mode === "update") {
       validator = validator.optional();
     } else {
-      validator = validator.exists().withMessage(`${key} is required`);
+      // For create, mark fields like createdAt and updatedAt as optional
+      if (key === "createdAt" || key === "updatedAt") {
+        validator = validator.optional();
+      } else {
+        validator = validator.exists().withMessage(`${key} is required`);
+      }
     }
 
+    // Type-specific validation
     switch (path.instance) {
       case "String":
         validator = validator.isString().withMessage(`${key} must be a string`);
@@ -57,4 +64,3 @@ export default function generateValidator(
 
   return validators;
 }
-
