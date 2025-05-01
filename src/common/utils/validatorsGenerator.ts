@@ -4,13 +4,11 @@ import { Model } from "mongoose";
 
 export default function generateValidator(
   model: Model<any>,
-  excludeFields: string[] = []
+  excludeFields: string[] = [],
+  mode: "create" | "update"
 ): ValidationChain[] {
   const schemaPaths = model.schema.paths;
   const validators: ValidationChain[] = [];
-
-  console.log("🧪 Generating validators for model:", model.modelName);
-  console.log("🚫 Excluded fields:", excludeFields);
 
   for (const key in schemaPaths) {
     if (
@@ -19,18 +17,17 @@ export default function generateValidator(
       key === "_id" ||
       key.includes(".")
     ) {
-      console.log(`⚠️ Skipping field: ${key}`);
       continue;
     }
 
     const path = schemaPaths[key];
-    console.log(`✅ Adding validator for: ${key}, type: ${path.instance}`);
 
     let validator = body(key);
 
-    if (path.isRequired) {
-      validator = validator.notEmpty().withMessage(`${key} is required`);
-      console.log(`   🔒 Required: ${key}`);
+    if (mode === "update") {
+      validator = validator.optional();
+    } else {
+      validator = validator.exists().withMessage(`${key} is required`);
     }
 
     switch (path.instance) {
@@ -53,12 +50,11 @@ export default function generateValidator(
           .withMessage(`${key} must be a valid Mongo ID`);
         break;
       default:
-        console.log(`   ❓ Unhandled type for: ${key} (${path.instance})`);
     }
 
     validators.push(validator);
   }
 
-  console.log(`✅ Total validators generated: ${validators.length}`);
   return validators;
 }
+

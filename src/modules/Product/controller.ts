@@ -3,7 +3,7 @@ import expressAsyncHandler from "express-async-handler";
 import { productService as s } from "./service";
 import ApiSuccess from "@/common/utils/api/ApiSuccess";
 import validatorMiddleware from "@/common/middleware/validators/validator";
-import { body, param, oneOf } from "express-validator";
+import { body, param } from "express-validator";
 import {
   checkIfBrandExists,
   checkIfCategoryExists,
@@ -11,7 +11,7 @@ import {
 } from "./utils";
 import baseController from "@/common/controllers/handlers";
 import ProductM from "./model";
-const { deleteOne } = baseController(ProductM);
+const { deleteOne, update } = baseController(ProductM, ["ratings", "sold"]);
 export const productC = {
   getAll: {
     handler: expressAsyncHandler(async (req: Request, res: Response) => {
@@ -74,53 +74,6 @@ export const productC = {
       validatorMiddleware,
     ],
   },
-  update: {
-    handler: expressAsyncHandler(async (req: Request, res: Response) => {
-      const { id } = req.params;
-      const updatedData = req.body;
-      const result = await s.update(id, updatedData);
-      ApiSuccess.send(res, "OK", "Product updated", result);
-    }),
-    validator: [
-      param("id").exists().withMessage("Product id is required").isMongoId(),
-      oneOf([
-        body("title")
-          .exists()
-          .withMessage("At least one field must be updated"),
-        body("description")
-          .exists()
-          .withMessage("At least one field must be updated"),
-        body("quantity")
-          .exists()
-          .withMessage("At least one field must be updated"),
-        body("price")
-          .exists()
-          .withMessage("At least one field must be updated"),
-        body("imageCover")
-          .exists()
-          .withMessage("At least one field must be updated"),
-        body("category")
-          .exists()
-          .withMessage("At least one field must be updated")
-          .isMongoId()
-          .withMessage("category must be valid id")
-          .custom(checkIfCategoryExists),
-        body("subCategories")
-          .exists()
-          .withMessage("Sub Categories required")
-          .isMongoId()
-          .withMessage("subCategories must be valid id")
-          .custom(checkIfSubCategoriesExist),
-        body("brand")
-          .exists()
-          .withMessage("brand required")
-          .isMongoId()
-          .withMessage("brand  must be valid id")
-          .custom(checkIfBrandExists),
-      ]),
-      validatorMiddleware,
-    ],
-  },
+  update,
   deleteOne,
-
 };

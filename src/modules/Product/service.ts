@@ -40,26 +40,18 @@ export const productService = {
   },
 
   // Update a product by slug
-  update: async (id: string, updatedData: Partial<ICreateProduct>) => {
-    const filteredData = filterExcludedKeys(updatedData, ["ratings", "sold"]);
+  // update: async (id: string, updatedData: Partial<ICreateProduct>) => {
+  //   const filteredData = filterExcludedKeys(updatedData, ["ratings", "sold"]);
 
-    const product = await ProductM.findByIdAndUpdate(
-      id,
-      { $set: filteredData },
-      { new: true, runValidators: true }
-    );
-    if (!product) {
-      throw new ApiError("Product not found", "NOT_FOUND");
-    }
-    return product;
-  },
+  //   const product = await ProductM.findByIdAndUpdate(
+  //     id,
+  //     { $set: filteredData },
+  //     { new: true, runValidators: true }
+  //   );
+  //   if (!product) {
+  //     throw new ApiError("Product not found", "NOT_FOUND");
+  //   }
+  //   return product;
+  // },
 
-  // Delete a product by slug
-  delete: async (id: string) => {
-    const product = await ProductM.findByIdAndDelete(id);
-    if (!product) {
-      throw new ApiError("Product not found", "NOT_FOUND");
-    }
-    return product;
-  },
 };
