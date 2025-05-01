@@ -13,6 +13,7 @@ export default function baseControllers(
   excludeData: string[] = []
 ) {
   const s = baseServices(model);
+  excludeData.push("slug");
   const updatableFields = Object.keys(model.schema.paths).filter(
     (key) =>
       !excludeData.includes(key) &&
@@ -42,8 +43,6 @@ export default function baseControllers(
       }),
       validator: [
         param("id").exists().withMessage("id is required").isMongoId(),
-
-        // 🛡 Ensure at least one updatable field is present in body
         oneOf(
           updatableFields.map((field) =>
             body(field).exists().withMessage(`${field} must be provided`)
@@ -52,10 +51,18 @@ export default function baseControllers(
             message: "At least one valid field must be provided to update", // Fix here: message should be in options
           }
         ),
-
-        // ✅ Validate fields (all optional, handled above)
         ...generateValidator(model, excludeData, "update"),
-
+        validatorMiddleware,
+      ],
+    },
+    create: {
+      handler: expressAsyncHandler(async (req: Request, res: Response) => {
+        const data = req.body;
+        const result = await s.create(data, excludeData);
+        ApiSuccess.send(res, "CREATED", "document created", result);
+      }),
+      validator: [
+        ...generateValidator(model, excludeData, "create"),
         validatorMiddleware,
       ],
     },

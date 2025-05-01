@@ -1,5 +1,4 @@
-import { filterExcludedKeys } from "@/common/utils/filterExcludedKeys";
-import { ICreateProduct } from "./interfaces";
+
 import ProductM from "./model";
 import ApiError from "@/common/utils/api/ApiError";
 import { ApiFeatures } from "@/common/utils/api/ApiFeatures";
@@ -31,13 +30,7 @@ export const productService = {
     return product;
   },
 
-  // Create a new product
-  create: async (productData: ICreateProduct) => {
-    // Filter the data to only include the fields we want to save
-    const filteredData = filterExcludedKeys(productData, ["ratings", "sold"]);
-    const product = await ProductM.create(filteredData);
-    return product;
-  },
+  
 
 
 };

@@ -3,15 +3,15 @@ import expressAsyncHandler from "express-async-handler";
 import { productService as s } from "./service";
 import ApiSuccess from "@/common/utils/api/ApiSuccess";
 import validatorMiddleware from "@/common/middleware/validators/validator";
-import { body, param } from "express-validator";
-import {
-  checkIfBrandExists,
-  checkIfCategoryExists,
-  checkIfSubCategoriesExist,
-} from "./utils";
+import { param } from "express-validator";
+
 import baseController from "@/common/controllers/handlers";
 import ProductM from "./model";
-const { deleteOne, update } = baseController(ProductM, ["ratings", "sold"]);
+const { deleteOne, update, create } = baseController(ProductM, [
+  "ratings",
+  "sold",
+  "ratingAvg",
+]);
 export const productC = {
   getAll: {
     handler: expressAsyncHandler(async (req: Request, res: Response) => {
@@ -36,44 +36,7 @@ export const productC = {
       validatorMiddleware,
     ],
   },
-  create: {
-    handler: expressAsyncHandler(async (req: Request, res: Response) => {
-      const result = await s.create(req.body);
-      ApiSuccess.send(res, "CREATED", "Product created", result);
-    }),
-    validator: [
-      body("title").exists().withMessage("Product title is required"),
-      body("description")
-        .exists()
-        .withMessage("Product description is required"),
-      body("quantity")
-        .isInt({ min: 1 })
-        .withMessage("Quantity must be at least 1"),
-      body("price")
-        .isFloat({ min: 0 })
-        .withMessage("Price must be a positive number"),
-      body("imageCover")
-        .exists()
-        .withMessage("Product image cover is required"),
-      body("category")
-        .exists()
-        .withMessage("Product category is required")
-        .custom(checkIfCategoryExists),
-      body("subCategories")
-        .exists()
-        .withMessage("Sub Categories required")
-        .isMongoId()
-        .withMessage("subCategories must be valid id")
-        .custom(checkIfSubCategoriesExist),
-      body("brand")
-        .exists()
-        .withMessage("Product brand is required")
-        .isMongoId()
-        .withMessage("brand  must be valid id")
-        .custom(checkIfBrandExists),
-      validatorMiddleware,
-    ],
-  },
+  create,
   update,
   deleteOne,
 };

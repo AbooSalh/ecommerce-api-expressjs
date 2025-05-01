@@ -30,5 +30,17 @@ export default function baseServices(model: Model<any>) {
       }
       return product;
     },
+    create: async (data: any, excludeData: string[] = []) => {
+      const filteredData = filterExcludedKeys(data, excludeData);
+      const document = await model.create(filteredData);
+      return document;
+    },
+    getOne: async (id: string) => {
+      const document = await model.findById(id);
+      if (!document) {
+        throw new ApiError("Not found", "NOT_FOUND");
+      }
+      return document;
+    },
   };
 }
