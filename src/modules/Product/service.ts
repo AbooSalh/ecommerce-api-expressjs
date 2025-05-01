@@ -39,19 +39,5 @@ export const productService = {
     return product;
   },
 
-  // Update a product by slug
-  // update: async (id: string, updatedData: Partial<ICreateProduct>) => {
-  //   const filteredData = filterExcludedKeys(updatedData, ["ratings", "sold"]);
-
-  //   const product = await ProductM.findByIdAndUpdate(
-  //     id,
-  //     { $set: filteredData },
-  //     { new: true, runValidators: true }
-  //   );
-  //   if (!product) {
-  //     throw new ApiError("Product not found", "NOT_FOUND");
-  //   }
-  //   return product;
-  // },
 
 };
