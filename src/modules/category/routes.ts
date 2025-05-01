@@ -10,6 +10,6 @@ categoryRouter
   .route("/:categorySlug")
   .get(c.getOne.validator, c.getOne.handler)
   .put(c.update.validator, c.update.handler)
-  .delete(c.delete.validator, c.delete.handler);
+  .delete(c.deleteOne.validator, c.deleteOne.handler);
 categoryRouter.use("/:categorySlug/sub-categories", subCategoryR);
 export default categoryRouter;

@@ -8,7 +8,7 @@ import validatorMiddleware from "@/common/middleware/validators/validator";
 import { body, oneOf, param } from "express-validator";
 import generateValidator from "@/common/utils/validatorsGenerator";
 
-export default function baseControllers(
+export default function baseController(
   model: Model<any>,
   excludeData: string[] = []
 ) {
