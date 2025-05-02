@@ -99,7 +99,13 @@ productSchema.pre("findOneAndUpdate", async function (next) {
   }
   next();
 });
-
+productSchema.pre("find", async function (next) {
+  this.populate({
+    path: "category",
+    select: "name",
+  });
+  next();
+});
 const ProductM = mongoose.model("Product", productSchema);
 
 export default ProductM;
