@@ -1,5 +1,5 @@
+import { addSlugMiddleware } from "@/common/middleware/mongoose/addSlugMiddleware";
 import mongoose from "mongoose";
-import slugify from "slugify";
 
 const productSchema = new mongoose.Schema(
   {
@@ -75,30 +75,31 @@ const productSchema = new mongoose.Schema(
 );
 
 // Pre-save hook to generate slug from title
-productSchema.pre("save", function (next) {
-  if (this.isModified("title") && this.title) {
-    this.slug = slugify(this.title, { lower: true, strict: true });
-  }
-  next();
-});
+// productSchema.pre("save", function (next) {
+//   if (this.isModified("title") && this.title) {
+//     this.slug = slugify(this.title, { lower: true, strict: true });
+//   }
+//   next();
+// });
 
 // Pre-update hook to generate slug from title
-productSchema.pre("findOneAndUpdate", async function (next) {
-  const update = this.getUpdate() as {
-    $set?: {
-      title?: string;
-      slug?: string;
-    };
-  };
+// productSchema.pre("findOneAndUpdate", async function (next) {
+//   const update = this.getUpdate() as {
+//     $set?: {
+//       title?: string;
+//       slug?: string;
+//     };
+//   };
 
-  if (update.$set?.title) {
-    update.$set.slug = slugify(update.$set.title, {
-      lower: true,
-      strict: true,
-    });
-  }
-  next();
-});
+//   if (update.$set?.title) {
+//     update.$set.slug = slugify(update.$set.title, {
+//       lower: true,
+//       strict: true,
+//     });
+//   }
+//   next();
+// });
+addSlugMiddleware(productSchema, "title"); // Add slug middleware for title
 productSchema.pre("find", async function (next) {
   this.populate({
     path: "category",

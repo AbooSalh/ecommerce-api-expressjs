@@ -12,7 +12,7 @@ subCategoryR
   .post(c.create.validator, c.create.handler);
 
 subCategoryR
-  .route("/:subCategorySlug")
+  .route("/:id")
   .get(c.getOne.validator, c.getOne.handler)
   .put(c.update.validator, c.update.handler)
   .delete(c.deleteOne.validator, c.deleteOne.handler);

@@ -13,7 +13,7 @@ export default function baseController(
   excludeData: string[] = []
 ) {
   const s = baseServices(model);
-  excludeData.push("slug");
+  excludeData.push("slug", "id");
   const updatableFields = Object.keys(model.schema.paths).filter(
     (key) =>
       !excludeData.includes(key) &&

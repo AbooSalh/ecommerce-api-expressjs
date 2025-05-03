@@ -7,9 +7,9 @@ categoryRouter
   .get(c.getAll.handler)
   .post(c.create.validator, c.create.handler);
 categoryRouter
-  .route("/:categorySlug")
+  .route("/:id")
   .get(c.getOne.validator, c.getOne.handler)
   .put(c.update.validator, c.update.handler)
   .delete(c.deleteOne.validator, c.deleteOne.handler);
-categoryRouter.use("/:categorySlug/sub-categories", subCategoryR);
+categoryRouter.use("/:id/sub-categories", subCategoryR);
 export default categoryRouter;
