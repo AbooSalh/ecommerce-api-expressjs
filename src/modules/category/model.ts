@@ -1,5 +1,5 @@
+import { addSlugMiddleware } from "@/common/middleware/mongoose/addSlugMiddleware";
 import mongoose, { Schema } from "mongoose";
-import slugify from "slugify";
 export interface ICategory {
   title: string;
   image: string;
@@ -30,29 +30,7 @@ const categorySchema = new Schema(
   }
 );
 
-// Pre-save hook to generate slug from title
-categorySchema.pre("save", function (next) {
-  if (this.isModified("title")) {
-    this.slug = slugify(this.title, { lower: true, strict: true });
-  }
-  next();
-});
-categorySchema.pre("findOneAndUpdate", async function (next) {
-  const update = this.getUpdate() as {
-    $set?: {
-      slug: string;
-      title?: string;
-    };
-  };
-
-  if (update.$set?.title) {
-    update.$set.slug = slugify(update.$set.title, {
-      lower: true,
-      strict: true,
-    });
-  }
-  next();
-});
+addSlugMiddleware(categorySchema, "title");
 const Category = mongoose.model("Category", categorySchema);
 
 export default Category;

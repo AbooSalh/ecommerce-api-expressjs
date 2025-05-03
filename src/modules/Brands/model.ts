@@ -1,5 +1,5 @@
+import { addSlugMiddleware } from "@/common/middleware/mongoose/addSlugMiddleware";
 import mongoose, { Schema } from "mongoose";
-import slugify from "slugify";
 const brandSchema = new Schema(
   {
     title: {
@@ -26,29 +26,7 @@ const brandSchema = new Schema(
   }
 );
 
-// Pre-save hook to generate slug from title
-brandSchema.pre("save", function (next) {
-  if (this.isModified("title")) {
-    this.slug = slugify(this.title, { lower: true, strict: true });
-  }
-  next();
-});
-brandSchema.pre("findOneAndUpdate", async function (next) {
-  const update = this.getUpdate() as {
-    $set?: {
-      slug: string;
-      title?: string;
-    };
-  };
-
-  if (update.$set?.title) {
-    update.$set.slug = slugify(update.$set.title, {
-      lower: true,
-      strict: true,
-    });
-  }
-  next();
-});
+addSlugMiddleware(brandSchema, "title");
 const BrandM = mongoose.model("Brand", brandSchema);
 
 export default BrandM;

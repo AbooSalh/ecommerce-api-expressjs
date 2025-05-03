@@ -1,5 +1,5 @@
+import { addSlugMiddleware } from "@/common/middleware/mongoose/addSlugMiddleware";
 import mongoose, { Schema, Document, ObjectId } from "mongoose";
-import slugify from "slugify";
 
 export interface ISubCategory extends Document {
   _id: ObjectId;
@@ -39,28 +39,7 @@ const subCategorySchema = new Schema<ISubCategory>(
   }
 );
 
-subCategorySchema.pre("save", function (next) {
-  if (this.isModified("title")) {
-    this.slug = slugify(this.title, { lower: true, strict: true });
-  }
-  next();
-});
-subCategorySchema.pre("findOneAndUpdate", async function (next) {
-  const update = this.getUpdate() as {
-    $set?: {
-      slug: string;
-      title?: string;
-    };
-  };
-
-  if (update.$set?.title) {
-    update.$set.slug = slugify(update.$set.title, {
-      lower: true,
-      strict: true,
-    });
-  }
-  next();
-});
+addSlugMiddleware(subCategorySchema, "title");
 const SubCategoryModel = mongoose.model<ISubCategory>(
   "SubCategory",
   subCategorySchema
