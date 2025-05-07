@@ -20,9 +20,7 @@ export const imageHandler = (savePath: string, fieldName: string) => {
     }
     cb(null, true);
   };
-
   const uploadImage = multer({ storage, fileFilter }).single(fieldName);
-
   const processImage = expressAsyncHandler(
     async (req: Request, _res: Response, next: NextFunction) => {
       if (!req.file) {
@@ -46,7 +44,6 @@ export const imageHandler = (savePath: string, fieldName: string) => {
       next();
     }
   );
-
   return { uploadImage, processImage };
 };
 
