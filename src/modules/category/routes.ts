@@ -5,7 +5,7 @@ const categoryRouter = express.Router();
 categoryRouter
   .route("/")
   .get(c.getAll.handler)
-  .post(c.create.validator, c.create.handler);
+  .post(c.uploadImage ,  c.create.validator, c.create.handler);
 categoryRouter
   .route("/:id")
   .get(c.getOne.validator, c.getOne.handler)

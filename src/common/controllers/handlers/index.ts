@@ -14,6 +14,8 @@ export default function baseController(
 ) {
   const s = baseServices(model);
   excludeData.push("slug", "id");
+  const excludeValidation = [...excludeData, "image"];
+
   const updatableFields = Object.keys(model.schema.paths).filter(
     (key) =>
       !excludeData.includes(key) &&
@@ -51,18 +53,23 @@ export default function baseController(
             message: "At least one valid field must be provided to update", // Fix here: message should be in options
           }
         ),
-        ...generateValidator(model, excludeData, "update"),
+        ...generateValidator(model, excludeValidation, "update"),
         validatorMiddleware,
       ],
     },
     create: {
       handler: expressAsyncHandler(async (req: Request, res: Response) => {
         const data = req.body;
+        if (req.file) {
+          data.image = req.file.path; // Save the file path or other metadata
+        }
+        console.log(data);
+
         const result = await s.create(data, excludeData);
         ApiSuccess.send(res, "CREATED", "document created", result);
       }),
       validator: [
-        ...generateValidator(model, excludeData, "create"),
+        ...generateValidator(model, excludeValidation, "create"),
         validatorMiddleware,
       ],
     },

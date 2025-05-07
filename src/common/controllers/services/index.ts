@@ -33,6 +33,7 @@ export default function baseServices(model: Model<any>) {
     },
     create: async (data: any, excludeData: string[] = []) => {
       const filteredData = filterExcludedKeys(data, excludeData);
+      
       const document = await model.create(filteredData);
       return document;
     },
