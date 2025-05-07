@@ -60,9 +60,6 @@ export default function baseController(
     create: {
       handler: expressAsyncHandler(async (req: Request, res: Response) => {
         const data = req.body;
-        if (req.file) {
-          data.image = req.file.path; // Save the file path or other metadata
-        }
         console.log(data);
 
         const result = await s.create(data, excludeData);

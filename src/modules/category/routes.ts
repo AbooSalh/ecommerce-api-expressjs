@@ -5,11 +5,16 @@ const categoryRouter = express.Router();
 categoryRouter
   .route("/")
   .get(c.getAll.handler)
-  .post(c.uploadImage ,  c.create.validator, c.create.handler);
+  .post(c.uploadImage, c.processImage, c.create.validator, c.create.handler);
 categoryRouter
   .route("/:id")
   .get(c.getOne.validator, c.getOne.handler)
   .put(c.update.validator, c.update.handler)
-  .delete(c.deleteOne.validator, c.deleteOne.handler);
+  .delete(
+    c.uploadImage,
+    c.processImage,
+    c.deleteOne.validator,
+    c.deleteOne.handler
+  );
 categoryRouter.use("/:id/sub-categories", subCategoryR);
 export default categoryRouter;

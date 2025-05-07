@@ -15,7 +15,8 @@ const app = express();
 const PORT = process.env.PORT || 5000;
 
 app.use(express.json()); // ✅ Middleware for parsing JSON
-
+app.use(express.static("public")); // ✅ Middleware for serving static files
+ // ✅ Middleware for serving static files
 dbConnection.connect();
 
 app.use("/api/categories", categoryRouter);
