@@ -1,19 +1,24 @@
+import { addSlugMiddleware } from "@/common/middleware/mongoose/addSlugMiddleware";
 import mongoose from "mongoose";
 
-const UserModel = mongoose.model(
-  "User",
-  new mongoose.Schema({
+const userSchema = new mongoose.Schema(
+  {
     name: { type: String, trim: true, required: [true, "Name is required"] },
-    email: {
-      type: String,
-      required: [true, "Email is required"],
-      unique: [true, "Email must be unique"],
-    },
     slug: {
       type: String,
       required: [true, "Slug is required"],
       lowercase: true,
     },
+    image: {
+      type: String,
+      default: "/uploads/images/default.jpg",
+    },
+    email: {
+      type: String,
+      required: [true, "Email is required"],
+      unique: [true, "Email must be unique"],
+    },
+
     password: {
       type: String,
       required: [true, "Password is required"],
@@ -25,6 +30,12 @@ const UserModel = mongoose.model(
       enum: ["user", "admin"],
       default: "user",
     },
-  })
+  },
+  {
+    timestamps: true,
+  }
 );
+addSlugMiddleware(userSchema, "name");
+const UserModel = mongoose.model("User", userSchema);
 export default UserModel;
+
