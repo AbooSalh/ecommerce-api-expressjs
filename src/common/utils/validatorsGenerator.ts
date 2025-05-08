@@ -18,8 +18,7 @@ export default function generateValidator(
       key.includes(".")
     ) {
       continue;
-    }
-
+    }    
     const path = schemaPaths[key];
 
     let validator = body(key);
@@ -61,6 +60,5 @@ export default function generateValidator(
 
     validators.push(validator);
   }
-
   return validators;
 }

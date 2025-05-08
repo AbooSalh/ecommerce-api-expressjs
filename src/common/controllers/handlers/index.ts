@@ -5,24 +5,38 @@ import expressAsyncHandler from "express-async-handler";
 import { Model } from "mongoose";
 import baseServices from "../services";
 import validatorMiddleware from "@/common/middleware/validators/validator";
-import { body, oneOf, param } from "express-validator";
+import { body, oneOf, param, ValidationChain } from "express-validator";
 import generateValidator from "@/common/utils/validatorsGenerator";
+
+type ValidatorMap = {
+  [field: string]: ValidationChain[];
+};
+
+type CustomValidatorOptions = {
+  create?: ValidatorMap;
+  update?: ValidatorMap;
+};
 
 export default function baseController(
   model: Model<any>,
-  excludeData: string[] = []
+  excludeCreation: string[] = [],
+  excludeValidation: string[] = [],
+  customValidators: CustomValidatorOptions = {}
 ) {
   const s = baseServices(model);
-  excludeData.push("slug", "id");
-  const excludeValidation = [...excludeData, "image"];
+  excludeCreation.push("slug", "id");
+  excludeValidation.push("slug", "id");
 
   const updatableFields = Object.keys(model.schema.paths).filter(
     (key) =>
-      !excludeData.includes(key) &&
+      !excludeCreation.includes(key) &&
       key !== "_id" &&
       key !== "__v" &&
       !key.includes(".")
   );
+
+  const buildCustomValidators = (map: ValidatorMap) =>
+    Object.values(map).flat();
 
   return {
     deleteOne: {
@@ -40,7 +54,7 @@ export default function baseController(
       handler: expressAsyncHandler(async (req: Request, res: Response) => {
         const { id } = req.params;
         const updatedData = req.body;
-        const result = await s.update(id, updatedData, excludeData);
+        const result = await s.update(id, updatedData, excludeCreation);
         ApiSuccess.send(res, "OK", "document updated", result);
       }),
       validator: [
@@ -50,9 +64,10 @@ export default function baseController(
             body(field).exists().withMessage(`${field} must be provided`)
           ),
           {
-            message: "At least one valid field must be provided to update", // Fix here: message should be in options
+            message: "At least one valid field must be provided to update",
           }
         ),
+        ...buildCustomValidators(customValidators.update || {}),
         ...generateValidator(model, excludeValidation, "update"),
         validatorMiddleware,
       ],
@@ -60,12 +75,11 @@ export default function baseController(
     create: {
       handler: expressAsyncHandler(async (req: Request, res: Response) => {
         const data = req.body;
-        console.log(data);
-
-        const result = await s.create(data, excludeData);
+        const result = await s.create(data, excludeCreation);
         ApiSuccess.send(res, "CREATED", "document created", result);
       }),
       validator: [
+        ...buildCustomValidators(customValidators.create || {}),
         ...generateValidator(model, excludeValidation, "create"),
         validatorMiddleware,
       ],
@@ -86,14 +100,7 @@ export default function baseController(
         const result = await s.getAll(req.body);
         ApiSuccess.send(res, "OK", "documents found", result);
       }),
-      validator: [
-        param("page").optional().isInt().withMessage("Page must be an integer"),
-        param("limit")
-          .optional()
-          .isInt()
-          .withMessage("Limit must be an integer"),
-        validatorMiddleware,
-      ],
+      validator: [],
     },
   };
 }
