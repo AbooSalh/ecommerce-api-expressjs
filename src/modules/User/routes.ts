@@ -4,7 +4,7 @@ import { UserC as c } from "./controller";
 const userR = express.Router();
 import { imageUploader } from "@/common/middleware/imageHandler";
 const { upload, processImages } = imageUploader("user", [
-  { name: "images", maxCount: 1 },
+  { name: "image", maxCount: 1 },
 ]);
 userR
   .route("/")

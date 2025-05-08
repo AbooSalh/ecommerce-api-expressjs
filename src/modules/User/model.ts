@@ -6,7 +6,6 @@ const userSchema = new mongoose.Schema(
     name: { type: String, trim: true, required: [true, "Name is required"] },
     slug: {
       type: String,
-      required: [true, "Slug is required"],
       lowercase: true,
     },
     image: {
@@ -18,7 +17,11 @@ const userSchema = new mongoose.Schema(
       required: [true, "Email is required"],
       unique: [true, "Email must be unique"],
     },
-
+    phone: {
+      type: String,
+      required: [true, "Phone number is required"],
+      unique: [true, "Phone number must be unique"],
+    },
     password: {
       type: String,
       required: [true, "Password is required"],
