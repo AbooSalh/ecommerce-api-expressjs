@@ -1,6 +1,11 @@
 import { body } from "express-validator";
 import UserModel from "./model";
 import baseController from "@/common/controllers/handlers";
+import expressAsyncHandler from "express-async-handler";
+import { Request, Response } from "express";
+import ApiError from "@/common/utils/api/ApiError";
+import ApiSuccess from "@/common/utils/api/ApiSuccess";
+import bcrypt from "node_modules/bcryptjs";
 
 const emailValidator = [
   body("email")
@@ -32,8 +37,11 @@ const phoneValidator = [
 export const UserC = {
   ...baseController(
     UserModel,
-    [],
-    ["email", "phone"], // exclude default email validator
+    {
+      create: ["role"],
+      update: ["image", "role"],
+    },
+    ["email", "phone"],
     {
       create: { email: emailValidator, phone: phoneValidator },
       update: {
@@ -42,6 +50,27 @@ export const UserC = {
       },
     }
   ),
+  changePassword: {
+    handler: expressAsyncHandler(async (req: Request, res: Response) => {
+      const { id } = req.params;
+      const { password } = req.body;
+      const result = await UserModel.findByIdAndUpdate(
+        id,
+        { $set: { password: await bcrypt.hash(password, 10) } },
+        { new: true, runValidators: true }
+      );
+      if (!result) {
+        throw new ApiError("Not found", "NOT_FOUND");
+      }
+      return ApiSuccess.send(
+        res,
+        "OK",
+        "Password updated successfully",
+        result
+      );
+    }),
+    validator: [],
+  },
 };
 
 export default UserC;

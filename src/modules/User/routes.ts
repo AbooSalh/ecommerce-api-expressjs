@@ -16,5 +16,9 @@ userR
   .get(c.getOne.validator, c.getOne.handler)
   .put(upload, processImages, c.update.validator, c.update.handler)
   .delete(c.deleteOne.validator, c.deleteOne.handler);
-
+userR.patch(
+  "/:id/change-password",
+  c.changePassword.validator,
+  c.changePassword.handler
+);
 export default userR;

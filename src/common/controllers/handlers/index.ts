@@ -17,19 +17,38 @@ type CustomValidatorOptions = {
   update?: ValidatorMap;
 };
 
+type ExcludedData =
+  | string[]
+  | {
+      create: string[];
+      update: string[];
+    };
+
 export default function baseController(
   model: Model<any>,
-  excludeCreation: string[] = [],
+  excludedData: ExcludedData = [],
   excludeValidation: string[] = [],
   customValidators: CustomValidatorOptions = {}
 ) {
-  const s = baseServices(model);
-  excludeCreation.push("slug", "id");
+  // Normalize excludedData
+  const normalizedExcludedData: { create: string[]; update: string[] } =
+    Array.isArray(excludedData)
+      ? { create: [...excludedData], update: [...excludedData] }
+      : {
+          create: [...excludedData.create],
+          update: [...excludedData.update],
+        };
+
+  // Always exclude 'slug' and 'id'
+  normalizedExcludedData.create.push("slug", "id");
+  normalizedExcludedData.update.push("slug", "id");
   excludeValidation.push("slug", "id");
+
+  const s = baseServices(model);
 
   const updatableFields = Object.keys(model.schema.paths).filter(
     (key) =>
-      !excludeCreation.includes(key) &&
+      !normalizedExcludedData.update.includes(key) &&
       key !== "_id" &&
       key !== "__v" &&
       !key.includes(".")
@@ -54,7 +73,11 @@ export default function baseController(
       handler: expressAsyncHandler(async (req: Request, res: Response) => {
         const { id } = req.params;
         const updatedData = req.body;
-        const result = await s.update(id, updatedData, excludeCreation);
+        const result = await s.update(
+          id,
+          updatedData,
+          normalizedExcludedData.update
+        );
         ApiSuccess.send(res, "OK", "document updated", result);
       }),
       validator: [
@@ -75,7 +98,7 @@ export default function baseController(
     create: {
       handler: expressAsyncHandler(async (req: Request, res: Response) => {
         const data = req.body;
-        const result = await s.create(data, excludeCreation);
+        const result = await s.create(data, normalizedExcludedData.create);
         ApiSuccess.send(res, "CREATED", "document created", result);
       }),
       validator: [
