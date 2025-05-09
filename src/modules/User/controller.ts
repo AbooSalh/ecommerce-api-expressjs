@@ -1,4 +1,4 @@
-import { body } from "express-validator";
+import { body, param } from "express-validator";
 import UserModel from "./model";
 import baseController from "@/common/controllers/handlers";
 import expressAsyncHandler from "express-async-handler";
@@ -6,6 +6,7 @@ import { Request, Response } from "express";
 import ApiError from "@/common/utils/api/ApiError";
 import ApiSuccess from "@/common/utils/api/ApiSuccess";
 import bcrypt from "node_modules/bcryptjs";
+import validatorMiddleware from "@/common/middleware/validators/validator";
 
 const emailValidator = [
   body("email")
@@ -53,10 +54,10 @@ export const UserC = {
   changePassword: {
     handler: expressAsyncHandler(async (req: Request, res: Response) => {
       const { id } = req.params;
-      const { password } = req.body;
+      const { newPassword } = req.body;
       const result = await UserModel.findByIdAndUpdate(
         id,
-        { $set: { password: await bcrypt.hash(password, 10) } },
+        { $set: { password: await bcrypt.hash(newPassword, 10) } },
         { new: true, runValidators: true }
       );
       if (!result) {
@@ -69,7 +70,36 @@ export const UserC = {
         result
       );
     }),
-    validator: [],
+    validator: [
+      param("id")
+        .exists()
+        .withMessage("User ID is required")
+        .isMongoId()
+        .withMessage("Invalid user ID format"),
+      body("currentPassword")
+        .exists()
+        .withMessage("Current password is required")
+        .isString()
+        .withMessage("Current password must be a string")
+        .custom(async (value, { req }) => {
+          const id = req.params?.id as string;
+          const user = await UserModel.findById(id);
+          if (!user) {
+            throw new ApiError("Not found", "NOT_FOUND");
+          }
+          const isMatch = await bcrypt.compare(value, user.password);
+          if (!isMatch) {
+            throw new ApiError("Current password is incorrect", "BAD_REQUEST");
+          }
+          return true;
+        }),
+      body("newPassword")
+        .exists()
+        .withMessage("New password is required")
+        .isString()
+        .withMessage("New password must be a string"),
+      validatorMiddleware,
+    ],
   },
 };
 
