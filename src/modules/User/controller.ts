@@ -40,7 +40,7 @@ export const UserC = {
     UserModel,
     {
       create: ["role"],
-      update: ["image", "role"],
+      update: ["image", "role" , "password"],
     },
     ["email", "phone"],
     {

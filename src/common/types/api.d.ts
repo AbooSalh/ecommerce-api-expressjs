@@ -1,3 +1,4 @@
+import { NextFunction } from "express";
 import { HTTP_STATUS } from "../constants/httpStatus";
 
 export type HttpSuccessStatus = keyof typeof HTTP_STATUS.SUCCESS;
@@ -26,4 +27,10 @@ export interface ApiErrorResponse extends ApiResponseBase {
 
 export interface ApiSuccessResponse<T = unknown> extends ApiResponseBase {
   data: T;
+}
+
+export interface Irequest {
+  req: Request;
+  res: Response;
+  next: NextFunction;
 }

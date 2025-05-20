@@ -1,5 +1,5 @@
 import { Error as MongooseError } from "mongoose";
-import { HttpErrorStatus } from "./api.types";
+import { HttpErrorStatus } from "./api";
 
 export interface MongoServerError extends Error {
   code: number;

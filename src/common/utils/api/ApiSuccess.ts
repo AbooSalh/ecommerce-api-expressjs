@@ -4,15 +4,15 @@ import ApiResponse from "@/common/utils/api/ApiResponse";
 
 class ApiSuccess {
   public response: ApiResponse;
-  public results: object | null;
+  public result: object | null;
 
   constructor(
     status: keyof (typeof HTTP_STATUS)["SUCCESS"],
     message: string,
-    results: object | null = null
+    result: object | null = null
   ) {
     this.response = new ApiResponse(HTTP_STATUS.SUCCESS[status], "OK", message);
-    this.results = results;
+    this.result = result;
   }
 
   /** Sends response directly using Express `res` */
