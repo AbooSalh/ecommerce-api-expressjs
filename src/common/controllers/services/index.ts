@@ -21,15 +21,15 @@ export default function baseServices(model: Model<any>) {
     ) => {
       const filteredData = filterExcludedKeys(updatedData, excludeData);
 
-      const product = await model.findByIdAndUpdate(
+      const document = await model.findByIdAndUpdate(
         id,
         { $set: filteredData },
         { new: true, runValidators: true }
       );
-      if (!product) {
+      if (!document) {
         throw new ApiError("Not found", "NOT_FOUND");
       }
-      return product;
+      return document;
     },
     create: async (data: any, excludeData: string[] = []) => {
       const filteredData = filterExcludedKeys(data, excludeData);
@@ -54,8 +54,8 @@ export default function baseServices(model: Model<any>) {
         .paginate(await model.countDocuments())
         .limitFields();
       const { mongooseQuery, pagination } = await apiFeatures;
-      const data = await mongooseQuery;
-      return { data, pagination };
+      const documents = await mongooseQuery;
+      return { documents, pagination };
     },
   };
 }
