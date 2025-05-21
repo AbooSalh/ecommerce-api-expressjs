@@ -13,5 +13,10 @@ authRouter.post(
   authController.login.validator,
   authController.login.handler
 );
+authRouter.post(
+  "/forgot-password",
+  authController.forgotPassword.validator,
+  authController.forgotPassword.handler
+);
 
 export default authRouter;

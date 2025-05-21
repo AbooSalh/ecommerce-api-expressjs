@@ -8,6 +8,7 @@ import { body } from "express-validator";
 import bcrypt from "bcryptjs";
 import { emailValidator, phoneValidator } from "../controller";
 import validatorMiddleware from "@/common/middleware/validators/validator";
+import generateCode from "@/common/utils/codeGenerator";
 
 const createToken = (payload: string | object | Buffer<ArrayBufferLike>) => {
   return jwt.sign(payload, process.env.JWT_SECRET as string, {
@@ -56,8 +57,36 @@ const loginHandler: RequestHandler = expressAsyncHandler(
     ApiSuccess.send(res, "OK", "User logged in successfully", { user, token });
   }
 );
+const forgotPasswordHandler: RequestHandler = expressAsyncHandler(
+  async (req, res) => {
+    // 1 get user by email
+    const { email } = req.body;
+    const user = await UserModel.findOne({ email });
+    if (!user) {
+      throw new ApiError("User not found", "NOT_FOUND");
+    }
 
+    // 2 generate secure code based on user data
+    const code = generateCode(6);
+    const hashedCode = await bcrypt.hash(code, 10);
+    console.log(hashedCode);
 
+    // 3 save code to user document
+    user.passwordResetCode = code;
+    user.passwordResetCodeExpires = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
+    user.passwordResetVerified = false;
+    await user.save();
+    // 4 send code to user email (TODO: implement email sending)
+
+    // 5 return success message
+    return ApiSuccess.send(
+      res,
+      "OK",
+      "Reset code has been sent to your email",
+      { email: user.email }
+    );
+  }
+);
 const authController = {
   register: {
     handler: registerHandler,
@@ -78,6 +107,17 @@ const authController = {
         .isEmail()
         .withMessage("Invalid email"),
       body("password").notEmpty().withMessage("Password is required"),
+      validatorMiddleware,
+    ],
+  },
+  forgotPassword: {
+    handler: forgotPasswordHandler,
+    validator: [
+      body("email")
+        .notEmpty()
+        .withMessage("Email is required")
+        .isEmail()
+        .withMessage("Invalid email"),
       validatorMiddleware,
     ],
   },
