@@ -40,11 +40,11 @@ export const UserC = {
     UserModel,
     {
       create: ["role"],
-      update: ["image", "role" , "password"],
+      update: ["image", "role", "password"],
     },
     ["email", "phone"],
     {
-      create: { email: emailValidator, phone: phoneValidator},
+      create: { email: emailValidator, phone: phoneValidator },
       update: {
         email: emailValidator.map((v) => v.optional()),
         phone: phoneValidator.map((v) => v.optional()),
@@ -57,9 +57,14 @@ export const UserC = {
       const { newPassword } = req.body;
       const result = await UserModel.findByIdAndUpdate(
         id,
-        { $set: { password: await bcrypt.hash(newPassword, 10) } },
+        {
+          $set: {
+            password: await bcrypt.hash(newPassword, 10),
+            passwordChangedAt: Date.now(),
+          },
+        },
         { new: true, runValidators: true }
-      );
+      ).select("-password");
       if (!result) {
         throw new ApiError("Not found", "NOT_FOUND");
       }
