@@ -12,9 +12,7 @@ type UserRole = "user" | "admin";
  * @param roles - Optional role(s) that are allowed to access the route. Can be passed as array or rest parameters
  * @returns Express middleware function
  */
-const authMiddleware = (
-  roles?: UserRole | UserRole[] | [...UserRole[]]
-): RequestHandler => {
+const authMiddleware = (...roles: UserRole[]): RequestHandler => {
   return expressAsyncHandler(async (req, res, next) => {
     try {
       // 1. Check for Bearer token in Authorization header
@@ -58,9 +56,8 @@ const authMiddleware = (
       req.user = currentUser as unknown as UserDocument;
 
       // 7. Check role if roles are specified
-      if (roles) {
-        const allowedRoles = Array.isArray(roles) ? roles : [roles];
-        if (!allowedRoles.includes(currentUser.role as UserRole)) {
+      if (roles.length > 0) {
+        if (!roles.includes(currentUser.role as UserRole)) {
           throw new ApiError(
             "You do not have permission to perform this action",
             "FORBIDDEN"
