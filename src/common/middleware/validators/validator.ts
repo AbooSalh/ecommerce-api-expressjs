@@ -37,7 +37,7 @@ export default function validatorMiddleware(
       }
     });
 
-    return next(new ApiError(errorMessages, "BAD_REQUEST"));
+    return next(new ApiError(errorMessages, "UNPROCESSABLE_ENTITY"));
   }
   next();
 }
