@@ -30,7 +30,6 @@ const userSchema = new mongoose.Schema(
     },
     passwordChangedAt: {
       type: Date,
-      default: Date.now,
     },
     role: {
       type: String,
