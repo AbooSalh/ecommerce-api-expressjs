@@ -1,5 +1,6 @@
 import type { Error as MongooseError } from "mongoose";
 import { ErrorHandler, ErrorType, MongoServerError } from "../types/error";
+import jwt from "jsonwebtoken";
 
 const isValidationError = (
   err: ErrorType
@@ -15,6 +16,10 @@ const isMongoServerError = (err: ErrorType): err is MongoServerError => {
 
 const isCastError = (err: ErrorType): err is MongooseError.CastError => {
   return err.name === "CastError";
+};
+
+const isJwtError = (err: ErrorType): err is jwt.JsonWebTokenError => {
+  return err instanceof jwt.JsonWebTokenError;
 };
 
 export const ERROR_MAPPINGS: Record<string, ErrorHandler> = {
@@ -68,6 +73,30 @@ export const ERROR_MAPPINGS: Record<string, ErrorHandler> = {
             code: "INVALID_TYPE",
           },
         ],
+      };
+    },
+  },
+  JsonWebTokenError: {
+    status: "UNAUTHORIZED",
+    handle: (err: ErrorType) => {
+      if (!isJwtError(err)) throw err;
+      if (err instanceof jwt.TokenExpiredError) {
+        return {
+          message: "Token expired",
+          details: [
+            { message: "Your session has expired. Please login again." },
+          ],
+        };
+      }
+      if (err instanceof jwt.NotBeforeError) {
+        return {
+          message: "Token not active",
+          details: [{ message: "Token is not yet active." }],
+        };
+      }
+      return {
+        message: "Invalid token",
+        details: [{ message: "Invalid authentication token." }],
       };
     },
   },

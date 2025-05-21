@@ -3,6 +3,7 @@ import { Error as MongooseError } from "mongoose";
 import ApiError from "../utils/api/ApiError";
 import { ERROR_MAPPINGS } from "../constants/error.constants";
 import { ErrorType } from "../types/error";
+import jwt from "jsonwebtoken";
 
 class ErrorHandler {
   private static getErrorName(err: ErrorType): string {
@@ -11,6 +12,9 @@ class ErrorHandler {
     }
     if (err.name === "MongoError") {
       return "MongoServerError";
+    }
+    if (err instanceof jwt.JsonWebTokenError) {
+      return "JsonWebTokenError";
     }
     return err.name || "Error";
   }

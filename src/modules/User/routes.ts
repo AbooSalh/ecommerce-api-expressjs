@@ -3,12 +3,13 @@ import { UserC as c } from "./controller";
 
 const userR = express.Router();
 import { imageUploader } from "@/common/middleware/imageHandler";
+import authMiddleware from "@/common/middleware/auth";
 const { upload, processImages } = imageUploader("user", [
   { name: "image", maxCount: 1 },
 ]);
 userR
   .route("/")
-  .get(c.getAll.validator, c.getAll.handler)
+  .get(authMiddleware,c.getAll.validator, c.getAll.handler)
   .post(upload, processImages, c.create.validator, c.create.handler);
 
 userR

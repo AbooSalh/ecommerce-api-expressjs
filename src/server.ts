@@ -8,7 +8,7 @@ import subCategoryR from "./modules/SubCategory/routes";
 import brandR from "./modules/Brands/routes";
 import productR from "./modules/Product/routes";
 import userR from "./modules/User/routes";
-import authRouter from "./modules/User/auth.route";
+import authRouter from "./modules/User/auth/auth.route";
 // import subCategoryRoutes from "./modules/SubCategory/routes";
 
 dotenv.config();
@@ -18,7 +18,7 @@ const PORT = process.env.PORT || 5000;
 
 app.use(express.json()); // ✅ Middleware for parsing JSON
 app.use(express.static("public")); // ✅ Middleware for serving static files
- // ✅ Middleware for serving static files
+// ✅ Middleware for serving static files
 dbConnection.connect();
 
 app.use("/api/categories", categoryRouter);

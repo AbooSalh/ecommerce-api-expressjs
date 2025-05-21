@@ -1,12 +1,12 @@
 import { RequestHandler } from "express";
 import expressAsyncHandler from "express-async-handler";
-import UserModel from "./model";
+import UserModel from "../model";
 import ApiSuccess from "@/common/utils/api/ApiSuccess";
 import ApiError from "@/common/utils/api/ApiError";
 import jwt from "jsonwebtoken";
 import { body } from "express-validator";
 import bcrypt from "bcryptjs";
-import { emailValidator, phoneValidator } from "./controller";
+import { emailValidator, phoneValidator } from "../controller";
 import validatorMiddleware from "@/common/middleware/validators/validator";
 
 const createToken = (payload: string | object | Buffer<ArrayBufferLike>) => {
@@ -56,6 +56,7 @@ const loginHandler: RequestHandler = expressAsyncHandler(
     ApiSuccess.send(res, "OK", "User logged in successfully", { user, token });
   }
 );
+
 
 const authController = {
   register: {
