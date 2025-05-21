@@ -8,7 +8,7 @@ import ApiSuccess from "@/common/utils/api/ApiSuccess";
 import bcrypt from "node_modules/bcryptjs";
 import validatorMiddleware from "@/common/middleware/validators/validator";
 
-const emailValidator = [
+export const emailValidator = [
   body("email")
     .exists()
     .withMessage("Email is required")
@@ -22,7 +22,7 @@ const emailValidator = [
       }
     }),
 ];
-const phoneValidator = [
+export const phoneValidator = [
   body("phone")
     .exists()
     .withMessage("Phone number is required")
@@ -44,7 +44,7 @@ export const UserC = {
     },
     ["email", "phone"],
     {
-      create: { email: emailValidator, phone: phoneValidator },
+      create: { email: emailValidator, phone: phoneValidator},
       update: {
         email: emailValidator.map((v) => v.optional()),
         phone: phoneValidator.map((v) => v.optional()),
