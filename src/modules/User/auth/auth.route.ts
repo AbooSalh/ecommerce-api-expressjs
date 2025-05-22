@@ -18,5 +18,9 @@ authRouter.post(
   authController.forgotPassword.validator,
   authController.forgotPassword.handler
 );
-
+authRouter.post(
+  "/verify-reset-code",
+  authController.verifyResetCode.validator,
+  authController.verifyResetCode.handler
+);
 export default authRouter;

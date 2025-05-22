@@ -9,8 +9,10 @@ import bcrypt from "bcryptjs";
 import { emailValidator, phoneValidator } from "../controller";
 import validatorMiddleware from "@/common/middleware/validators/validator";
 import generateCode from "@/common/utils/codeGenerator";
-
-const createToken = (payload: string | object | Buffer<ArrayBufferLike>) => {
+import sendEmail from "@/common/utils/sendEmail";
+import { resetPasswordTemplate } from "@/common/utils/emailTemplates";
+import crypto from "crypto";
+const createToken = (payload: jwt.JwtPayload) => {
   return jwt.sign(payload, process.env.JWT_SECRET as string, {
     expiresIn: "1d",
   });
@@ -68,23 +70,45 @@ const forgotPasswordHandler: RequestHandler = expressAsyncHandler(
 
     // 2 generate secure code based on user data
     const code = generateCode(6);
-    const hashedCode = await bcrypt.hash(code, 10);
-    console.log(hashedCode);
-
+    const hashedCode = crypto.createHash("sha256").update(code).digest("hex");
     // 3 save code to user document
-    user.passwordResetCode = code;
+    user.passwordResetCode = hashedCode;
     user.passwordResetCodeExpires = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
     user.passwordResetVerified = false;
     await user.save();
-    // 4 send code to user email (TODO: implement email sending)
-
+    // 4 send code to user email
+    try {
+      await sendEmail({
+        to: user.email,
+        subject: "Reset Password Code",
+        html: resetPasswordTemplate(code),
+      });
+    } catch (err) {
+      console.log(err);
+      user.passwordResetCode = null;
+      user.passwordResetCodeExpires = null;
+      user.passwordResetVerified = undefined;
+      await user.save();
+      throw new ApiError("Failed to send email", "INTERNAL_SERVER_ERROR");
+    }
     // 5 return success message
-    return ApiSuccess.send(
-      res,
-      "OK",
-      "Reset code has been sent to your email",
-      { email: user.email }
-    );
+    return ApiSuccess.send(res, "OK", "Reset code has been sent to your email");
+  }
+);
+const verifyResetCodeHandler: RequestHandler = expressAsyncHandler(
+  async (req, res) => {
+    const hashedCode = crypto.createHash("sha256").update(req.body.code).digest("hex");
+    const user = await UserModel.findOne({
+      passwordResetCode: hashedCode,
+      passwordResetCodeExpires: { $gt: new Date() },
+    });
+    if (!user) {
+      throw new ApiError("Invalid reset code or expired", "UNAUTHORIZED");
+    }
+    // if reset code is correct, create a token for the user
+    user.passwordResetVerified = true;
+    await user.save();
+    return ApiSuccess.send(res, "OK", "Reset code verified successfully");
   }
 );
 const authController = {
@@ -118,6 +142,13 @@ const authController = {
         .withMessage("Email is required")
         .isEmail()
         .withMessage("Invalid email"),
+      validatorMiddleware,
+    ],
+  },
+  verifyResetCode: {
+    handler: verifyResetCodeHandler,
+    validator: [
+      body("code").notEmpty().withMessage("Reset code is required"),
       validatorMiddleware,
     ],
   },

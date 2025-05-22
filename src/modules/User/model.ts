@@ -33,7 +33,7 @@ const userSchema = new mongoose.Schema(
     passwordResetCodeExpires: Date,
     passwordResetVerified: {
       type: Boolean,
-      default: false,
+      default: undefined,
     },
     role: {
       type: String,
