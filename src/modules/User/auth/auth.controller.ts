@@ -85,8 +85,8 @@ const forgotPasswordHandler: RequestHandler = expressAsyncHandler(
       });
     } catch (err) {
       console.log(err);
-      user.passwordResetCode = null;
-      user.passwordResetCodeExpires = null;
+      user.passwordResetCode = undefined;
+      user.passwordResetCodeExpires = undefined;
       user.passwordResetVerified = undefined;
       await user.save();
       throw new ApiError("Failed to send email", "INTERNAL_SERVER_ERROR");
@@ -97,7 +97,10 @@ const forgotPasswordHandler: RequestHandler = expressAsyncHandler(
 );
 const verifyResetCodeHandler: RequestHandler = expressAsyncHandler(
   async (req, res) => {
-    const hashedCode = crypto.createHash("sha256").update(req.body.code).digest("hex");
+    const hashedCode = crypto
+      .createHash("sha256")
+      .update(req.body.code)
+      .digest("hex");
     const user = await UserModel.findOne({
       passwordResetCode: hashedCode,
       passwordResetCodeExpires: { $gt: new Date() },
@@ -109,6 +112,25 @@ const verifyResetCodeHandler: RequestHandler = expressAsyncHandler(
     user.passwordResetVerified = true;
     await user.save();
     return ApiSuccess.send(res, "OK", "Reset code verified successfully");
+  }
+);
+
+const resetPasswordHandler: RequestHandler = expressAsyncHandler(
+  async (req, res) => {
+    const user = await UserModel.findOne({ email: req.body.email });
+    if (!user) {
+      throw new ApiError("User not found", "NOT_FOUND");
+    }
+    if (!user.passwordResetVerified) {
+      throw new ApiError("Reset code not verified", "UNAUTHORIZED");
+    }
+    user.password = req.body.newPassword;
+    user.passwordResetCode = undefined;
+    user.passwordResetCodeExpires = undefined;
+    user.passwordResetVerified = undefined;
+    await user.save();
+    const token = createToken({ id: user._id });
+    return ApiSuccess.send(res, "OK", "Password reset successfully", {token});
   }
 );
 const authController = {
@@ -150,6 +172,13 @@ const authController = {
     validator: [
       body("code").notEmpty().withMessage("Reset code is required"),
       validatorMiddleware,
+    ],
+  },
+  resetPassword: {
+    handler: resetPasswordHandler,
+    validator: [
+      body("email").notEmpty().withMessage("Email is required"),
+      body("newPassword").notEmpty().withMessage("New password is required"),
     ],
   },
 };

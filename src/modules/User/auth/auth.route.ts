@@ -23,4 +23,9 @@ authRouter.post(
   authController.verifyResetCode.validator,
   authController.verifyResetCode.handler
 );
+authRouter.put(
+  "/reset-password",
+  authController.resetPassword.validator,
+  authController.resetPassword.handler
+);
 export default authRouter;

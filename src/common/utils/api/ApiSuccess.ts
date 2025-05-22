@@ -4,12 +4,12 @@ import ApiResponse from "@/common/utils/api/ApiResponse";
 
 class ApiSuccess {
   public response: ApiResponse;
-  public result: object | null;
+  public result: object | null | string;
 
   constructor(
     status: keyof (typeof HTTP_STATUS)["SUCCESS"],
     message: string,
-    result: object | null = null
+    result: object | null | string = null
   ) {
     this.response = new ApiResponse(HTTP_STATUS.SUCCESS[status], "OK", message);
     this.result = result;
@@ -25,7 +25,7 @@ class ApiSuccess {
     res: Response,
     status: keyof (typeof HTTP_STATUS)["SUCCESS"],
     message: string,
-    data: object | null = null
+    data: object | null | string = null
   ) {
     new ApiSuccess(status, message, data).send(res);
   }
