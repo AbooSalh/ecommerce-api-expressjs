@@ -1,18 +1,18 @@
+import { randomInt } from "crypto";
 
 /**
- * Generates a random 6-digit code for password reset
- * @param user - User document or user ID (not used in this implementation)
- * @param length - Length of the code to generate (default: 6)
- * @returns A string of the specified length containing only numbers
+ * Generates a secure random numeric code for password reset
+ * @param length - Length of the numeric code (default: 6)
+ * @returns A string of the specified length containing only digits
  */
-export const generateCode = (
-  length: number = 6
-): string => {
-  // Generate a random number between 0 and 999999
-  const randomNum = Math.floor(Math.random() * 1000000);
-
-  // Convert to string and pad with zeros if needed
-  return randomNum.toString().padStart(length, "0");
+export const generateCode = (length: number = 6): string => {
+  const digits = "0123456789";
+  let code = "";
+  for (let i = 0; i < length; i++) {
+    const index = randomInt(0, digits.length);
+    code += digits[index];
+  }
+  return code;
 };
 
 export default generateCode;

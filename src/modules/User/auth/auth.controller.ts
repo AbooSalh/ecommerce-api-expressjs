@@ -102,6 +102,7 @@ const verifyResetCodeHandler: RequestHandler = expressAsyncHandler(
       .update(req.body.code)
       .digest("hex");
     const user = await UserModel.findOne({
+      email: req.body.email,
       passwordResetCode: hashedCode,
       passwordResetCodeExpires: { $gt: new Date() },
     });
