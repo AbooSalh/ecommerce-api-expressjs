@@ -1,7 +1,7 @@
 import { Document, ObjectId } from "mongoose";
 
 export interface UserDocument extends Document {
-  _id: ObjectId;
+  _id: ObjectId | string;
   name: string;
   email: string;
   role: "user" | "admin";

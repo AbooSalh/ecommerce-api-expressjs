@@ -18,7 +18,21 @@ userR
     c.create.validator,
     c.create.handler
   );
-
+userR.patch(
+  "/change-password",
+  authMiddleware(),
+  c.changePassword.validator,
+  c.changePassword.handler
+);
+userR.get("/profile", authMiddleware(), c.getProfile.handler, c.getOne.handler);
+// update auth user
+userR.put(
+  "/update",
+  authMiddleware(),
+  c.updateAuthUser.handler,
+  c.update.validator,
+  c.update.handler
+);
 userR
   .route("/:id")
   .get(authMiddleware("admin"), c.getOne.validator, c.getOne.handler)
@@ -31,11 +45,6 @@ userR
   )
   .delete(authMiddleware("admin"), c.deleteOne.validator, c.deleteOne.handler);
 
-userR.patch(
-  "/:id/change-password",
-  authMiddleware("admin", "user"),
-  c.changePassword.validator,
-  c.changePassword.handler
-);
+
 
 export default userR;

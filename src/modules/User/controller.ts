@@ -1,8 +1,8 @@
-import { body, param } from "express-validator";
+import { body } from "express-validator";
 import UserModel from "./model";
 import baseController from "@/common/controllers/handlers";
 import expressAsyncHandler from "express-async-handler";
-import { Request, Response } from "express";
+import { NextFunction, Request, Response } from "express";
 import ApiError from "@/common/utils/api/ApiError";
 import ApiSuccess from "@/common/utils/api/ApiSuccess";
 import bcrypt from "node_modules/bcryptjs";
@@ -36,24 +36,27 @@ export const phoneValidator = [
     }),
 ];
 export const UserC = {
-  ...baseController(
-    UserModel,
-    {
-      create: ["role"],
-      update: ["image", "role", "password"],
+  ...baseController(UserModel, {
+    excludedData: {
+      create: [],
+      update: ["image", "password", "email"],
     },
-    ["email", "phone"],
-    {
+    excludeValidation: ["email", "phone"],
+    customValidators: {
       create: { email: emailValidator, phone: phoneValidator },
       update: {
         email: emailValidator.map((v) => v.optional()),
         phone: phoneValidator.map((v) => v.optional()),
       },
-    }
-  ),
+    },
+  }),
+
   changePassword: {
     handler: expressAsyncHandler(async (req: Request, res: Response) => {
-      const { id } = req.params;
+      const id = req.user?._id;
+      if (!id) {
+        throw new ApiError("User not found", "UNAUTHORIZED");
+      }
       const { newPassword } = req.body;
       const result = await UserModel.findByIdAndUpdate(
         id,
@@ -76,23 +79,21 @@ export const UserC = {
       );
     }),
     validator: [
-      param("id")
-        .exists()
-        .withMessage("User ID is required")
-        .isMongoId()
-        .withMessage("Invalid user ID format"),
       body("currentPassword")
         .exists()
         .withMessage("Current password is required")
         .isString()
         .withMessage("Current password must be a string")
         .custom(async (value, { req }) => {
-          const id = req.params?.id as string;
+          const id = req.user?._id as string;
+          console.log(id);
           const user = await UserModel.findById(id);
+          console.log(user);
           if (!user) {
             throw new ApiError("Not found", "NOT_FOUND");
           }
           const isMatch = await bcrypt.compare(value, user.password);
+          console.log(isMatch);
           if (!isMatch) {
             throw new ApiError("Current password is incorrect", "BAD_REQUEST");
           }
@@ -103,6 +104,49 @@ export const UserC = {
         .withMessage("New password is required")
         .isString()
         .withMessage("New password must be a string"),
+      validatorMiddleware,
+    ],
+  },
+  getProfile: {
+    handler: expressAsyncHandler(
+      async (req: Request, res: Response, next: NextFunction) => {
+        if (!req.user?._id) {
+          throw new ApiError("User not found", "UNAUTHORIZED");
+        }
+        req.params.id = req.user._id.toString();
+        next();
+      }
+    ),
+  },
+  updateAuthUser: {
+    handler: expressAsyncHandler(async (req: Request, res: Response) => {
+      const updatedUser = await UserModel.findByIdAndUpdate(
+        req.user?._id,
+        {
+          name: req.body.name,
+          email: req.body.email,
+          phone: req.body.phone,
+        },
+        { new: true }
+      );
+      if (!updatedUser) {
+        throw new ApiError("User not found", "NOT_FOUND");
+      }
+      return ApiSuccess.send(
+        res,
+        "OK",
+        "User updated successfully",
+        updatedUser
+      );
+    }),
+    validator: [
+      body("name")
+        .exists()
+        .withMessage("Name is required")
+        .isString()
+        .withMessage("Name must be a string"),
+      ...emailValidator,
+      ...phoneValidator,
       validatorMiddleware,
     ],
   },

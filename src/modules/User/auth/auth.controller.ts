@@ -70,6 +70,7 @@ const forgotPasswordHandler: RequestHandler = expressAsyncHandler(
 
     // 2 generate secure code based on user data
     const code = generateCode(6);
+    console.log(code);
     const hashedCode = crypto.createHash("sha256").update(code).digest("hex");
     // 3 save code to user document
     user.passwordResetCode = hashedCode;
@@ -131,7 +132,7 @@ const resetPasswordHandler: RequestHandler = expressAsyncHandler(
     user.passwordResetVerified = undefined;
     await user.save();
     const token = createToken({ id: user._id });
-    return ApiSuccess.send(res, "OK", "Password reset successfully", {token});
+    return ApiSuccess.send(res, "OK", "Password reset successfully", { token });
   }
 );
 const authController = {
@@ -171,6 +172,11 @@ const authController = {
   verifyResetCode: {
     handler: verifyResetCodeHandler,
     validator: [
+      body("email")
+        .notEmpty()
+        .withMessage("Email is required")
+        .isEmail()
+        .withMessage("Invalid email"),
       body("code").notEmpty().withMessage("Reset code is required"),
       validatorMiddleware,
     ],
@@ -178,8 +184,13 @@ const authController = {
   resetPassword: {
     handler: resetPasswordHandler,
     validator: [
-      body("email").notEmpty().withMessage("Email is required"),
+      body("email")
+        .notEmpty()
+        .withMessage("Email is required")
+        .isEmail()
+        .withMessage("Invalid email"),
       body("newPassword").notEmpty().withMessage("New password is required"),
+      validatorMiddleware,
     ],
   },
 };

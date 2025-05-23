@@ -9,10 +9,6 @@ const userSchema = new mongoose.Schema(
       type: String,
       lowercase: true,
     },
-    image: {
-      type: String,
-      default: "/uploads/images/default.jpg",
-    },
     email: {
       type: String,
       required: [true, "Email is required"],
