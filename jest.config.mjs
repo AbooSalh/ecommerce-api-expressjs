@@ -1,7 +1,3 @@
-/**
- * For a detailed explanation regarding each configuration property, visit:
- * https://jestjs.io/docs/configuration
- */
 import { pathsToModuleNameMapper } from "ts-jest";
 import tsconfig from "./tsconfig.json" assert { type: "json" };
 
@@ -123,7 +119,7 @@ const config = {
   // rootDir: undefined,
 
   // A list of paths to directories that Jest should use to search for files in
-  roots: ["<rootDir>/src"],
+  roots: ["<rootDir>/src/__tests__"],
 
   // Allows you to use a custom runner instead of Jest's default test runner
   // runner: "jest-runner",
@@ -153,7 +149,12 @@ const config = {
   testMatch: ["**/__tests__/**/*.[jt]s?(x)", "**/?(*.)+(spec|test).[tj]s?(x)"],
 
   // An array of regexp pattern strings that are matched against all test paths, matched tests are skipped
-  testPathIgnorePatterns: ["\\\\node_modules\\\\"],
+  testPathIgnorePatterns: [
+    "\\\\node_modules\\\\",
+    "\\\\dist\\\\",
+    "\\\\src\\\\__tests__\\\\__utils__\\\\",
+    "\\\\src\\\\__tests__\\\\__mocks__\\\\",
+  ],
 
   // The regexp pattern or array of patterns that Jest uses to detect test files
   // testRegex: [],
@@ -167,10 +168,7 @@ const config = {
   // A map from regular expressions to paths to transformers
 
   // An array of regexp pattern strings that are matched against all source file paths, matched files will skip transformation
-  // transformIgnorePatterns: [
-  //   "\\\\node_modules\\\\",
-  //   "\\.pnp\\.[^\\\\]+$"
-  // ],
+  transformIgnorePatterns: ["\\\\node_modules\\\\", "\\.pnp\\.[^\\\\]+$"],
 
   // An array of regexp pattern strings that are matched against all modules before the module loader will automatically return a mock for them
   // unmockedModulePathPatterns: undefined,
@@ -179,10 +177,15 @@ const config = {
   // verbose: undefined,
 
   // An array of regexp patterns that are matched against all source file paths before re-running tests in watch mode
-  // watchPathIgnorePatterns: [],
+  watchPathIgnorePatterns: [
+    "\\\\node_modules\\\\",
+    "\\\\dist\\\\",
+    "\\\\src\\\\__tests__\\\\__utils__\\\\",
+    "\\\\src\\\\__tests__\\\\__mocks__\\\\",
+  ],
 
   // Whether to use watchman for file crawling
-  // watchman: true,
+  watchman: true,
 };
 
 export default config;

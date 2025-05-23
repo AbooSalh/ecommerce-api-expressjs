@@ -1,5 +1,9 @@
+import { addSlugMiddleware } from "@/common/middleware/mongoose/addSlugMiddleware";
 import mongoose, { Schema } from "mongoose";
-
+export interface ICategory {
+  title: string;
+  image: string;
+}
 const categorySchema = new Schema(
   {
     title: {
@@ -17,6 +21,7 @@ const categorySchema = new Schema(
     },
     image: {
       type: String,
+      required: [true, "Category image is required"],
     },
   },
   //   mongoose options
@@ -26,5 +31,7 @@ const categorySchema = new Schema(
   }
 );
 
+addSlugMiddleware(categorySchema, "title");
 const Category = mongoose.model("Category", categorySchema);
+
 export default Category;

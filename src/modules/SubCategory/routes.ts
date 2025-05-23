@@ -1,16 +1,19 @@
+// import express from "express";
+
 import express from "express";
-import { categoryC as c } from "./controller";
-import subCategoryR from "../SubCategory/routes";
+import { subCategoryC as c } from "./controller";
+//
 import authMiddleware from "@/common/middleware/auth";
-const categoryRouter = express.Router();
+
+const subCategoryR = express.Router({ mergeParams: true });
+// const c = subCategoryController;
 import { imageUploader } from "@/common/middleware/imageHandler";
 const { upload, processImages } = imageUploader("users", [
   { name: "image", maxCount: 1 },
 ]);
-
-categoryRouter
+subCategoryR
   .route("/")
-  .get(c.getAll.handler)
+  .get(c.getAll.validator, c.getAll.handler)
   .post(
     authMiddleware("admin"),
     upload,
@@ -19,18 +22,15 @@ categoryRouter
     c.create.handler
   );
 
-categoryRouter
+subCategoryR
   .route("/:id")
   .get(c.getOne.validator, c.getOne.handler)
-  .put(authMiddleware("admin"), c.update.validator, c.update.handler)
-  .delete(
+  .put(
     authMiddleware("admin"),
     upload,
     processImages,
-    c.deleteOne.validator,
-    c.deleteOne.handler
-  );
-
-categoryRouter.use("/:id/sub-categories", subCategoryR);
-
-export default categoryRouter;
+    c.update.validator,
+    c.update.handler
+  )
+  .delete(authMiddleware("admin"), c.deleteOne.validator, c.deleteOne.handler);
+export default subCategoryR;
