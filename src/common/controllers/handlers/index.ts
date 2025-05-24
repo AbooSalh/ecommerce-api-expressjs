@@ -158,7 +158,13 @@ export default function baseController(
     getOne: {
       handler: expressAsyncHandler(async (req: Request, res: Response) => {
         const { id } = req.params;
-        const result = await s.getOne(id);
+        const queryParams: { [key: string]: string } = {};
+        Object.entries(req.query).forEach(([key, value]) => {
+          if (typeof value === "string") queryParams[key] = value;
+          else if (Array.isArray(value)) queryParams[key] = value.join(",");
+          else if (value !== undefined) queryParams[key] = String(value);
+        });
+        const result = await s.getOne(id, queryParams);
         ApiSuccess.send(res, "OK", "document found", result);
       }),
       validator: [

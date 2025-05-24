@@ -28,13 +28,14 @@ const reviewValidator = {
         _id: value,
         user: req.user._id,
       });
+      console.log(review, value, req.user._id);
       if (!review) {
         throw new ApiError(
           "Review not found or you are not allowed to update it",
           "NOT_FOUND"
         );
       }
-      if (review.user.toString() !== req.user._id.toString()) {
+      if (review.user._id.toString() !== req.user._id.toString()) {
         throw new ApiError(
           "You are not allowed to update this review",
           "FORBIDDEN"
@@ -55,7 +56,7 @@ const reviewValidator = {
         return true;
       }
       // Regular users can only delete their own reviews
-      if (review.user.toString() !== req.user._id.toString()) {
+      if (review.user._id.toString() !== req.user._id.toString()) {
         throw new ApiError(
           "You are not allowed to delete this review",
           "FORBIDDEN"

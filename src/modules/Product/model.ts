@@ -71,7 +71,11 @@ const productSchema = new mongoose.Schema(
       type: Number,
     },
   },
-  { timestamps: true }
+  {
+    timestamps: true,
+    toJSON: { virtuals: true },
+    toObject: { virtuals: true },
+  }
 );
 
 addSlugMiddleware(productSchema, "title"); // Add slug middleware for title
@@ -81,6 +85,11 @@ productSchema.pre("find", async function (next) {
     select: "name",
   });
   next();
+});
+productSchema.virtual("reviews", {
+  ref: "Review",
+  foreignField: "product",
+  localField: "_id",
 });
 const ProductM = mongoose.model("Product", productSchema);
 

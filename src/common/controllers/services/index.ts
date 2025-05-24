@@ -37,8 +37,12 @@ export default function baseServices(model: Model<any>) {
       const document = await model.create(filteredData);
       return document;
     },
-    getOne: async (id: string) => {
-      const document = await model.findById(id);
+    getOne: async (id: string, reqQuery: { [key: string]: string } = {}) => {
+      const apiFeatures = new ApiFeatures(model.findById(id), reqQuery)
+        .limitFields()
+        .populate();
+      const { mongooseQuery } = await apiFeatures;
+      const document = await mongooseQuery;
       if (!document) {
         throw new ApiError("Not found", "NOT_FOUND");
       }
