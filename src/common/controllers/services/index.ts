@@ -52,7 +52,8 @@ export default function baseServices(model: Model<any>) {
         .search()
         .sort()
         .paginate(await model.countDocuments())
-        .limitFields();
+        .limitFields()
+        .populate();
       const { mongooseQuery, pagination } = await apiFeatures;
       const documents = await mongooseQuery;
       return { documents, pagination };

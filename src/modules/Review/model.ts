@@ -1,4 +1,12 @@
-import mongoose from "mongoose";
+import mongoose, { Query, Document } from "mongoose";
+
+interface IReview extends Document {
+  user: mongoose.Types.ObjectId;
+  product: mongoose.Types.ObjectId;
+  rating: number;
+  title: string;
+  comment: string;
+}
 
 const reviewSchema = new mongoose.Schema({
   user: {
@@ -10,7 +18,6 @@ const reviewSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: "Product",
     required: [true, "Product is required"],
-    
   },
   rating: {
     type: Number,
@@ -31,7 +38,10 @@ const reviewSchema = new mongoose.Schema({
     maxLength: [1000, "Comment must be at most 1000 characters"],
   },
 });
-
+reviewSchema.pre(/^find/, function (this: Query<IReview, IReview>, next) {
+  this.populate({ path: "user", select: "name" });
+  next();
+});
 const ReviewM = mongoose.model("Review", reviewSchema);
 
 export default ReviewM;
