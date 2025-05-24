@@ -9,7 +9,7 @@ import brandR from "./modules/Brands/routes";
 import productR from "./modules/Product/routes";
 import userR from "./modules/User/routes";
 import authRouter from "./modules/User/auth/auth.route";
-// import subCategoryRoutes from "./modules/SubCategory/routes";
+import reviewR from "./modules/Review/routes";
 
 dotenv.config();
 
@@ -27,6 +27,7 @@ app.use("/api/brands", brandR);
 app.use("/api/products", productR);
 app.use("/api/users", userR);
 app.use("/api/auth", authRouter);
+app.use("/api/reviews", reviewR);
 // handle all other unhandled routes
 app.all("*", (req: Request, res: Response, next: NextFunction) => {
   next(new ApiError("Route not found", "NOT_FOUND"));

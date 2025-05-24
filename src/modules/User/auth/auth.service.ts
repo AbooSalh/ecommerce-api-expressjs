@@ -30,6 +30,7 @@ export const register = async (req: Request) => {
   return { user, token };
 };
 
+
 export const login = async (req: Request) => {
   const { email, password } = req.body;
   const userWithPassword = await UserModel.findOne({ email });

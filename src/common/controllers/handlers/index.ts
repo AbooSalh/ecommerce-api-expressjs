@@ -30,8 +30,8 @@ type CustomValidatorOptions = {
 type ExcludedData =
   | string[]
   | {
-      create: string[];
-      update: string[];
+      create?: string[];
+      update?: string[];
     };
 
 /**
@@ -64,8 +64,8 @@ export default function baseController(
     Array.isArray(excludedData)
       ? { create: [...excludedData], update: [...excludedData] }
       : {
-          create: [...excludedData.create],
-          update: [...excludedData.update],
+          create: [...(excludedData.create || [])],
+          update: [...(excludedData.update || [])],
         };
 
   // Always exclude 'slug' and 'id' from data and validation
