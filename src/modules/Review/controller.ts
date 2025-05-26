@@ -4,7 +4,7 @@ import ReviewM from "./model";
 export const reviewController = {
   ...baseController(ReviewM, {
     excludedData: {
-      update: ["user", "product"]
+      update: ["user", "product"],
     },
   }),
 };

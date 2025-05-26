@@ -1,4 +1,5 @@
 import mongoose, { Query, Document } from "mongoose";
+import ProductM from "../Product/model";
 
 interface IReview extends Document {
   user: mongoose.Types.ObjectId;
@@ -6,6 +7,10 @@ interface IReview extends Document {
   rating: number;
   title: string;
   comment: string;
+}
+
+interface IReviewModel extends mongoose.Model<IReview> {
+  calcAverageRatings(productId: string): Promise<void>;
 }
 
 const reviewSchema = new mongoose.Schema({
@@ -42,6 +47,45 @@ reviewSchema.pre(/^find/, function (this: Query<IReview, IReview>, next) {
   this.populate({ path: "user", select: "name" });
   next();
 });
-const ReviewM = mongoose.model("Review", reviewSchema);
+
+reviewSchema.post("save", async function (this: IReview) {
+  await ReviewM.calcAverageRatings(this.product.toString());
+});
+reviewSchema.post("findOneAndDelete", async function (doc) {
+  if (doc) {
+    await ReviewM.calcAverageRatings(doc.product.toString());
+  }
+});
+reviewSchema.statics.calcAverageRatings = async function (productId: string) {
+  // 1. Aggregation Pipeline
+  const result = await this.aggregate([
+    // Stage 1: Filter reviews for specific product
+    { $match: { product: new mongoose.Types.ObjectId(productId) } },
+    // Stage 2: Calculate statistics
+    {
+      $group: {
+        _id: "product", // Group all reviews together
+        avgRating: { $avg: "$rating" }, // Calculate average of all ratings
+        numOfReviews: { $sum: 1 }, // Count total number of reviews
+      },
+    },
+  ]);
+
+  // 2. Update Product with Results
+  if (result.length > 0) {
+    // If reviews exist, update with calculated values
+    await ProductM.findByIdAndUpdate(productId, {
+      ratingAvg: Math.round(result[0].avgRating * 10) / 10, // Round to 1 decimal place
+      ratings: result[0].numOfReviews, // Set total number of reviews
+    });
+  } else {
+    // If no reviews exist, set both to 0
+    await ProductM.findByIdAndUpdate(productId, {
+      ratingAvg: 0,
+      ratings: 0,
+    });
+  }
+};
+const ReviewM = mongoose.model<IReview, IReviewModel>("Review", reviewSchema);
 
 export default ReviewM;

@@ -118,6 +118,7 @@ export default function baseController(
           updatedData,
           normalizedExcludedData.update
         );
+        result.save();
         ApiSuccess.send(res, "OK", "document updated", result);
       }),
       validator: [

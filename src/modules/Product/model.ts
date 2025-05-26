@@ -60,21 +60,14 @@ const productSchema = new mongoose.Schema(
       type: mongoose.Schema.ObjectId,
       ref: "Brand",
     },
-    ratings: [
-      {
-        type: Number,
-        min: [1, "Rating must be at least 1.0"],
-        max: [5, "Rating must be at most 5.0"],
-      },
-    ],
-    ratingAvg: {
-      type: Number,
-    },
+    ratings: Number,
+    ratingAvg: Number,
   },
   {
     timestamps: true,
     toJSON: { virtuals: true },
     toObject: { virtuals: true },
+    id: false,
   }
 );
 
