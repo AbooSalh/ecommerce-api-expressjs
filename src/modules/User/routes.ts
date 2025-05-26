@@ -4,10 +4,28 @@ import { UserC as c } from "./controller";
 const userR = express.Router();
 import { imageUploader } from "@/common/middleware/imageHandler";
 import authMiddleware from "@/common/middleware/auth";
+import WishlistC from "./wishlist/controller";
 const { upload, processImages } = imageUploader("user", [
   { name: "image", maxCount: 1 },
 ]);
-
+userR.post(
+  "/wishlist",
+  authMiddleware(),
+  WishlistC.addToWishlist.validator,
+  WishlistC.addToWishlist.handler
+);
+userR.delete(
+  "/wishlist",
+  authMiddleware(),
+  WishlistC.removeFromWishlist.validator,
+  WishlistC.removeFromWishlist.handler
+);
+userR.get(
+  "/wishlist",
+  authMiddleware(),
+  WishlistC.getWishlist.validator,
+  WishlistC.getWishlist.handler
+);
 userR
   .route("/")
   .get(authMiddleware("admin"), c.getAll.validator, c.getAll.handler)
@@ -33,6 +51,7 @@ userR.put(
   c.update.validator,
   c.update.handler
 );
+
 userR
   .route("/:id")
   .get(authMiddleware("admin"), c.getOne.validator, c.getOne.handler)
@@ -44,7 +63,5 @@ userR
     c.update.handler
   )
   .delete(authMiddleware("admin"), c.deleteOne.validator, c.deleteOne.handler);
-
-
 
 export default userR;

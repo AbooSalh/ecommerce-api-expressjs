@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 import ApiError from "@/common/utils/api/ApiError";
-import { ApiFeatures } from "@/common/utils/api/ApiFeatures";
+import { ApiFeatures, IRequestBody } from "@/common/utils/api/ApiFeatures";
 import { filterExcludedKeys } from "@/common/utils/filterExcludedKeys";
 import { Model } from "mongoose";
 
@@ -37,7 +37,7 @@ export default function baseServices(model: Model<any>) {
       const document = await model.create(filteredData);
       return document;
     },
-    getOne: async (id: string, reqQuery: { [key: string]: string } = {}) => {
+    getOne: async (id: string, reqQuery: IRequestBody = {}) => {
       const apiFeatures = new ApiFeatures(model.findById(id), reqQuery)
         .limitFields()
         .populate();

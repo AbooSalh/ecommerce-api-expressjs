@@ -7,10 +7,10 @@ import * as userValidator from "./user.validator";
 export const UserC = {
   ...baseController(UserModel, {
     excludedData: {
-      create: [],
-      update: ["password", "email"],
+      create: ["wishlist"],
+      update: ["password", "email", "wishlist"],
     },
-    excludeValidation: ["email", "phone"],
+    excludeValidation: ["email", "phone", "wishlist"],
     customValidators: {
       create: {
         email: userValidator.emailValidator,
