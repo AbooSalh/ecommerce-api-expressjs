@@ -60,18 +60,15 @@ const productSchema = new mongoose.Schema(
       type: mongoose.Schema.ObjectId,
       ref: "Brand",
     },
-    ratings: [
-      {
-        type: Number,
-        min: [1, "Rating must be at least 1.0"],
-        max: [5, "Rating must be at most 5.0"],
-      },
-    ],
-    ratingAvg: {
-      type: Number,
-    },
+    ratings: Number,
+    ratingAvg: Number,
   },
-  { timestamps: true }
+  {
+    timestamps: true,
+    toJSON: { virtuals: true },
+    toObject: { virtuals: true },
+    id: false,
+  }
 );
 
 addSlugMiddleware(productSchema, "title"); // Add slug middleware for title
@@ -81,6 +78,11 @@ productSchema.pre("find", async function (next) {
     select: "name",
   });
   next();
+});
+productSchema.virtual("reviews", {
+  ref: "Review",
+  foreignField: "product",
+  localField: "_id",
 });
 const ProductM = mongoose.model("Product", productSchema);
 

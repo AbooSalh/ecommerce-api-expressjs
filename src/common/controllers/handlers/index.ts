@@ -30,8 +30,8 @@ type CustomValidatorOptions = {
 type ExcludedData =
   | string[]
   | {
-      create: string[];
-      update: string[];
+      create?: string[];
+      update?: string[];
     };
 
 /**
@@ -64,8 +64,8 @@ export default function baseController(
     Array.isArray(excludedData)
       ? { create: [...excludedData], update: [...excludedData] }
       : {
-          create: [...excludedData.create],
-          update: [...excludedData.update],
+          create: [...(excludedData.create || [])],
+          update: [...(excludedData.update || [])],
         };
 
   // Always exclude 'slug' and 'id' from data and validation
@@ -118,6 +118,7 @@ export default function baseController(
           updatedData,
           normalizedExcludedData.update
         );
+        result.save();
         ApiSuccess.send(res, "OK", "document updated", result);
       }),
       validator: [
@@ -158,7 +159,13 @@ export default function baseController(
     getOne: {
       handler: expressAsyncHandler(async (req: Request, res: Response) => {
         const { id } = req.params;
-        const result = await s.getOne(id);
+        const queryParams: { [key: string]: string } = {};
+        Object.entries(req.query).forEach(([key, value]) => {
+          if (typeof value === "string") queryParams[key] = value;
+          else if (Array.isArray(value)) queryParams[key] = value.join(",");
+          else if (value !== undefined) queryParams[key] = String(value);
+        });
+        const result = await s.getOne(id, queryParams);
         ApiSuccess.send(res, "OK", "document found", result);
       }),
       validator: [
