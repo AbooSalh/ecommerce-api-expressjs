@@ -1,15 +1,15 @@
 import express, { NextFunction, Request, Response } from "express";
 import dotenv from "dotenv";
 import dbConnection from "./common/config/database.config";
-import categoryRouter from "./modules/Category/routes";
-import ApiError from "./common/utils/api/ApiError";
 import globalError from "./common/middleware/globalError";
-import subCategoryR from "./modules/SubCategory/routes";
+import ApiError from "./common/utils/api/ApiError";
 import brandR from "./modules/Brands/routes";
+import categoryRouter from "./modules/category/routes";
 import productR from "./modules/Product/routes";
-import userR from "./modules/User/routes";
-import authRouter from "./modules/User/auth/auth.route";
 import reviewR from "./modules/Review/routes";
+import subCategoryR from "./modules/SubCategory/routes";
+import authRouter from "./modules/User/auth/auth.route";
+import userR from "./modules/User/routes";
 
 dotenv.config();
 

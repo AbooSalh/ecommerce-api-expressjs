@@ -5,9 +5,13 @@ const userR = express.Router();
 import { imageUploader } from "@/common/middleware/imageHandler";
 import authMiddleware from "@/common/middleware/auth";
 import WishlistC from "./wishlist/controller";
+import addressR from "./address/routes";
+
 const { upload, processImages } = imageUploader("user", [
   { name: "image", maxCount: 1 },
 ]);
+
+// Wishlist routes
 userR.post(
   "/wishlist",
   authMiddleware(),
@@ -26,6 +30,9 @@ userR.get(
   WishlistC.getWishlist.validator,
   WishlistC.getWishlist.handler
 );
+
+userR.use("/addresses", addressR);
+
 userR
   .route("/")
   .get(authMiddleware("admin"), c.getAll.validator, c.getAll.handler)
