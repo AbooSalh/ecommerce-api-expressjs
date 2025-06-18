@@ -10,6 +10,7 @@ import reviewR from "./modules/Review/routes";
 import subCategoryR from "./modules/SubCategory/routes";
 import authRouter from "./modules/User/auth/auth.route";
 import userR from "./modules/User/routes";
+import couponR from "./modules/Coupon/routes";
 
 dotenv.config();
 
@@ -28,6 +29,7 @@ app.use("/api/products", productR);
 app.use("/api/users", userR);
 app.use("/api/auth", authRouter);
 app.use("/api/reviews", reviewR);
+app.use("/api/coupons", couponR);
 // handle all other unhandled routes
 app.all("*", (req: Request, res: Response, next: NextFunction) => {
   next(new ApiError("Route not found", "NOT_FOUND"));
