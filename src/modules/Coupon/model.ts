@@ -1,7 +1,7 @@
 import mongoose from "mongoose";
 
 const couponSchema = new mongoose.Schema({
-  name: {
+  code: {
     type: String,
     required: [true, "Coupon name is required"],
     unique: true,
@@ -9,6 +9,10 @@ const couponSchema = new mongoose.Schema({
   expire: {
     type: Date,
     required: [true, "Coupon expire date is required"],
+  },
+  quantity: {
+    type: Number,
+    required: [true, "Coupon quantity is required"],
   },
   discount: {
     type: Number,

@@ -2,8 +2,10 @@ import type mongoose from "mongoose";
 import CartM, { ICart, ICartItem } from "./model";
 import ProductM from "../Product/model";
 import ApiError from "@/common/utils/api/ApiError";
+import CouponM from "../Coupon/model";
+import UserModel from "../User/model";
 
-type IUserId = mongoose.Schema.Types.ObjectId | string;
+export type IUserId = mongoose.Schema.Types.ObjectId | string;
 type IProductId = mongoose.Schema.Types.ObjectId | string;
 
 const addProductToCart = async (
@@ -63,11 +65,12 @@ const addProductToCart = async (
   return { document: cart, message };
 };
 
-const calcTotalPrice = (cart: ICart) => {
+export const calcTotalPrice = (cart: ICart) => {
   let totalPrice = 0;
   cart.cartItems.forEach((item) => {
     totalPrice += item.price * item.quantity;
   });
+  cart.totalPriceAfterDiscount = totalPrice; // Assuming no discount applied initially
   return totalPrice;
 };
 
@@ -131,11 +134,47 @@ const updateCartItemQuantity = async (
   await cart.save();
   return { document: cart, message: "Product quantity updated in cart" };
 };
+const applyCoupon = async (userId: IUserId, couponCode: string) => {
+  const coupon = await CouponM.findOne({
+    code: couponCode,
+    expire: { $gt: new Date() },
+    quantity: { $gt: 0 },
+  });  
+  if (!coupon) {
+    throw new ApiError("Coupon not found or expired", "NOT_FOUND");
+  }
+
+  //   Check if user has already used this coupon
+  const user = await UserModel.findById(userId);
+  if (!user) {
+    throw new ApiError("User not found", "NOT_FOUND");
+  }
+  if (user.usedCoupons.includes(coupon._id)) {
+    throw new ApiError("You have already used this coupon", "CONFLICT");
+  }
+  // use the coupon
+  const cart = await CartM.findOne({ user: userId });
+  if (!cart) {
+    throw new ApiError("Cart not found", "NOT_FOUND");
+  }
+  const totalPrice = cart.totalPrice || calcTotalPrice(cart);
+  //   calculate discount
+  const discountAmount = (totalPrice * coupon.discount) / 100;
+  cart.totalPriceAfterDiscount = parseInt(
+    (totalPrice - discountAmount).toFixed(2)
+  );
+  await cart.save();
+  await user.save();
+  return cart;
+};
+
 export const CartS = {
   addProductToCart,
   getCart,
   removeItemFromCart,
   clearCart,
   updateCartItemQuantity,
+  applyCoupon,
 };
+; // Exporting for testing purposes
 export default CartS;

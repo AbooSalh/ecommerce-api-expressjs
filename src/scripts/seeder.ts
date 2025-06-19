@@ -106,14 +106,22 @@ async function seed() {
     })
   );
 
-  // Coupons
-  await CouponM.insertMany(
-    Array.from({ length: 3 }).map(() => ({
-      name: faker.string.alphanumeric(8),
-      expire: faker.date.future(),
-      discount: faker.number.int({ min: 5, max: 50 }),
-    }))
-  );
+  // Coupons (unique codes)
+  const couponCodes = new Set<string>();
+  const couponsArr = [];
+  while (couponsArr.length < 3) {
+    const code = faker.string.alphanumeric(8);
+    if (!couponCodes.has(code)) {
+      couponCodes.add(code);
+      couponsArr.push({
+        code,
+        expire: faker.date.future(),
+        quantity: faker.number.int({ min: 1, max: 100 }),
+        discount: faker.number.int({ min: 5, max: 50 }),
+      });
+    }
+  }
+  await CouponM.insertMany(couponsArr);
 
   // Reviews
   await ReviewM.insertMany(
