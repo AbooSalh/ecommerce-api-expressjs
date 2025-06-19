@@ -6,6 +6,7 @@ import { imageUploader } from "@/common/middleware/imageHandler";
 import authMiddleware from "@/common/middleware/auth";
 import WishlistC from "./wishlist/controller";
 import addressR from "./address/routes";
+import cartR from "@/modules/Cart/routes";
 
 const { upload, processImages } = imageUploader("user", [
   { name: "image", maxCount: 1 },
@@ -32,6 +33,7 @@ userR.get(
 );
 
 userR.use("/addresses", addressR);
+userR.use("/cart", cartR);
 
 userR
   .route("/")

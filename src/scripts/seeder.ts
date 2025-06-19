@@ -128,20 +128,27 @@ async function seed() {
 
   // Carts
   await CartM.insertMany(
-    users.map((user) => ({
-      user: user._id,
-      cartItems: [
+    users.map((user) => {
+      const cartItems = [
         {
           product: faker.helpers.arrayElement(products)._id,
           quantity: faker.number.int({ min: 1, max: 5 }),
-          price: faker.commerce.price(),
+          price: Number(faker.commerce.price()),
           color: faker.color.human(),
           size: faker.helpers.arrayElement(["xs", "s", "m", "l", "xl", "xxl"]),
         },
-      ],
-      totalPrice: faker.commerce.price(),
-      totalPriceAfterDiscount: faker.commerce.price(),
-    }))
+      ];
+      const totalPrice = cartItems.reduce(
+        (sum, item) => sum + item.price * item.quantity,
+        0
+      );
+      return {
+        user: user._id,
+        cartItems,
+        totalPrice,
+        totalPriceAfterDiscount: totalPrice,
+      };
+    })
   );
 
   console.log("Database seeded!");
