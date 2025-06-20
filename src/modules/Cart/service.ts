@@ -1,9 +1,10 @@
 import type mongoose from "mongoose";
-import CartM, { ICart, ICartItem } from "./model";
+import CartM, { ICartItem } from "./model";
 import ProductM from "../Product/model";
 import ApiError from "@/common/utils/api/ApiError";
 import CouponM from "../Coupon/model";
 import UserModel from "../User/model";
+import { calcTotalPrice } from "./utils";
 
 export type IUserId = mongoose.Schema.Types.ObjectId | string;
 type IProductId = mongoose.Schema.Types.ObjectId | string;
@@ -63,15 +64,6 @@ const addProductToCart = async (
 
   await cart.save();
   return { document: cart, message };
-};
-
-export const calcTotalPrice = (cart: ICart) => {
-  let totalPrice = 0;
-  cart.cartItems.forEach((item) => {
-    totalPrice += item.price * item.quantity;
-  });
-  cart.totalPriceAfterDiscount = totalPrice; // Assuming no discount applied initially
-  return totalPrice;
 };
 
 const getCart = async (userId: IUserId): Promise<mongoose.Document> => {
@@ -139,7 +131,7 @@ const applyCoupon = async (userId: IUserId, couponCode: string) => {
     code: couponCode,
     expire: { $gt: new Date() },
     quantity: { $gt: 0 },
-  });  
+  });
   if (!coupon) {
     throw new ApiError("Coupon not found or expired", "NOT_FOUND");
   }
@@ -176,5 +168,4 @@ export const CartS = {
   updateCartItemQuantity,
   applyCoupon,
 };
-; // Exporting for testing purposes
 export default CartS;
