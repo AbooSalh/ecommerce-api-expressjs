@@ -6,7 +6,8 @@ export type ICartItem = {
   quantity: number;
   color: string;
   size: ISize;
-  price: number; 
+  price: number;
+  discount: number; // Optional, if discounts are not always applied
 };
 export type ICart = {
   user: mongoose.Schema.Types.ObjectId;
@@ -46,6 +47,10 @@ const cartSchema = new mongoose.Schema(
           required: true,
           type: String,
           enum: ["xs", "s", "m", "l", "xl", "xxl"],
+        },
+        discount: {
+          type: Number,
+          default: 0,
         },
       },
     ],

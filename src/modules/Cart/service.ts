@@ -29,7 +29,8 @@ const addProductToCart = async (
           quantity: cartItem.quantity,
           color: cartItem.color,
           size: cartItem.size,
-          price: product.price, // Assuming price is taken from the product
+          price: product.price,
+          discount: product.discount, // Assuming price is taken from the product
         },
       ],
     });
@@ -55,6 +56,7 @@ const addProductToCart = async (
         color: cartItem.color,
         size: cartItem.size,
         price: product.price, // Assuming price is taken from the product
+        discount: product.discount,
       });
       message = "Product added to cart";
     }
