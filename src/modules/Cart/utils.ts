@@ -15,21 +15,28 @@ export const calcTotalPrice = (cart: ICart) => {
 };
 
 /**
- * Checks if a product with the given color and size is available in stock.
+ * Checks if a product with the given color, size, and requested quantity is available to order.
  * @param productId - The product's ObjectId or string
  * @param color - The color to check
  * @param size - The size to check
- * @returns true if available, false otherwise
+ * @param requestedQty - The quantity user wants to order
+ * @param maxOrderQty - The maximum allowed per order (default 10)
+ * @returns true if available and allowed, false otherwise
  */
-export const isProductInStock = async (
-  productId: mongoose.Types.ObjectId | string,
+export const checkAvailability = async (
+  productId: mongoose.Schema.Types.ObjectId | string,
   color: string,
-  size: string
+  size: string,
+  requestedQty: number,
+  maxOrderQty = 10
 ): Promise<boolean> => {
   const product = await ProductM.findById(productId).lean();
   if (!product || !Array.isArray(product.stocks)) return false;
-  return product.stocks.some(
-    (stock: IStock) =>
-      stock.color === color && stock.size === size && stock.quantity > 0
+  const stock = product.stocks.find(
+    (s: IStock) => s.color === color && s.size === size
   );
+  if (!stock) return false;
+  if (requestedQty > stock.quantity) return false;
+  if (requestedQty > maxOrderQty) return false;
+  return true;
 };

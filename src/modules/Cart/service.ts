@@ -4,7 +4,7 @@ import ProductM from "../Product/model";
 import ApiError from "@/common/utils/api/ApiError";
 import CouponM from "../Coupon/model";
 import UserModel from "../User/model";
-import { calcTotalPrice } from "./utils";
+import { calcTotalPrice, checkAvailability } from "./utils";
 
 export type IUserId = mongoose.Schema.Types.ObjectId | string;
 type IProductId = mongoose.Schema.Types.ObjectId | string;
@@ -18,6 +18,19 @@ const addProductToCart = async (
   const product = await ProductM.findById(cartItem.product);
   if (!product) {
     throw new ApiError("Product not found", "NOT_FOUND");
+  }
+  // Check availability before adding
+  const isAvailable = await checkAvailability(
+    cartItem.product ,
+    cartItem.color,
+    cartItem.size,
+    cartItem.quantity
+  );
+  if (!isAvailable) {
+    throw new ApiError(
+      "Requested quantity not available for this product/variant or exceeds max allowed per order",
+      "BAD_REQUEST"
+    );
   }
   let cart = await CartM.findOne({ user: userId });
   if (!cart) {
@@ -44,9 +57,22 @@ const addProductToCart = async (
     );
     if (productExists > -1) {
       // if product exists, update quantity
-      const product = cart.cartItems[productExists];
-      product.quantity = (product.quantity ?? 0) + cartItem.quantity;
-      cart.cartItems[productExists] = product;
+      const newQuantity =
+        (cart.cartItems[productExists].quantity ?? 0) + cartItem.quantity;
+      // Check availability for the new total quantity
+      const isAvailable = await checkAvailability(
+        cartItem.product,
+        cartItem.color,
+        cartItem.size,
+        newQuantity
+      );
+      if (!isAvailable) {
+        throw new ApiError(
+          "Requested quantity not available for this product/variant or exceeds max allowed per order",
+          "BAD_REQUEST"
+        );
+      }
+      cart.cartItems[productExists].quantity = newQuantity;
       message = "Product quantity updated in cart";
     } else {
       // if product does not exist, add to cart
@@ -63,7 +89,6 @@ const addProductToCart = async (
   }
   // recalculate total price
   cart.totalPrice = calcTotalPrice(cart);
-
   await cart.save();
   return { document: cart, message };
 };
@@ -121,6 +146,14 @@ const updateCartItemQuantity = async (
   );
   if (productIndex === -1) {
     throw new ApiError("Product not found in cart", "NOT_FOUND");
+  }
+  // Check availability for the new quantity
+  const isAvailable = await checkAvailability(productId, color, size, quantity);
+  if (!isAvailable) {
+    throw new ApiError(
+      "Requested quantity not available for this product/variant or exceeds max allowed per order",
+      "BAD_REQUEST"
+    );
   }
   cart.cartItems[productIndex].quantity = quantity;
   // recalculate total price
