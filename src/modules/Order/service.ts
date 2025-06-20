@@ -1,8 +1,10 @@
 import ApiError from "@/common/utils/api/ApiError";
 import CartM from "../Cart/model";
-import UserM, { IUser, IUserAddress } from "../User/model";
+import UserM, { IUser } from "../User/model";
 import { IUserId } from "../Cart/service";
 import ProductM from "../Product/model";
+import { getShippingAddress } from "./utils";
+
 const taxPrice = 0; // Assuming a fixed tax price for simplicity
 const shippingPrice = 0; // Assuming a fixed shipping price for simplicity
 
@@ -18,22 +20,7 @@ const createCashOrder = async (userId: IUserId, addressId?: string) => {
     throw new ApiError("User not found", "NOT_FOUND");
   }
   // get shipping address
-  let shippingAddress: IUserAddress | undefined;
-  if (addressId) {
-    shippingAddress = user.addresses?.find(
-      (addr: IUserAddress) => addr._id.toString() === addressId.toString()
-    );
-    if (!shippingAddress) {
-      throw new ApiError("Address not found", "NOT_FOUND");
-    }
-  } else {
-    shippingAddress = user.addresses?.find(
-      (addr: IUserAddress) => addr.isDefault
-    );
-    if (!shippingAddress) {
-      throw new ApiError("No default address found", "NOT_FOUND");
-    }
-  }
+  const shippingAddress = getShippingAddress(user, addressId);
   //   get Order Price
   const cartPrice = cart.totalPrice;
   const totalOrderPrice = cartPrice + taxPrice + shippingPrice;

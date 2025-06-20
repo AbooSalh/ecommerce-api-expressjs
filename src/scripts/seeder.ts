@@ -88,15 +88,28 @@ async function seed() {
     Array.from({ length: 10 }).map(() => {
       const category = faker.helpers.arrayElement(categories);
       const brand = faker.helpers.arrayElement(brands);
+      // Generate random stocks for product
+      const sizes = ["xs", "s", "m", "l", "xl", "xxl"];
+      const colors = [faker.color.human(), faker.color.human()];
+      const stocks = [];
+      for (const size of sizes) {
+        for (const color of colors) {
+          stocks.push({
+            size,
+            color,
+            quantity: faker.number.int({ min: 1, max: 50 }),
+          });
+        }
+      }
       return {
         title: faker.commerce.productName(),
         slug: faker.helpers.slugify(faker.commerce.productName()).toLowerCase(),
+        stocks,
         description: faker.commerce.productDescription(),
         quantity: faker.number.int({ min: 1, max: 100 }),
         sold: faker.number.int({ min: 0, max: 20 }),
         price: faker.commerce.price(),
         discount: faker.number.int({ min: 1, max: 50 }),
-        colors: [faker.color.human(), faker.color.human()],
         imageCover: faker.image.url(),
         images: [faker.image.url(), faker.image.url()],
         category: category._id,
