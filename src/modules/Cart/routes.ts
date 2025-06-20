@@ -1,12 +1,14 @@
 import { Router } from "express";
 import { CartC as c } from "./controller";
 import authMiddleware from "@/common/middleware/auth";
+import OrderR from "../Order/routes";
 
 const cartR = Router();
 
 cartR.use(authMiddleware());
 cartR.post("/", c.addProductToCart.validator, c.addProductToCart.handler);
 cartR.get("/", c.getCart.handler);
+cartR.use("/order", OrderR);
 cartR.delete(
   "/:id",
   c.removeItemFromCart.validator,

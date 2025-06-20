@@ -12,7 +12,7 @@ export type ICartItem = {
 export type ICart = {
   user: mongoose.Schema.Types.ObjectId;
   cartItems: ICartItem[];
-  totalPrice?: number; // Optional, if total price is not always calculated
+  totalPrice: number; // Optional, if total price is not always calculated
   totalPriceAfterDiscount?: number; // Optional, if discounts are not always applied
 };
 const cartSchema = new mongoose.Schema(

@@ -73,3 +73,33 @@ const UserModel = mongoose.model("User", userSchema);
 export default UserModel;
 
 export type UserModel = typeof userSchema;
+
+export interface IUserAddress {
+  _id: mongoose.Types.ObjectId;
+  alias?: string;
+  details?: string;
+  phone?: string;
+  city?: string;
+  postalCode?: string;
+  isDefault?: boolean;
+}
+
+export interface IUser {
+  _id?: mongoose.Types.ObjectId;
+  name: string;
+  slug?: string;
+  email: string;
+  password: string;
+  passwordChangedAt?: Date;
+  passwordResetCode?: string;
+  passwordResetCodeExpires?: Date;
+  passwordResetVerified?: boolean;
+  role?: "user" | "admin";
+  wishlist?: mongoose.Types.ObjectId[];
+  addresses?: IUserAddress[];
+  usedCoupons?: mongoose.Types.ObjectId[];
+  createdAt?: Date;
+  updatedAt?: Date;
+}
+
+export type IUserDocument = IUser & mongoose.Document;

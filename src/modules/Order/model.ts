@@ -4,6 +4,15 @@ type IOrder = {
   cart: mongoose.Schema.Types.ObjectId;
   taxPrice: number;
   shippingPrice: number;
+  shippingAddress: {
+    id: mongoose.Schema.Types.ObjectId;
+    alias: string;
+    details: string;
+    phone: string;
+    city: string;
+    postalCode: string;
+    isDefault: boolean;
+  };
   totalOrderPrice: number;
   paymentMethod: string;
   isPaid: boolean;
@@ -32,6 +41,15 @@ const OrderSchema = new mongoose.Schema(
       type: Number,
       required: true,
       default: 0,
+    },
+    shippingAddress: {
+      id: { type: mongoose.Schema.Types.ObjectId, required: true },
+      alias: { type: String },
+      details: { type: String },
+      phone: { type: String },
+      city: { type: String },
+      postalCode: { type: String },
+      isDefault: { type: Boolean, default: false },
     },
     totalOrderPrice: {
       type: Number,
