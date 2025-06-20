@@ -2,9 +2,14 @@ import type mongoose from "mongoose";
 import CartM, { ICartItem } from "./model";
 import ProductM from "../Product/model";
 import ApiError from "@/common/utils/api/ApiError";
-import CouponM from "../Coupon/model";
-import UserModel from "../User/model";
-import { calcTotalPrice, checkAvailability } from "./utils";
+import { calcTotalPrice } from "./utils";
+import {
+  assertCartItemAvailable,
+  upsertCartItem,
+  setCartItemQuantity,
+  removeCartItem,
+} from "./cart.helpers";
+import { applyCouponToCart } from "./cart.coupon";
 
 export type IUserId = mongoose.Schema.Types.ObjectId | string;
 type IProductId = mongoose.Schema.Types.ObjectId | string;
@@ -13,81 +18,35 @@ const addProductToCart = async (
   userId: IUserId,
   cartItem: ICartItem
 ): Promise<{ document: mongoose.Document; message: string }> => {
-  // get cart for user
   let message = "";
   const product = await ProductM.findById(cartItem.product);
   if (!product) {
     throw new ApiError("Product not found", "NOT_FOUND");
   }
-  // Check availability before adding
-  const isAvailable = await checkAvailability(
-    cartItem.product ,
-    cartItem.color,
-    cartItem.size,
-    cartItem.quantity
-  );
-  if (!isAvailable) {
-    throw new ApiError(
-      "Requested quantity not available for this product/variant or exceeds max allowed per order",
-      "BAD_REQUEST"
-    );
-  }
   let cart = await CartM.findOne({ user: userId });
   if (!cart) {
+    await assertCartItemAvailable(cartItem, cartItem.quantity);
     cart = await CartM.create({
       user: userId,
-      cartItems: [
-        {
-          product: cartItem.product,
-          quantity: cartItem.quantity,
-          color: cartItem.color,
-          size: cartItem.size,
-          price: product.price,
-          discount: product.discount, // Assuming price is taken from the product
-        },
-      ],
+      cartItems: [cartItem],
     });
     message = "Product added to new cart";
   } else {
-    const productExists = cart.cartItems.findIndex(
+    const idx = cart.cartItems.findIndex(
       (item) =>
         item.product.toString() === cartItem.product.toString() &&
         item.color === cartItem.color &&
         item.size === cartItem.size
     );
-    if (productExists > -1) {
-      // if product exists, update quantity
-      const newQuantity =
-        (cart.cartItems[productExists].quantity ?? 0) + cartItem.quantity;
-      // Check availability for the new total quantity
-      const isAvailable = await checkAvailability(
-        cartItem.product,
-        cartItem.color,
-        cartItem.size,
-        newQuantity
-      );
-      if (!isAvailable) {
-        throw new ApiError(
-          "Requested quantity not available for this product/variant or exceeds max allowed per order",
-          "BAD_REQUEST"
-        );
-      }
-      cart.cartItems[productExists].quantity = newQuantity;
-      message = "Product quantity updated in cart";
-    } else {
-      // if product does not exist, add to cart
-      cart.cartItems.push({
-        product: cartItem.product,
-        quantity: cartItem.quantity,
-        color: cartItem.color,
-        size: cartItem.size,
-        price: product.price, // Assuming price is taken from the product
-        discount: product.discount,
-      });
-      message = "Product added to cart";
+    let newQuantity = cartItem.quantity;
+    if (idx > -1) {
+      newQuantity = (cart.cartItems[idx].quantity ?? 0) + cartItem.quantity;
     }
+    await assertCartItemAvailable(cartItem, newQuantity);
+    const [updatedItems, msg] = upsertCartItem(cart.cartItems, cartItem);
+    cart.cartItems = updatedItems;
+    message = msg;
   }
-  // recalculate total price
   cart.totalPrice = calcTotalPrice(cart);
   await cart.save();
   return { document: cart, message };
@@ -100,23 +59,18 @@ const getCart = async (userId: IUserId): Promise<mongoose.Document> => {
   }
   return cart;
 };
+
 const removeItemFromCart = async (userId: IUserId, productId: IProductId) => {
   const cart = await CartM.findOne({ user: userId });
   if (!cart) {
     throw new ApiError("Cart not found", "NOT_FOUND");
   }
-  const productIndex = cart.cartItems.findIndex(
-    (item) => item.product.toString() === productId.toString()
-  );
-  if (productIndex === -1) {
-    throw new ApiError("Product not found in cart", "NOT_FOUND");
-  }
-  cart.cartItems.splice(productIndex, 1);
-  // recalculate total price
+  cart.cartItems = removeCartItem(cart.cartItems, productId);
   cart.totalPrice = calcTotalPrice(cart);
   await cart.save();
   return { document: cart, message: "Product removed from cart" };
 };
+
 const clearCart = async (userId: IUserId): Promise<mongoose.Document> => {
   const cart = await CartM.findOne({ user: userId });
   if (!cart) {
@@ -127,6 +81,7 @@ const clearCart = async (userId: IUserId): Promise<mongoose.Document> => {
   await cart.save();
   return cart;
 };
+
 const updateCartItemQuantity = async (
   userId: IUserId,
   productId: IProductId,
@@ -138,61 +93,24 @@ const updateCartItemQuantity = async (
   if (!cart) {
     throw new ApiError("Cart not found", "NOT_FOUND");
   }
-  const productIndex = cart.cartItems.findIndex(
-    (item) =>
-      item.product.toString() === productId.toString() &&
-      item.color === color &&
-      item.size === size
+  await assertCartItemAvailable(
+    { product: productId, color, size, quantity } as ICartItem,
+    quantity
   );
-  if (productIndex === -1) {
-    throw new ApiError("Product not found in cart", "NOT_FOUND");
-  }
-  // Check availability for the new quantity
-  const isAvailable = await checkAvailability(productId, color, size, quantity);
-  if (!isAvailable) {
-    throw new ApiError(
-      "Requested quantity not available for this product/variant or exceeds max allowed per order",
-      "BAD_REQUEST"
-    );
-  }
-  cart.cartItems[productIndex].quantity = quantity;
-  // recalculate total price
+  cart.cartItems = setCartItemQuantity(
+    cart.cartItems,
+    productId,
+    color,
+    size,
+    quantity
+  );
   cart.totalPrice = calcTotalPrice(cart);
   await cart.save();
   return { document: cart, message: "Product quantity updated in cart" };
 };
-const applyCoupon = async (userId: IUserId, couponCode: string) => {
-  const coupon = await CouponM.findOne({
-    code: couponCode,
-    expire: { $gt: new Date() },
-    quantity: { $gt: 0 },
-  });
-  if (!coupon) {
-    throw new ApiError("Coupon not found or expired", "NOT_FOUND");
-  }
 
-  //   Check if user has already used this coupon
-  const user = await UserModel.findById(userId);
-  if (!user) {
-    throw new ApiError("User not found", "NOT_FOUND");
-  }
-  if (user.usedCoupons.includes(coupon._id)) {
-    throw new ApiError("You have already used this coupon", "CONFLICT");
-  }
-  // use the coupon
-  const cart = await CartM.findOne({ user: userId });
-  if (!cart) {
-    throw new ApiError("Cart not found", "NOT_FOUND");
-  }
-  const totalPrice = cart.totalPrice || calcTotalPrice(cart);
-  //   calculate discount
-  const discountAmount = (totalPrice * coupon.discount) / 100;
-  cart.totalPriceAfterDiscount = parseInt(
-    (totalPrice - discountAmount).toFixed(2)
-  );
-  await cart.save();
-  await user.save();
-  return cart;
+const applyCoupon = async (userId: IUserId, couponCode: string) => {
+  return applyCouponToCart(userId.toString(), couponCode);
 };
 
 export const CartS = {
