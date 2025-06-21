@@ -22,12 +22,21 @@ const addProductToCart = async (
   if (!product) {
     throw new ApiError("Product not found", "NOT_FOUND");
   }
+  // Always set price and discount from product, not client
+  const cartItemWithPrice = {
+    ...cartItem,
+    price: product.price,
+    discount: product.discount,
+  };
   let cart = await CartM.findOne({ user: userId });
   if (!cart) {
-    await assertCartItemAvailable(cartItem, cartItem.quantity);
+    await assertCartItemAvailable(
+      cartItemWithPrice,
+      cartItemWithPrice.quantity
+    );
     cart = await CartM.create({
       user: userId,
-      cartItems: [cartItem],
+      cartItems: [cartItemWithPrice],
     });
     message = "Product added to new cart";
   } else {
@@ -37,12 +46,16 @@ const addProductToCart = async (
         item.color === cartItem.color &&
         item.size === cartItem.size
     );
-    let newQuantity = cartItem.quantity;
+    let newQuantity = cartItemWithPrice.quantity;
     if (idx > -1) {
-      newQuantity = (cart.cartItems[idx].quantity ?? 0) + cartItem.quantity;
+      newQuantity =
+        (cart.cartItems[idx].quantity ?? 0) + cartItemWithPrice.quantity;
     }
-    await assertCartItemAvailable(cartItem, newQuantity);
-    const [updatedItems, msg] = upsertCartItem(cart.cartItems, cartItem);
+    await assertCartItemAvailable(cartItemWithPrice, newQuantity);
+    const [updatedItems, msg] = upsertCartItem(
+      cart.cartItems,
+      cartItemWithPrice
+    );
     cart.cartItems = updatedItems;
     message = msg;
   }
@@ -92,8 +105,20 @@ const updateCartItemQuantity = async (
   if (!cart) {
     throw new ApiError("Cart not found", "NOT_FOUND");
   }
+  // Always set price and discount from product
+  const product = await ProductM.findById(productId);
+  if (!product) {
+    throw new ApiError("Product not found", "NOT_FOUND");
+  }
   await assertCartItemAvailable(
-    { product: productId, color, size, quantity } as ICartItem,
+    {
+      product: productId,
+      color,
+      size,
+      quantity,
+      price: product.price,
+      discount: product.discount,
+    } as ICartItem,
     quantity
   );
   cart.cartItems = setCartItemQuantity(
@@ -103,6 +128,17 @@ const updateCartItemQuantity = async (
     size,
     quantity
   );
+  // Update price and discount for the updated item
+  const idx = cart.cartItems.findIndex(
+    (item) =>
+      item.product.toString() === productId.toString() &&
+      item.color === color &&
+      item.size === size
+  );
+  if (idx > -1) {
+    cart.cartItems[idx].price = product.price;
+    cart.cartItems[idx].discount = product.discount;
+  }
   cart.totalPrice = calcTotalPrice(cart);
   await cart.save();
   return { document: cart, message: "Product quantity updated in cart" };

@@ -50,11 +50,11 @@ const updateCartItemQuantityHandler: RequestHandler = async (req, res) => {
   );
   return ApiSuccess.send(res, "OK", "Cart updated successfully", cart);
 };
-const applyCouponHandler: RequestHandler = async (req, res) => {
-  const userId = req.user!._id as string;
-  const cart = await CartS.applyCoupon(userId, req.body.code);
-  return ApiSuccess.send(res, "OK", "Coupon applied successfully", cart);
-};
+// const applyCouponHandler: RequestHandler = async (req, res) => {
+//   const userId = req.user!._id as string;
+//   const cart = await CartS.applyCoupon(userId, req.body.code);
+//   return ApiSuccess.send(res, "OK", "Coupon applied successfully", cart);
+// };
 export const CartC = {
   addProductToCart: {
     handler: expressAsyncHandler(addProductToCartHandler),
@@ -137,15 +137,15 @@ export const CartC = {
       validatorMiddleware,
     ],
   },
-  applyCoupon: {
-    handler: expressAsyncHandler(applyCouponHandler),
-    validator: [
-      body("code")
-        .isString()
-        .withMessage("Coupon code must be a string")
-        .notEmpty()
-        .withMessage("Coupon code is required"),
-      validatorMiddleware,
-    ],
-  },
+  // applyCoupon: {
+  //   handler: expressAsyncHandler(applyCouponHandler),
+  //   validator: [
+  //     body("code")
+  //       .isString()
+  //       .withMessage("Coupon code must be a string")
+  //       .notEmpty()
+  //       .withMessage("Coupon code is required"),
+  //     validatorMiddleware,
+  //   ],
+  // },
 };

@@ -21,6 +21,6 @@ cartR.put(
   c.updateCartItemQuantity.handler
 );
 
-cartR.post("/coupon", c.applyCoupon.validator, c.applyCoupon.handler);
+// cartR.post("/coupon", c.applyCoupon.validator, c.applyCoupon.handler);
 
 export default cartR;
