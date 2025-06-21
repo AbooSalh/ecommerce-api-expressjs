@@ -9,7 +9,6 @@ import {
   setCartItemQuantity,
   removeCartItem,
 } from "./cart.helpers";
-import { applyCouponToCart } from "./cart.coupon";
 
 export type IUserId = mongoose.Schema.Types.ObjectId | string;
 type IProductId = mongoose.Schema.Types.ObjectId | string;
@@ -109,16 +108,11 @@ const updateCartItemQuantity = async (
   return { document: cart, message: "Product quantity updated in cart" };
 };
 
-const applyCoupon = async (userId: IUserId, couponCode: string) => {
-  return applyCouponToCart(userId.toString(), couponCode);
-};
-
 export const CartS = {
   addProductToCart,
   getCart,
   removeItemFromCart,
   clearCart,
   updateCartItemQuantity,
-  applyCoupon,
 };
 export default CartS;

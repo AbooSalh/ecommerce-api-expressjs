@@ -2,7 +2,7 @@ import mongoose from "mongoose";
 
 type ISize = "xs" | "s" | "m" | "l" | "xl" | "xxl";
 export type ICartItem = {
-  product: mongoose.Schema.Types.ObjectId ;
+  product: mongoose.Schema.Types.ObjectId;
   quantity: number;
   color: string;
   size: ISize;
@@ -13,7 +13,6 @@ export type ICart = {
   user: mongoose.Schema.Types.ObjectId;
   cartItems: ICartItem[];
   totalPrice: number; // Optional, if total price is not always calculated
-  totalPriceAfterDiscount?: number; // Optional, if discounts are not always applied
 };
 const cartSchema = new mongoose.Schema(
   {
@@ -59,7 +58,6 @@ const cartSchema = new mongoose.Schema(
     ],
 
     totalPrice: Number,
-    totalPriceAfterDiscount: Number,
   },
   {
     timestamps: true,

@@ -10,7 +10,6 @@ export const calcTotalPrice = (cart: ICart) => {
     const priceAfterDiscount = item.price * (1 - discount / 100);
     totalPrice += priceAfterDiscount * item.quantity;
   });
-  cart.totalPriceAfterDiscount = totalPrice; // Assuming no further cart-level discount
   return totalPrice;
 };
 

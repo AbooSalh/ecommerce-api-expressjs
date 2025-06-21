@@ -36,14 +36,19 @@ const createCashOrder = async (userId: IUserId, addressId?: string) => {
     isPaid: false, // Assuming cash orders are paid immediately
   });
   //   after creating order , decrement product stock , increment sold count
-  const bulkOptions = cart.cartItems.map((item) => ({
-    updateOne: {
-      filter: { _id: item.product },
-      update: { $inc: { quantity: -item.quantity, sold: item.quantity } },
-    },
-  }));
-  await ProductM.bulkWrite(bulkOptions, {});
-  //   clear cart
+  if (order) {
+    const bulkOptions = cart.cartItems.map((item) => ({
+      updateOne: {
+        filter: { _id: item.product },
+        update: { $inc: { quantity: -item.quantity, sold: item.quantity } },
+      },
+    }));
+    await ProductM.bulkWrite(bulkOptions, {});
+    //   clear cart
+    await CartM.deleteOne({ user: userId });
+  }
+  console.log("Order created successfully:", order);
+
   return order;
 };
 const OrderS = {
