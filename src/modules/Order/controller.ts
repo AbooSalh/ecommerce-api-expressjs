@@ -22,6 +22,18 @@ const updateOrderToDeliveredHandler: RequestHandler = async (req, res) => {
   const result = await OrderS.updateOrderToDelivered(req.params.id);
   ApiSuccess.send(res, "OK", "Order updated to delivered successfully", result);
 };
+const checkoutSessionHandler: RequestHandler = async (req, res) => {
+  const session = await OrderS.checkoutSession(
+    req.user!._id,
+    req.body.addressId,
+    {
+      protocol: req.protocol,
+      secure: req.secure,
+      host: req.get("host") || req.hostname, // Use req.get("host") for compatibility
+    }
+  );
+  ApiSuccess.send(res, "OK", "Checkout session created successfully", session);
+};
 export const OrderC = {
   createCashOrder: {
     handler: expressAsyncHandler(createCashOrderHandler),
@@ -53,6 +65,16 @@ export const OrderC = {
         .withMessage("Invalid order ID")
         .notEmpty()
         .withMessage("Order ID is required"),
+      validatorMiddleware,
+    ],
+  },
+  checkoutSession: {
+    handler: expressAsyncHandler(checkoutSessionHandler),
+    validator: [
+      body("addressId")
+        .optional()
+        .isMongoId()
+        .withMessage("Invalid address ID"),
       validatorMiddleware,
     ],
   },
