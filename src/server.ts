@@ -4,14 +4,26 @@ import dbConnection from "./common/config/database.config";
 import globalError from "./common/middleware/globalError";
 import ApiError from "./common/utils/api/ApiError";
 import { mountRoutes } from "./index";
+import dotenvExpand from "dotenv-expand";
+import cors from "cors";
+import compression from "compression";
 
-dotenv.config();
-
+dotenvExpand.expand(dotenv.config());
 const app = express();
 const PORT = process.env.PORT || 5000;
 
 app.use(express.json()); // ✅ Middleware for parsing JSON
-app.use(express.static("public")); // ✅ Middleware for serving static files
+app.use(express.static("public"));
+console.log(process.env.CORS_ORIGIN); // ✅ Middleware for serving static files
+app.use(compression()); // ✅ Middleware for compressing responses
+app.use(
+  cors({
+    origin: process.env.CORS_ORIGIN, // ✅ Middleware for enabling CORS
+    methods: "GET,HEAD,PUT,PATCH,POST,DELETE", // ✅ Allowed methods
+    allowedHeaders: "Content-Type,Authorization", // ✅ Allowed headers
+    credentials: true, // ✅ Allow credentials
+  })
+); // ✅ Middleware for enabling CORS
 // ✅ Middleware for serving static files
 dbConnection.connect();
 mountRoutes(app);

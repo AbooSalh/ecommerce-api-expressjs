@@ -7,9 +7,10 @@ import { getShippingAddress } from "./utils";
 import OrderM from "./model";
 import Stripe from "stripe";
 import dotenv from "dotenv";
+import dotenvExpand from "dotenv-expand";
 const taxPrice = 0; // Assuming a fixed tax price for simplicity
 const shippingPrice = 0; // Assuming a fixed shipping price for simplicity
-dotenv.config();
+dotenvExpand.expand(dotenv.config());
 
 const createCashOrder = async (userId: IUserId, addressId?: string) => {
   // get user's cart
