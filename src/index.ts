@@ -7,6 +7,7 @@ import subCategoryR from "./modules/SubCategory/routes";
 import authRouter from "./modules/User/auth/auth.route";
 import userR from "./modules/User/routes";
 import couponR from "./modules/Coupon/routes";
+import OrderR from "./modules/Order/routes";
 
 export const mountRoutes = (app: Application) => {
   app.use("/api/categories", categoryRouter);
@@ -17,4 +18,5 @@ export const mountRoutes = (app: Application) => {
   app.use("/api/auth", authRouter);
   app.use("/api/reviews", reviewR);
   app.use("/api/coupons", couponR);
+  app.use("/api/order", OrderR);
 };

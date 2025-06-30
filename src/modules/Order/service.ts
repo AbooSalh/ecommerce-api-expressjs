@@ -4,6 +4,7 @@ import UserM, { IUser } from "../User/model";
 import { IUserId } from "../Cart/service";
 import ProductM from "../Product/model";
 import { getShippingAddress } from "./utils";
+import OrderM from "./model";
 
 const taxPrice = 0; // Assuming a fixed tax price for simplicity
 const shippingPrice = 0; // Assuming a fixed shipping price for simplicity
@@ -21,16 +22,22 @@ const createCashOrder = async (userId: IUserId, addressId?: string) => {
   }
   // get shipping address
   const shippingAddress = getShippingAddress(user, addressId);
+  // Map _id to id for order schema
+  const orderShippingAddress = {
+    id: shippingAddress._id,
+    ...shippingAddress,
+  };
   //   get Order Price
   const cartPrice = cart.totalPrice;
   const totalOrderPrice = cartPrice + taxPrice + shippingPrice;
-  //   create order
-  const order = await CartM.create({
+  //   create order (use OrderM, not CartM)
+  const order = await OrderM.create({
     user: userId,
     cart: cart._id,
+    cartItems: cart.cartItems, // snapshot of cart items
     taxPrice,
     shippingPrice,
-    shippingAddress,
+    shippingAddress: orderShippingAddress,
     totalOrderPrice,
     paymentMethod: "cod", // Cash on delivery
     isPaid: false, // Assuming cash orders are paid immediately
@@ -51,7 +58,33 @@ const createCashOrder = async (userId: IUserId, addressId?: string) => {
 
   return order;
 };
+const updateOrderToPaid = async (orderId: string) => {
+  // Find the order by ID and update the isPaid field to true
+  const order = await OrderM.findByIdAndUpdate(
+    orderId,
+    { isPaid: true, paidAt: new Date() },
+    { new: true }
+  );
+  if (!order) {
+    throw new ApiError("Order not found", "NOT_FOUND");
+  }
+  return order;
+};
+const updateOrderToDelivered = async (orderId: string) => {
+  // Find the order by ID and update the isDelivered field to true
+  const order = await OrderM.findByIdAndUpdate(
+    orderId,
+    { isDelivered: true, deliveredAt: new Date() },
+    { new: true }
+  );
+  if (!order) {
+    throw new ApiError("Order not found", "NOT_FOUND");
+  }
+  return order;
+};
 const OrderS = {
   createCashOrder,
+  updateOrderToPaid,
+  updateOrderToDelivered,
 };
 export default OrderS;

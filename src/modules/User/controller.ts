@@ -34,6 +34,9 @@ export const UserC = {
     handler: expressAsyncHandler(userService.updateAuthUser),
     validator: userValidator.updateAuthUserValidator,
   },
+  getOrders: {
+    handler: expressAsyncHandler(userService.getOrders),
+  },
 };
 
 export default UserC;

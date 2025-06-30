@@ -52,6 +52,8 @@ userR.patch(
   c.changePassword.handler
 );
 userR.get("/profile", authMiddleware(), c.getProfile.handler, c.getOne.handler);
+// get user orders
+userR.get("/orders", authMiddleware("user"), c.getOrders.handler);
 // update auth user
 userR.put(
   "/update",

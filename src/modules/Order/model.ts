@@ -2,6 +2,14 @@ import mongoose from "mongoose";
 type IOrder = {
   user: mongoose.Schema.Types.ObjectId;
   cart: mongoose.Schema.Types.ObjectId;
+  cartItems: Array<{
+    product: mongoose.Schema.Types.ObjectId;
+    quantity: number;
+    color: string;
+    size: string;
+    price: number;
+    discount: number;
+  }>;
   taxPrice: number;
   shippingPrice: number;
   shippingAddress: {
@@ -32,6 +40,20 @@ const OrderSchema = new mongoose.Schema(
       ref: "Cart",
       required: true,
     },
+    cartItems: [
+      {
+        product: {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: "Product",
+          required: true,
+        },
+        quantity: { type: Number, required: true },
+        color: { type: String, required: true },
+        size: { type: String, required: true },
+        price: { type: Number, required: true },
+        discount: { type: Number, required: true },
+      },
+    ],
     taxPrice: {
       type: Number,
       required: true,

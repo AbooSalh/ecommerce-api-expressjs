@@ -3,6 +3,8 @@ import UserModel from "./model";
 import ApiError from "@/common/utils/api/ApiError";
 import bcrypt from "bcryptjs";
 import ApiSuccess from "@/common/utils/api/ApiSuccess";
+import OrderM from "../Order/model";
+import { ApiFeatures, IRequestBody } from "@/common/utils/api/ApiFeatures";
 
 export const changePassword = async (req: Request, res: Response) => {
   const id = req.user?._id;
@@ -53,4 +55,22 @@ export const updateAuthUser = async (req: Request, res: Response) => {
     throw new ApiError("User not found", "NOT_FOUND");
   }
   return ApiSuccess.send(res, "OK", "User updated successfully", updatedUser);
+};
+
+export const getOrders = async (req: Request, res: Response) => {
+  const userId = req.user?._id;
+  if (!userId) {
+    throw new ApiError("User not found", "UNAUTHORIZED");
+  }
+  const query = new ApiFeatures(OrderM.find({ user: userId }), req.query as IRequestBody)
+    .filter()
+    .sort()
+    .paginate(await OrderM.countDocuments({ user: userId }))
+    .limitFields();
+  const { mongooseQuery } = await query;
+  const orders = await mongooseQuery;
+  if (!orders) {
+    throw new ApiError("No orders found", "NOT_FOUND");
+  }
+  return ApiSuccess.send(res, "OK", "Orders retrieved successfully", orders);
 };
