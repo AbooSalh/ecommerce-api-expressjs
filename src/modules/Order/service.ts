@@ -8,6 +8,9 @@ import OrderM from "./model";
 import Stripe from "stripe";
 import dotenv from "dotenv";
 import dotenvExpand from "dotenv-expand";
+import { Request, Response } from "express";
+import expressAsyncHandler from "express-async-handler";
+import ApiSuccess from "@/common/utils/api/ApiSuccess";
 const taxPrice = 0; // Assuming a fixed tax price for simplicity
 const shippingPrice = 0; // Assuming a fixed shipping price for simplicity
 dotenvExpand.expand(dotenv.config());
@@ -126,7 +129,79 @@ const checkoutSession = async (
       addressId: getShippingAddress(user, addressId)._id.toString(), // Store address ID
     },
   });
+  console.log("[checkoutSession] Stripe session created:", session.id);
   return session;
+};
+export const webHookCheckout = expressAsyncHandler(
+  async (req: Request, res: Response) => {
+    const sig = req.headers["stripe-signature"];
+    if (!sig || typeof sig !== "string") {
+      throw new ApiError("Stripe signature header missing", "BAD_REQUEST");
+    }
+    const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET;
+    if (!endpointSecret) {
+      throw new ApiError("Endpoint secret not found", "NOT_FOUND");
+    }
+    let event;
+    try {
+      event = stripe.webhooks.constructEvent(req.body, sig, endpointSecret);
+    } catch {
+      throw new ApiError("Invalid signature", "UNAUTHORIZED");
+    }
+
+    if (event.type === "checkout.session.completed") {
+      try {
+        await createCardOrder(event.data.object as Stripe.Checkout.Session);
+      } catch {
+        // Optionally handle error
+        throw new ApiError(
+          "Failed to create order from checkout session",
+          "INTERNAL_SERVER_ERROR"
+        );
+      }
+    }
+    ApiSuccess.send(
+      res,
+      "OK",
+      "Order created successfully",
+      event.data.object as Stripe.Checkout.Session
+    );
+  }
+);
+const createCardOrder = async (session: Stripe.Checkout.Session) => {
+  // Extract userId and addressId from session metadata
+  // check nullity
+  if (
+    !session.client_reference_id ||
+    !session.metadata?.addressId ||
+    session.amount_total == null
+  ) {
+    throw new ApiError(
+      "User ID or address ID not found in session metadata",
+      "BAD_REQUEST"
+    );
+  }
+  const userId = session.client_reference_id as IUserId;
+  const addressId = session.metadata?.addressId;
+  // const orderPrice = session.amount_total / 100; // Convert from cents to dollars
+  if (!addressId) {
+    throw new ApiError(
+      "Address ID not found in session metadata",
+      "BAD_REQUEST"
+    );
+  }
+  if (!userId) {
+    throw new ApiError("User ID not found in session metadata", "BAD_REQUEST");
+  }
+
+  // Create a cash order using the session details
+    const order = await createCashOrder(userId, addressId);
+    order.paymentMethod = "card"; // Update payment method to card
+    await order.save();
+    // Update the order to paid
+    await updateOrderToPaid(order._id.toString());
+    return order;
+  
 };
 const OrderS = {
   createCashOrder,
