@@ -12,11 +12,18 @@ import { webHookCheckout } from "./modules/Order/service";
 import createRateLimiter from "./common/utils/api/rateLimiter";
 import hpp from "hpp";
 
+import mongoSanitize from "express-mongo-sanitize";
+import xss from "xss-clean";
+
 dotenvExpand.expand(dotenv.config());
 const app = express();
 const PORT = process.env.PORT || 5000;
 // Global rate limiter: 1000 requests per 15 minutes per IP (for all routes)
 app.use(createRateLimiter({ minutes: 15, max: 1000 }));
+// Prevent NoSQL injection
+app.use(mongoSanitize());
+// Prevent XSS attacks
+app.use(xss());
 // Prevent HTTP Parameter Pollution
 app.use(hpp());
 app.use(express.urlencoded({ extended: true }));
