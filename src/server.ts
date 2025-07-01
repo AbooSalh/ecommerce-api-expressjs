@@ -8,10 +8,15 @@ import dotenvExpand from "dotenv-expand";
 import cors from "cors";
 import compression from "compression";
 import { webHookCheckout } from "./modules/Order/service";
+import createRateLimiter  from "./common/utils/api/rateLimiter";
+
 
 dotenvExpand.expand(dotenv.config());
 const app = express();
 const PORT = process.env.PORT || 5000;
+// Global rate limiter: 1000 requests per 15 minutes per IP (for all routes)
+app.use(createRateLimiter({ minutes: 15, max: 1000 }));
+app.use(express.urlencoded({ extended: true })); // ✅ Middleware for parsing URL-encoded bodies
 app.post(
   "/api/stripe/webhook-checkout",
   express.raw({ type: "application/json" }),
