@@ -6,13 +6,13 @@ export type ICartItem = {
   quantity: number;
   color: string;
   size: ISize;
-  price: number; 
+  price: number;
+  discount: number; // Optional, if discounts are not always applied
 };
 export type ICart = {
   user: mongoose.Schema.Types.ObjectId;
   cartItems: ICartItem[];
-  totalPrice?: number; // Optional, if total price is not always calculated
-  totalPriceAfterDiscount?: number; // Optional, if discounts are not always applied
+  totalPrice: number; // Optional, if total price is not always calculated
 };
 const cartSchema = new mongoose.Schema(
   {
@@ -31,6 +31,9 @@ const cartSchema = new mongoose.Schema(
         quantity: {
           type: Number,
           required: true,
+          min: [1, "Quantity cannot be less than 1"],
+          max: [10, "Quantity cannot be more than 10"],
+          default: 1,
         },
         price: {
           type: Number,
@@ -47,11 +50,14 @@ const cartSchema = new mongoose.Schema(
           type: String,
           enum: ["xs", "s", "m", "l", "xl", "xxl"],
         },
+        discount: {
+          type: Number,
+          default: 0,
+        },
       },
     ],
 
     totalPrice: Number,
-    totalPriceAfterDiscount: Number,
   },
   {
     timestamps: true,
