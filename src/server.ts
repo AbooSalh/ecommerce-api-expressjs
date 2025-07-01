@@ -8,31 +8,34 @@ import dotenvExpand from "dotenv-expand";
 import cors from "cors";
 import compression from "compression";
 import { webHookCheckout } from "./modules/Order/service";
-import createRateLimiter  from "./common/utils/api/rateLimiter";
 
+import createRateLimiter from "./common/utils/api/rateLimiter";
+import hpp from "hpp";
 
 dotenvExpand.expand(dotenv.config());
 const app = express();
 const PORT = process.env.PORT || 5000;
 // Global rate limiter: 1000 requests per 15 minutes per IP (for all routes)
 app.use(createRateLimiter({ minutes: 15, max: 1000 }));
-app.use(express.urlencoded({ extended: true })); // ✅ Middleware for parsing URL-encoded bodies
+// Prevent HTTP Parameter Pollution
+app.use(hpp());
+app.use(express.urlencoded({ extended: true }));
 app.post(
   "/api/stripe/webhook-checkout",
   express.raw({ type: "application/json" }),
   webHookCheckout
 ); // ✅ Middleware for parsing raw body for Stripe webhook
-app.use(express.json()); // ✅ Middleware for parsing JSON
+app.use(express.json());
 app.use(express.static("public"));
-app.use(compression()); // ✅ Middleware for compressing responses
+app.use(compression());
 app.use(
   cors({
-    origin: process.env.CORS_ORIGIN, // ✅ Middleware for enabling CORS
-    methods: "GET,HEAD,PUT,PATCH,POST,DELETE", // ✅ Allowed methods
-    allowedHeaders: "Content-Type,Authorization", // ✅ Allowed headers
-    credentials: true, // ✅ Allow credentials
+    origin: process.env.CORS_ORIGIN,
+    methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
+    allowedHeaders: "Content-Type,Authorization",
+    credentials: true,
   })
-); // ✅ Middleware for enabling CORS
+);
 
 // ✅ Middleware for serving static files
 dbConnection.connect();
