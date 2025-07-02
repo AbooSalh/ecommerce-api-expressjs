@@ -1,3 +1,51 @@
+import crypto from "crypto";
+import sendEmail from "@/common/utils/sendEmail";
+import { emailVerificationTemplate } from "@/common/utils/emailTemplates";
+// Step 1: Send code for account deletion
+export const sendDeleteAccountCode = async (req: Request, res: Response) => {
+  const user = await UserModel.findById(req.user?._id).select(
+    "email emailVerified"
+  );
+  if (!user || !user.emailVerified)
+    throw new ApiError("Unauthorized", "UNAUTHORIZED");
+  const code = Math.floor(100000 + Math.random() * 900000).toString();
+  const hashedCode = crypto.createHash("sha256").update(code).digest("hex");
+  user.deleteAccountCode = hashedCode;
+  user.deleteAccountCodeExpires = new Date(Date.now() + 10 * 60 * 1000);
+  await user.save();
+  await sendEmail({
+    to: user.email,
+    subject: "Delete Account Verification Code",
+    html: emailVerificationTemplate(code),
+  });
+  return ApiSuccess.send(res, "OK", "Verification code sent to your email");
+};
+
+// Step 2: Verify code and delete account
+export const deleteAccount = async (req: Request, res: Response) => {
+  const { code, email, password } = req.body;
+  // Find user by id and select password and deleteAccountCode fields
+  const user = await UserModel.findById(req.user?._id).select(
+    "+password +deleteAccountCode +deleteAccountCodeExpires email"
+  );
+  if (!user) throw new ApiError("User not found", "UNAUTHORIZED");
+  if (user.email !== email)
+    throw new ApiError(
+      "Email does not match authenticated user",
+      "UNAUTHORIZED"
+    );
+  const isMatch = await bcrypt.compare(password, user.password);
+  if (!isMatch) throw new ApiError("Incorrect password", "UNAUTHORIZED");
+  if (!user.deleteAccountCode || !user.deleteAccountCodeExpires)
+    throw new ApiError("No verification code found", "BAD_REQUEST");
+  if (user.deleteAccountCodeExpires < new Date())
+    throw new ApiError("Verification code expired", "BAD_REQUEST");
+  const hashedCode = crypto.createHash("sha256").update(code).digest("hex");
+  if (hashedCode !== user.deleteAccountCode)
+    throw new ApiError("Invalid verification code", "BAD_REQUEST");
+  await UserModel.findByIdAndDelete(user._id);
+  return ApiSuccess.send(res, "OK", "Account deleted successfully");
+};
 import { Request, Response, NextFunction } from "express";
 import UserModel from "./model";
 import ApiError from "@/common/utils/api/ApiError";
@@ -62,7 +110,10 @@ export const getOrders = async (req: Request, res: Response) => {
   if (!userId) {
     throw new ApiError("User not found", "UNAUTHORIZED");
   }
-  const query = new ApiFeatures(OrderM.find({ user: userId }), req.query as IRequestBody)
+  const query = new ApiFeatures(
+    OrderM.find({ user: userId }),
+    req.query as IRequestBody
+  )
     .filter()
     .sort()
     .paginate(await OrderM.countDocuments({ user: userId }))

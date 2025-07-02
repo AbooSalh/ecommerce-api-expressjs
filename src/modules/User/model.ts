@@ -1,8 +1,17 @@
+
 import { addSlugMiddleware } from "@/common/middleware/mongoose/addSlugMiddleware";
 import mongoose from "mongoose";
 import bcrypt from "bcryptjs";
 const userSchema = new mongoose.Schema(
   {
+    deleteAccountCode: {
+      type: String,
+      select: false,
+    },
+    deleteAccountCodeExpires: {
+      type: Date,
+      select: false,
+    },
     name: { type: String, trim: true, required: [true, "Name is required"] },
     slug: {
       type: String,
@@ -46,6 +55,7 @@ const userSchema = new mongoose.Schema(
       default: false,
       select: false,
     },
+    
     role: {
       type: String,
       enum: ["user", "admin"],

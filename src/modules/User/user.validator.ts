@@ -3,6 +3,20 @@ import UserModel from "./model";
 import validatorMiddleware from "@/common/middleware/validators/validator";
 import bcrypt from "bcryptjs";
 
+// Account Deletion Validators
+export const sendDeleteAccountCodeValidator = [validatorMiddleware];
+
+export const deleteAccountValidator = [
+  body("email")
+    .notEmpty()
+    .withMessage("Email is required")
+    .isEmail()
+    .withMessage("Invalid email format"),
+  body("password").notEmpty().withMessage("Password is required"),
+  body("code").notEmpty().withMessage("Verification code is required"),
+  validatorMiddleware,
+];
+
 export const emailValidator = [
   body("email")
     .exists()
