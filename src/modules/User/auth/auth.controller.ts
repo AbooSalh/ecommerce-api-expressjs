@@ -1,9 +1,16 @@
+
+
 import { RequestHandler } from "express";
 import expressAsyncHandler from "express-async-handler";
 import ApiSuccess from "@/common/utils/api/ApiSuccess";
 import * as authService from "./auth.service";
 import * as authValidator from "./auth.validator";
-
+const verifyEmailHandler: RequestHandler = expressAsyncHandler(
+  async (req, res) => {
+    const result = await authService.verifyEmail(req);
+    ApiSuccess.send(res, "OK", result.message);
+  }
+);
 const registerHandler: RequestHandler = expressAsyncHandler(
   async (req, res) => {
     const result = await authService.register(req);
@@ -57,6 +64,10 @@ const authController = {
   resetPassword: {
     handler: resetPasswordHandler,
     validator: authValidator.resetPasswordValidator,
+  },
+  verifyEmail: {
+    handler: verifyEmailHandler,
+    validator: authValidator.verifyEmailValidator,
   },
 };
 

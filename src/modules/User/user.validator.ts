@@ -9,7 +9,7 @@ export const emailValidator = [
     .withMessage("Email is required")
     .isEmail()
     .withMessage("Invalid email format")
-    .normalizeEmail()
+    .normalizeEmail({ gmail_remove_dots: false })
     .custom(async (email) => {
       const exists = await UserModel.findOne({ email });
       if (exists) {

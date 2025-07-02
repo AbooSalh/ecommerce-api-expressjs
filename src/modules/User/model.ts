@@ -33,6 +33,19 @@ const userSchema = new mongoose.Schema(
       default: undefined,
       select: false,
     },
+    emailVerificationCode: {
+      type: String,
+      select: false,
+    },
+    emailVerificationCodeExpires: {
+      type: Date,
+      select: false,
+    },
+    emailVerified: {
+      type: Boolean,
+      default: false,
+      select: false,
+    },
     role: {
       type: String,
       enum: ["user", "admin"],
@@ -64,6 +77,12 @@ const userSchema = new mongoose.Schema(
   }
 );
 addSlugMiddleware(userSchema, "name");
+
+// TTL index: auto-remove unverified users after code expires
+userSchema.index(
+  { emailVerificationCodeExpires: 1 },
+  { expireAfterSeconds: 0, partialFilterExpression: { emailVerified: false } }
+);
 userSchema.pre("save", async function (next) {
   if (this.isModified("password")) {
     this.password = await bcrypt.hash(this.password, 10);

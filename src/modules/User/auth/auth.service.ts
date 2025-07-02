@@ -1,3 +1,22 @@
+export const verifyEmail = async (req: Request) => {
+  const { email, code } = req.body;
+  const hashedCode = crypto.createHash("sha256").update(code).digest("hex");
+  // Select hidden fields for verification
+  const user = await UserModel.findOne({
+    email,
+    emailVerificationCode: hashedCode,
+    emailVerificationCodeExpires: { $gt: new Date() },
+  }).select(
+    "+emailVerificationCode +emailVerificationCodeExpires +emailVerified"
+  );
+  if (!user)
+    throw new ApiError("Invalid or expired verification code", "UNAUTHORIZED");
+  user.emailVerified = true;
+  user.emailVerificationCode = undefined;
+  user.emailVerificationCodeExpires = undefined;
+  await user.save();
+  return { message: "Email verified successfully" };
+};
 import { Request } from "express";
 import UserModel from "../model";
 import ApiError from "@/common/utils/api/ApiError";
@@ -5,7 +24,10 @@ import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
 import generateCode from "@/common/utils/codeGenerator";
 import sendEmail from "@/common/utils/sendEmail";
-import { resetPasswordTemplate } from "@/common/utils/emailTemplates";
+import {
+  resetPasswordTemplate,
+  emailVerificationTemplate,
+} from "@/common/utils/emailTemplates";
 import crypto from "crypto";
 
 const createToken = (payload: jwt.JwtPayload) => {
@@ -16,8 +38,37 @@ const createToken = (payload: jwt.JwtPayload) => {
 
 export const register = async (req: Request) => {
   const { name, email, password, phone } = req.body;
-  const newUser = await UserModel.create({ name, email, password, phone });
+
+  // Generate email verification code
+  const code = generateCode(6);
+  const hashedCode = crypto.createHash("sha256").update(code).digest("hex");
+
+  const newUser = await UserModel.create({
+    name,
+    email,
+    password,
+    phone,
+    emailVerificationCode: hashedCode,
+    emailVerificationCodeExpires: new Date(Date.now() + 10 * 60 * 1000), // 10 min
+    emailVerified: false,
+  });
   if (!newUser) throw new ApiError("User not created", "INTERNAL_SERVER_ERROR");
+
+  // Send verification email
+  try {
+    await sendEmail({
+      to: newUser.email,
+      subject: "Verify Your Email",
+      html: emailVerificationTemplate(code),
+    });
+  } catch {
+    // If email fails, clean up user
+    await UserModel.findByIdAndDelete(newUser._id);
+    throw new ApiError(
+      "Failed to send verification email",
+      "INTERNAL_SERVER_ERROR"
+    );
+  }
 
   const user = await UserModel.findById(newUser._id).select("-password");
   if (!user)

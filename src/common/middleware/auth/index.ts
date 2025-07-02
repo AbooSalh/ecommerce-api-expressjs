@@ -33,8 +33,10 @@ const authMiddleware = (...roles: UserRole[]): RequestHandler => {
         process.env.JWT_SECRET!
       ) as JwtPayload & { id: string; iat: number };
 
-      // 4. Find user and check if exists
-      const currentUser = await UserModel.findById(decoded.id);
+      // 4. Find user and check if exists (explicitly select emailVerified)
+      const currentUser = await UserModel.findById(decoded.id).select(
+        "+emailVerified"
+      );
       if (!currentUser) {
         throw new ApiError("User not found", "UNAUTHORIZED");
       }
@@ -52,10 +54,18 @@ const authMiddleware = (...roles: UserRole[]): RequestHandler => {
         }
       }
 
-      // 6. Attach user to request object
+      // 6. Check if email is verified
+      if (!currentUser.emailVerified) {
+        throw new ApiError(
+          "Please verify your email to access this resource",
+          "FORBIDDEN"
+        );
+      }
+
+      // 7. Attach user to request object
       req.user = currentUser as unknown as UserDocument;
 
-      // 7. Check role if roles are specified
+      // 8. Check role if roles are specified
       if (roles.length > 0) {
         if (!roles.includes(currentUser.role as UserRole)) {
           throw new ApiError(

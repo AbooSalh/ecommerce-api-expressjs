@@ -1,6 +1,15 @@
 import { body } from "express-validator";
 import validatorMiddleware from "@/common/middleware/validators/validator";
 import { emailValidator } from "../user.validator";
+export const verifyEmailValidator = [
+  body("email")
+    .notEmpty()
+    .withMessage("Email is required")
+    .isEmail()
+    .withMessage("Invalid email"),
+  body("code").notEmpty().withMessage("Verification code is required"),
+  validatorMiddleware,
+];
 
 export const registerValidator = [
   body("name").notEmpty().withMessage("Name is required"),

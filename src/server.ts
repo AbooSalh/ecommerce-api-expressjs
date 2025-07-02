@@ -23,17 +23,22 @@ dotenvExpand.expand(dotenv.config());
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-// --- Security Middlewares ---
-app.use(helmet()); // Set security-related HTTP headers
-app.use(mongoSanitize()); // Prevent NoSQL injection
-app.use(hpp()); // Prevent HTTP Parameter Pollution
-app.use(createRateLimiter({ minutes: 15, max: 1000 })); // Rate limiting
-
 // --- Body Parsing & Static Files ---
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(express.static("public"));
 app.use(compression());
+
+// --- Security Middlewares ---
+app.use(helmet()); // Set security-related HTTP headers
+app.use(
+  mongoSanitize({
+    replaceWith: "_", // Replace prohibited characters in keys with _
+    allowDots: true, // Allow dots in values (e.g., emails)
+  })
+); // Prevent NoSQL injection
+app.use(hpp()); // Prevent HTTP Parameter Pollution
+app.use(createRateLimiter({ minutes: 15, max: 1000 })); // Rate limiting
 
 // --- CORS ---
 app.use(
