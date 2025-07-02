@@ -1,40 +1,41 @@
+// External dependencies
 import express, { NextFunction, Request, Response } from "express";
 import dotenv from "dotenv";
+import dotenvExpand from "dotenv-expand";
+import cors from "cors";
+import compression from "compression";
+import helmet from "helmet";
+import hpp from "hpp";
+import mongoSanitize from "express-mongo-sanitize";
+
+// Internal modules
 import dbConnection from "./common/config/database.config";
 import globalError from "./common/middleware/globalError";
 import ApiError from "./common/utils/api/ApiError";
 import { mountRoutes } from "./index";
-import dotenvExpand from "dotenv-expand";
-import cors from "cors";
-import compression from "compression";
+import createRateLimiter from "./common/utils/api/rateLimiter";
 import { webHookCheckout } from "./modules/Order/service";
 
-import createRateLimiter from "./common/utils/api/rateLimiter";
-import hpp from "hpp";
-
-import mongoSanitize from "express-mongo-sanitize";
-import xss from "xss-clean";
-
+// Load environment variables
 dotenvExpand.expand(dotenv.config());
+
+// App initialization
 const app = express();
 const PORT = process.env.PORT || 5000;
-// Global rate limiter: 1000 requests per 15 minutes per IP (for all routes)
-app.use(createRateLimiter({ minutes: 15, max: 1000 }));
-// Prevent NoSQL injection
-app.use(mongoSanitize());
-// Prevent XSS attacks
-app.use(xss());
-// Prevent HTTP Parameter Pollution
-app.use(hpp());
+
+// --- Security Middlewares ---
+app.use(helmet()); // Set security-related HTTP headers
+app.use(mongoSanitize()); // Prevent NoSQL injection
+app.use(hpp()); // Prevent HTTP Parameter Pollution
+app.use(createRateLimiter({ minutes: 15, max: 1000 })); // Rate limiting
+
+// --- Body Parsing & Static Files ---
 app.use(express.urlencoded({ extended: true }));
-app.post(
-  "/api/stripe/webhook-checkout",
-  express.raw({ type: "application/json" }),
-  webHookCheckout
-); // ✅ Middleware for parsing raw body for Stripe webhook
 app.use(express.json());
 app.use(express.static("public"));
 app.use(compression());
+
+// --- CORS ---
 app.use(
   cors({
     origin: process.env.CORS_ORIGIN,
@@ -44,21 +45,31 @@ app.use(
   })
 );
 
-// ✅ Middleware for serving static files
+// --- Special Routes ---
+app.post(
+  "/api/stripe/webhook-checkout",
+  express.raw({ type: "application/json" }),
+  webHookCheckout
+);
+
+// --- App Routes ---
 dbConnection.connect();
 mountRoutes(app);
-// handle all other unhandled routes
+
+// --- 404 Handler ---
 app.all("*", (req: Request, res: Response, next: NextFunction) => {
   next(new ApiError("Route not found", "NOT_FOUND"));
 });
+
+// --- Global Error Handler ---
 app.use(globalError);
+
+// --- Start Server ---
 const server = app.listen(PORT, () => {
   console.log(`🚀 Server running on http://localhost:${PORT}`);
 });
 
-// Events
-
-// handle uncaught exceptions
+// --- Unhandled Promise Rejection Handler ---
 process.on("unhandledRejection", (err: Error) => {
   console.error(`Internal Server Error: ${err.name} | ${err.message}`);
   console.error("shutting down...");

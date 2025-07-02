@@ -1,7 +1,7 @@
 // Exported function to create a rate limiter middleware
 
 import rateLimit from "express-rate-limit";
-import bouncer from "express-bouncer";
+// import bouncer from "express-bouncer";
 
 /**
  * Create a rate limiter middleware.
@@ -28,18 +28,18 @@ export default function createRateLimiter({
  * @param lockMinutes - Lockout duration in minutes
  * @param coolOffMinutes - Cool-off duration in minutes
  */
-export function createBouncer({
-  maxAttempts,
-  lockMinutes,
-  coolOffMinutes,
-}: {
-  maxAttempts: number;
-  lockMinutes: number;
-  coolOffMinutes: number;
-}) {
-  return bouncer(
-    maxAttempts,
-    lockMinutes * 60 * 1000,
-    coolOffMinutes * 60 * 1000
-  );
-}
+// export function createBouncer({
+//   maxAttempts,
+//   lockMinutes,
+//   coolOffMinutes,
+// }: {
+//   maxAttempts: number;
+//   lockMinutes: number;
+//   coolOffMinutes: number;
+// }) {
+//   return bouncer(
+//     maxAttempts,
+//     lockMinutes * 60 * 1000,
+//     coolOffMinutes * 60 * 1000
+//   );
+// }
