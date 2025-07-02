@@ -1,4 +1,5 @@
 // ...existing code...
+// ...existing code...
 import express from "express";
 import authController from "./auth.controller";
 import createRateLimiter from "@/common/utils/api/rateLimiter";
@@ -61,5 +62,20 @@ authRouter.post(
   bruteForceLimiter,
   authController.verifyEmail.validator,
   authController.verifyEmail.handler
+);
+// Resend email verification code: strict limiter
+authRouter.post(
+  "/resend-email-verification-code",
+  bruteForceLimiter,
+  authController.resendEmailVerificationCode.validator,
+  authController.resendEmailVerificationCode.handler
+);
+
+// Resend password reset code: strict limiter
+authRouter.post(
+  "/resend-password-reset-code",
+  bruteForceLimiter,
+  authController.resendPasswordResetCode.validator,
+  authController.resendPasswordResetCode.handler
 );
 export default authRouter;

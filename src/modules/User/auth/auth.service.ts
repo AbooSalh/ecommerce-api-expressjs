@@ -1,3 +1,63 @@
+// RESEND EMAIL VERIFICATION CODE
+export const resendEmailVerificationCode = async (req: Request) => {
+  const { email } = req.body;
+  const user = await UserModel.findOne({ email }).select("+emailVerified");
+  if (!user) throw new ApiError("User not found", "NOT_FOUND");
+  if (user.emailVerified)
+    throw new ApiError("Email already verified", "BAD_REQUEST");
+
+  // Only allow resend if user is in a verification flow (code/expiry not null)
+  if (!user.emailVerificationCode || !user.emailVerificationCodeExpires) {
+    throw new ApiError(
+      "No verification in progress. Please register again.",
+      "BAD_REQUEST"
+    );
+  }
+
+  const code = generateCode(6);
+  const hashedCode = crypto.createHash("sha256").update(code).digest("hex");
+  user.emailVerificationCode = hashedCode;
+  user.emailVerificationCodeExpires = new Date(Date.now() + 10 * 60 * 1000);
+  await user.save();
+
+  await sendEmail({
+    to: user.email,
+    subject: "Verify Your Email",
+    html: emailVerificationTemplate(code),
+  });
+  return { message: "Verification code resent" };
+};
+
+// RESEND PASSWORD RESET CODE
+export const resendPasswordResetCode = async (req: Request) => {
+  const { email } = req.body;
+  const user = await UserModel.findOne({ email }).select(
+    "+passwordResetCode +passwordResetCodeExpires +passwordResetVerified"
+  );
+  if (!user) throw new ApiError("User not found", "NOT_FOUND");
+
+  // Only allow resend if user is in a reset flow (code/expiry not null)
+  if (!user.passwordResetCode || !user.passwordResetCodeExpires) {
+    throw new ApiError(
+      "No password reset in progress. Please request a reset first.",
+      "BAD_REQUEST"
+    );
+  }
+
+  const code = generateCode(6);
+  const hashedCode = crypto.createHash("sha256").update(code).digest("hex");
+  user.passwordResetCode = hashedCode;
+  user.passwordResetCodeExpires = new Date(Date.now() + 10 * 60 * 1000);
+  user.passwordResetVerified = false;
+  await user.save();
+
+  await sendEmail({
+    to: user.email,
+    subject: "Reset Password Code",
+    html: resetPasswordTemplate(code),
+  });
+  return { message: "Password reset code resent" };
+};
 export const verifyEmail = async (req: Request) => {
   const { email, code } = req.body;
   const hashedCode = crypto.createHash("sha256").update(code).digest("hex");
