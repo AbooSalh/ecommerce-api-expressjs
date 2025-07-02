@@ -1,6 +1,6 @@
 import baseControllers from "@/common/controllers/handlers";
-import SubCategoryModel from "./model";
+import SubCategoryM from "./Model";
 
 export const subCategoryC = {
-  ...baseControllers(SubCategoryModel),
+  ...baseControllers(SubCategoryM),
 };

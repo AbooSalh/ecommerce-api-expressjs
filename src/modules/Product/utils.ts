@@ -1,8 +1,8 @@
 import mongoose from "mongoose";
-import Category from "../Category/model";
-import SubCategory from "../SubCategory/model";
+import SubCategory from "../SubCategory/Model";
 import BrandM from "../Brands/model";
 import { CustomValidator } from "express-validator";
+import Category from "../category/model";
 
 // Helper function to validate ObjectId
 const isValidObjectId = (id: string): boolean => {

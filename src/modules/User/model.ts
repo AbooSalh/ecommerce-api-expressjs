@@ -1,7 +1,6 @@
 import { addSlugMiddleware } from "@/common/middleware/mongoose/addSlugMiddleware";
 import mongoose from "mongoose";
-import bcrypt from "node_modules/bcryptjs";
-
+import bcrypt from "bcryptjs";
 const userSchema = new mongoose.Schema(
   {
     name: { type: String, trim: true, required: [true, "Name is required"] },
