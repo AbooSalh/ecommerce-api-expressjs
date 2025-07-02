@@ -26,7 +26,7 @@ export const changePasswordValidator = [
     .withMessage("Current password must be a string")
     .custom(async (value, { req }) => {
       const id = req.user?._id as string;
-      const user = await UserModel.findById(id);
+      const user = await UserModel.findById(id).select("+password");
       if (!user) {
         throw new Error("Not found");
       }

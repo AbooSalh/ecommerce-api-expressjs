@@ -30,10 +30,12 @@ export const register = async (req: Request) => {
   return { user, token };
 };
 
-
 export const login = async (req: Request) => {
   const { email, password } = req.body;
-  const userWithPassword = await UserModel.findOne({ email });
+  // Explicitly select password for authentication
+  const userWithPassword = await UserModel.findOne({ email }).select(
+    "+password"
+  );
   if (!userWithPassword) throw new ApiError("User not found", "NOT_FOUND");
 
   const isPasswordCorrect = await bcrypt.compare(
@@ -54,7 +56,10 @@ export const login = async (req: Request) => {
 
 export const forgotPassword = async (req: Request) => {
   const { email } = req.body;
-  const user = await UserModel.findOne({ email });
+  // Select all password reset fields for update
+  const user = await UserModel.findOne({ email }).select(
+    "+passwordResetCode +passwordResetCodeExpires +passwordResetVerified"
+  );
   if (!user) throw new ApiError("User not found", "NOT_FOUND");
 
   const code = generateCode(6);
@@ -85,11 +90,14 @@ export const verifyResetCode = async (req: Request) => {
     .createHash("sha256")
     .update(req.body.code)
     .digest("hex");
+  // Select all password reset fields for update
   const user = await UserModel.findOne({
     email: req.body.email,
     passwordResetCode: hashedCode,
     passwordResetCodeExpires: { $gt: new Date() },
-  });
+  }).select(
+    "+passwordResetCode +passwordResetCodeExpires +passwordResetVerified"
+  );
 
   if (!user)
     throw new ApiError("Invalid reset code or expired", "UNAUTHORIZED");
@@ -99,7 +107,10 @@ export const verifyResetCode = async (req: Request) => {
 };
 
 export const resetPassword = async (req: Request) => {
-  const user = await UserModel.findOne({ email: req.body.email });
+  // Select all password reset fields for validation and update
+  const user = await UserModel.findOne({ email: req.body.email }).select(
+    "+passwordResetCode +passwordResetCodeExpires +passwordResetVerified"
+  );
   if (!user) throw new ApiError("User not found", "NOT_FOUND");
 
   if (!user.passwordResetVerified) {

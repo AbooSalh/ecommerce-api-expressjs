@@ -17,13 +17,21 @@ const userSchema = new mongoose.Schema(
       type: String,
       required: [true, "Password is required"],
       minlength: [6, "Password must be at least 6 characters"],
+      select: false,
     },
     passwordChangedAt: Date,
-    passwordResetCode: String,
-    passwordResetCodeExpires: Date,
+    passwordResetCode: {
+      type: String,
+      select: false,
+    },
+    passwordResetCodeExpires: {
+      type: Date,
+      select: false,
+    },
     passwordResetVerified: {
       type: Boolean,
       default: undefined,
+      select: false,
     },
     role: {
       type: String,
@@ -48,12 +56,6 @@ const userSchema = new mongoose.Schema(
           type: Boolean,
           default: false,
         },
-      },
-    ],
-    usedCoupons: [
-      {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "Coupon",
       },
     ],
   },
