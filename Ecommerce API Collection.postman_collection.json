@@ -1,0 +1,3992 @@
+{
+	"info": {
+		"_postman_id": "02b31175-fc32-4bf5-8b89-4a0a86402701",
+		"name": "Ecommerce API Collection",
+		"description": "A collection of API endpoints for the Ecommerce application, now with basic test scripts.",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "39432797"
+	},
+	"item": [
+		{
+			"name": "Authentication",
+			"item": [
+				{
+					"name": "Register New User",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 201 (Created)\", function () {",
+									"    pm.response.to.have.status(201);",
+									"});",
+									"",
+									"pm.test(\"Response is valid JSON\", function () {",
+									"    pm.response.to.be.json;",
+									"});",
+									"",
+									"pm.test(\"Response body contains expected keys for user registration\", function () {",
+									"    const jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property('statusMessage');",
+									"    pm.expect(jsonData).to.have.property('result');",
+									"    if (jsonData.result && jsonData.result.document) {",
+									"        pm.expect(jsonData.result.document).to.have.all.keys('_id', 'name', 'email', 'role', 'slug', 'createdAt', 'updatedAt', 'addresses', 'wishlist', 'verified', 'isActive');",
+									"    } else if (jsonData.result && jsonData.result.user) { // Alternative structure",
+									"        pm.expect(jsonData.result.user).to.have.all.keys('_id', 'name', 'email', 'role', 'slug', 'createdAt', 'updatedAt', 'addresses', 'wishlist', 'verified', 'isActive');",
+									"    }",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Test User\",\n  \"email\": \"user@example.com\",\n  \"password\": \"password123\",\n  \"passwordConfirm\": \"password123\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/auth/register",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"register"
+							]
+						},
+						"description": "Register a new user. Requires name, email, password, and passwordConfirm. Sends a verification email."
+					},
+					"response": []
+				},
+				{
+					"name": "Login User",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200 (OK)\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Response is valid JSON\", function () {",
+									"    pm.response.to.be.json;",
+									"});",
+									"",
+									"pm.test(\"Auth token is present and set as collection variable\", function () {",
+									"    const jsonData = pm.response.json();",
+									"    let token;",
+									"    if (jsonData.token) { token = jsonData.token; }",
+									"    else if (jsonData.data && jsonData.data.token) { token = jsonData.data.token; }",
+									"    else if (jsonData.result && jsonData.result.token) { token = jsonData.result.token; }",
+									"    pm.expect(token).to.be.a('string', \"Token not found or not a string in response\");",
+									"    if (token) {",
+									"        pm.collectionVariables.set(\"authToken\", token);",
+									"        console.log(\"authToken set from response: \" + token);",
+									"    }",
+									"});",
+									"",
+									"pm.test(\"Response contains user data\", function() {",
+									"    const jsonData = pm.response.json();",
+									"    let userData = jsonData.user || (jsonData.data && jsonData.data.user) || (jsonData.result && jsonData.result.user);",
+									"    pm.expect(userData).to.be.an('object');",
+									"    pm.expect(userData).to.have.property('_id');",
+									"    pm.expect(userData).to.have.property('email');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"user@example.com\",\n  \"password\": \"password123\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/auth/login",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"login"
+							]
+						},
+						"description": "Login an existing user. Returns a JWT token upon successful authentication."
+					},
+					"response": []
+				},
+				{
+					"name": "Forgot Password",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200 (OK)\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Response is valid JSON\", function () {",
+									"    pm.response.to.be.json;",
+									"});",
+									"",
+									"pm.test(\"Response contains a success message\", function () {",
+									"    const jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property('message');",
+									"    pm.expect(jsonData.message).to.be.a('string');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"user@example.com\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/auth/forgot-password",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"forgot-password"
+							]
+						},
+						"description": "Request a password reset. Sends a reset code to the user's email."
+					},
+					"response": []
+				},
+				{
+					"name": "Verify Reset Code",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200 (OK)\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Response is valid JSON\", function () {",
+									"    pm.response.to.be.json;",
+									"});",
+									"",
+									"pm.test(\"Response indicates success or provides relevant info\", function () {",
+									"    const jsonData = pm.response.json();",
+									"    // Depending on your API, it might return a simple message or status",
+									"    pm.expect(jsonData).to.have.property('statusMessage'); // or 'message' or 'status'",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"resetCode\": \"123456\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/auth/verify-reset-code",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"verify-reset-code"
+							]
+						},
+						"description": "Verify the password reset code sent to the user's email."
+					},
+					"response": []
+				},
+				{
+					"name": "Reset Password",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200 (OK)\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Response is valid JSON\", function () {",
+									"    pm.response.to.be.json;",
+									"});",
+									"",
+									"pm.test(\"Response contains a success message\", function () {",
+									"    const jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property('message');",
+									"    pm.expect(jsonData.message).to.be.a('string');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"user@example.com\",\n  \"newPassword\": \"newPassword456\",\n  \"newPasswordConfirm\": \"newPassword456\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/auth/reset-password",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"reset-password"
+							]
+						},
+						"description": "Reset the user's password after verifying the reset code. Requires email and new password."
+					},
+					"response": []
+				},
+				{
+					"name": "Verify Email",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200 (OK)\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Response is valid JSON\", function () {",
+									"    pm.response.to.be.json;",
+									"});",
+									"",
+									"pm.test(\"Response contains a success message\", function () {",
+									"    const jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property('message');",
+									"    pm.expect(jsonData.message).to.be.a('string');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"verificationCode\": \"123456\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/auth/verify-email",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"verify-email"
+							]
+						},
+						"description": "Verify the user's email address using the code sent during registration."
+					},
+					"response": []
+				},
+				{
+					"name": "Resend Email Verification Code",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200 (OK)\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Response is valid JSON\", function () {",
+									"    pm.response.to.be.json;",
+									"});",
+									"",
+									"pm.test(\"Response contains a success message\", function () {",
+									"    const jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property('message');",
+									"    pm.expect(jsonData.message).to.be.a('string');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"user@example.com\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/auth/resend-email-verification-code",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"resend-email-verification-code"
+							]
+						},
+						"description": "Resend the email verification code if the previous one expired or was not received."
+					},
+					"response": []
+				},
+				{
+					"name": "Resend Password Reset Code",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200 (OK)\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Response is valid JSON\", function () {",
+									"    pm.response.to.be.json;",
+									"});",
+									"",
+									"pm.test(\"Response contains a success message\", function () {",
+									"    const jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property('message');",
+									"    pm.expect(jsonData.message).to.be.a('string');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"user@example.com\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/auth/resend-password-reset-code",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"resend-password-reset-code"
+							]
+						},
+						"description": "Resend the password reset code."
+					},
+					"response": []
+				}
+			],
+			"description": "User authentication operations like register, login, password reset, email verification."
+		},
+		{
+			"name": "User Management",
+			"item": [
+				{
+					"name": "Addresses",
+					"item": [
+						{
+							"name": "Get All My Addresses",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 200 (OK) or 401 (Unauthorized)\", function () {",
+											"    pm.expect(pm.response.code).to.be.oneOf([200, 401]);",
+											"});",
+											"",
+											"if (pm.response.code === 200) {",
+											"    pm.test(\"Response is valid JSON\", function () {",
+											"        pm.response.to.be.json;",
+											"    });",
+											"    pm.test(\"Address list (result.documents or data) is an array\", function () {",
+											"        const jsonData = pm.response.json();",
+											"        const addresses = jsonData.result ? jsonData.result.documents : jsonData.data;",
+											"        pm.expect(addresses).to.be.an('array');",
+											"    });",
+											"    pm.test(\"If address list is not empty, first address has _id, alias, details\", function () {",
+											"        const jsonData = pm.response.json();",
+											"        const addresses = jsonData.result ? jsonData.result.documents : jsonData.data;",
+											"        if (addresses && addresses.length > 0) {",
+											"            pm.expect(addresses[0]).to.have.property('_id');",
+											"            pm.expect(addresses[0]).to.have.property('alias');",
+											"            pm.expect(addresses[0]).to.have.property('details');",
+											"        }",
+											"    });",
+											"}"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{authToken}}",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{baseUrl}}/api/users/addresses",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"api",
+										"users",
+										"addresses"
+									]
+								},
+								"description": "Get all addresses for the authenticated user. (Requires Auth)"
+							},
+							"response": []
+						},
+						{
+							"name": "Get Specific Address",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 200 (OK) or 401 (Unauthorized) or 404 (Not Found)\", function () {",
+											"    pm.expect(pm.response.code).to.be.oneOf([200, 401, 404]);",
+											"});",
+											"",
+											"if (pm.response.code === 200) {",
+											"    pm.test(\"Response is valid JSON\", function () {",
+											"        pm.response.to.be.json;",
+											"    });",
+											"    pm.test(\"Response body contains address with _id, alias, details\", function () {",
+											"        const jsonData = pm.response.json();",
+											"        const address = jsonData.result ? jsonData.result.document : jsonData.data;",
+											"        pm.expect(address).to.have.property('_id');",
+											"        pm.expect(address).to.have.property('alias');",
+											"        pm.expect(address).to.have.property('details');",
+											"    });",
+											"}"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{authToken}}",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{baseUrl}}/api/users/addresses/:addressId",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"api",
+										"users",
+										"addresses",
+										":addressId"
+									],
+									"variable": [
+										{
+											"key": "addressId",
+											"value": "address_id_here"
+										}
+									]
+								},
+								"description": "Get a specific address by its ID for the authenticated user. (Requires Auth)"
+							},
+							"response": []
+						},
+						{
+							"name": "Add New Address",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 201 (Created) or 200 (OK) or 401 (Unauthorized)\", function () {",
+											"    pm.expect(pm.response.code).to.be.oneOf([201, 200, 401]);",
+											"});",
+											"",
+											"if (pm.response.code === 201 || pm.response.code === 200) {",
+											"    pm.test(\"Response is valid JSON\", function () {",
+											"        pm.response.to.be.json;",
+											"    });",
+											"    pm.test(\"Response body contains new address with _id\", function () {",
+											"        const jsonData = pm.response.json();",
+											"        const address = jsonData.result ? jsonData.result.document : jsonData.data;",
+											"        pm.expect(address).to.have.property('_id');",
+											"        pm.expect(address).to.have.property('alias');",
+											"    });",
+											"}"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "Authorization",
+										"value": "Bearer {{authToken}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"alias\": \"Home\",\n  \"details\": \"123 Main St\",\n  \"phone\": \"555-1234\",\n  \"city\": \"Anytown\",\n  \"postalCode\": \"12345\"\n}"
+								},
+								"url": {
+									"raw": "{{baseUrl}}/api/users/addresses",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"api",
+										"users",
+										"addresses"
+									]
+								},
+								"description": "Add a new address for the authenticated user. (Requires Auth)"
+							},
+							"response": []
+						},
+						{
+							"name": "Remove Address",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 200 (OK) or 204 (No Content) or 401 (Unauthorized) or 404 (Not Found)\", function () {",
+											"    pm.expect(pm.response.code).to.be.oneOf([200, 204, 401, 404]);",
+											"});",
+											"",
+											"if (pm.response.code === 200) {",
+											"    pm.test(\"Response is valid JSON\", function () {",
+											"        pm.response.to.be.json;",
+											"    });",
+											"    pm.test(\"Response contains a success message or updated address list\", function () {",
+											"        const jsonData = pm.response.json();",
+											"        pm.expect(jsonData).to.satisfy(function(obj) {",
+											"            return obj.hasOwnProperty('message') || (obj.result && obj.result.documents) || obj.data;",
+											"        });",
+											"    });",
+											"}"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "DELETE",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{authToken}}",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{baseUrl}}/api/users/addresses/:addressId",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"api",
+										"users",
+										"addresses",
+										":addressId"
+									],
+									"variable": [
+										{
+											"key": "addressId",
+											"value": "address_id_here"
+										}
+									]
+								},
+								"description": "Remove an address by its ID for the authenticated user. (Requires Auth)"
+							},
+							"response": []
+						}
+					],
+					"description": "Manage user addresses."
+				},
+				{
+					"name": "Send Delete Account Code",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200 (OK) or 401 (Unauthorized)\", function () {",
+									"    pm.expect(pm.response.code).to.be.oneOf([200, 401]);",
+									"});",
+									"",
+									"if (pm.response.code === 200) {",
+									"    pm.test(\"Response is valid JSON\", function () {",
+									"        pm.response.to.be.json;",
+									"    });",
+									"    pm.test(\"Response contains a success message or status\", function () {",
+									"        const jsonData = pm.response.json();",
+									"        pm.expect(jsonData).to.satisfy(function(obj) {",
+									"            return obj.hasOwnProperty('message') || obj.hasOwnProperty('statusMessage') || obj.hasOwnProperty('status');",
+									"        });",
+									"    });",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{authToken}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/users/send-delete-account-code",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"users",
+								"send-delete-account-code"
+							]
+						},
+						"description": "Send a code to the authenticated user's email to verify account deletion. (Requires Auth)"
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Account",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200 (OK) or 204 (No Content) or 401 (Unauthorized)\", function () {",
+									"    pm.expect(pm.response.code).to.be.oneOf([200, 204, 401]);",
+									"});",
+									"",
+									"if (pm.response.code === 200) {",
+									"    pm.test(\"Response is valid JSON\", function () {",
+									"        pm.response.to.be.json;",
+									"    });",
+									"    pm.test(\"Response contains a success message\", function () {",
+									"        const jsonData = pm.response.json();",
+									"        pm.expect(jsonData).to.have.property('message');",
+									"    });",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{authToken}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"user@example.com\",\n  \"password\": \"password123\",\n  \"code\": \"123456\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/users/delete-account",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"users",
+								"delete-account"
+							]
+						},
+						"description": "Delete the authenticated user's account. Requires email, password, and the deletion code. (Requires Auth)"
+					},
+					"response": []
+				},
+				{
+					"name": "Add to Wishlist",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200 (OK) or 201 (Created) or 401 (Unauthorized)\", function () {",
+									"    pm.expect(pm.response.code).to.be.oneOf([200, 201, 401]);",
+									"});",
+									"",
+									"if (pm.response.code === 200 || pm.response.code === 201) {",
+									"    pm.test(\"Response is valid JSON\", function () {",
+									"        pm.response.to.be.json;",
+									"    });",
+									"    pm.test(\"Response body contains wishlist data or success message\", function () {",
+									"        const jsonData = pm.response.json();",
+									"        // Assuming it returns the updated wishlist or a success message",
+									"        pm.expect(jsonData.result || jsonData.data || jsonData).to.not.be.empty;",
+									"    });",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{authToken}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"productId\": \"product_id_here\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/users/wishlist",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"users",
+								"wishlist"
+							]
+						},
+						"description": "Add a product to the authenticated user's wishlist. (Requires Auth)"
+					},
+					"response": []
+				},
+				{
+					"name": "Remove from Wishlist",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200 (OK) or 401 (Unauthorized)\", function () {",
+									"    pm.expect(pm.response.code).to.be.oneOf([200, 401]);",
+									"});",
+									"",
+									"if (pm.response.code === 200) {",
+									"    pm.test(\"Response is valid JSON\", function () {",
+									"        pm.response.to.be.json;",
+									"    });",
+									"    pm.test(\"Response body indicates success or updated wishlist\", function () {",
+									"        const jsonData = pm.response.json();",
+									"        pm.expect(jsonData.result || jsonData.data || jsonData).to.not.be.empty;",
+									"    });",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{authToken}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"productId\": \"product_id_here\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/users/wishlist",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"users",
+								"wishlist"
+							]
+						},
+						"description": "Remove a product from the authenticated user's wishlist. (Requires Auth)"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Wishlist",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200 (OK) or 401 (Unauthorized)\", function () {",
+									"    pm.expect(pm.response.code).to.be.oneOf([200, 401]);",
+									"});",
+									"",
+									"if (pm.response.code === 200) {",
+									"    pm.test(\"Response is valid JSON\", function () {",
+									"        pm.response.to.be.json;",
+									"    });",
+									"    pm.test(\"Wishlist data (result.documents or data) is an array\", function () {",
+									"        const jsonData = pm.response.json();",
+									"        const wishlistData = jsonData.result ? jsonData.result.documents : jsonData.data;",
+									"        pm.expect(wishlistData).to.be.an('array');",
+									"    });",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{authToken}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/users/wishlist",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"users",
+								"wishlist"
+							]
+						},
+						"description": "Get the authenticated user's wishlist. (Requires Auth)"
+					},
+					"response": []
+				},
+				{
+					"name": "Get All Users (Admin)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200 (OK) or 401/403 (Unauthorized/Forbidden)\", function () {",
+									"    pm.expect(pm.response.code).to.be.oneOf([200, 401, 403]);",
+									"});",
+									"",
+									"if (pm.response.code === 200) {",
+									"    pm.test(\"Response is valid JSON\", function () {",
+									"        pm.response.to.be.json;",
+									"    });",
+									"    pm.test(\"User list (result.documents or data) is an array\", function () {",
+									"        const jsonData = pm.response.json();",
+									"        const users = jsonData.result ? jsonData.result.documents : jsonData.data;",
+									"        pm.expect(users).to.be.an('array');",
+									"    });",
+									"    pm.test(\"If user list is not empty, first user has _id, name, email\", function () {",
+									"        const jsonData = pm.response.json();",
+									"        const users = jsonData.result ? jsonData.result.documents : jsonData.data;",
+									"        if (users && users.length > 0) {",
+									"            pm.expect(users[0]).to.have.all.keys('_id', 'name', 'email', 'role', 'slug', 'createdAt', 'updatedAt', 'addresses', 'wishlist', 'verified', 'isActive');",
+									"        }",
+									"    });",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{authToken}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/users/",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"users",
+								""
+							]
+						},
+						"description": "Get a list of all users. (Admin Only, Requires Auth)"
+					},
+					"response": []
+				},
+				{
+					"name": "Create User (Admin)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 201 (Created) or 401/403 (Unauthorized/Forbidden)\", function () {",
+									"    pm.expect(pm.response.code).to.be.oneOf([201, 401, 403]);",
+									"});",
+									"",
+									"if (pm.response.code === 201) {",
+									"    pm.test(\"Response is valid JSON\", function () {",
+									"        pm.response.to.be.json;",
+									"    });",
+									"    pm.test(\"Response body contains created user with _id, name, email, role\", function () {",
+									"        const jsonData = pm.response.json();",
+									"        const user = jsonData.result ? jsonData.result.document : jsonData.data;",
+									"        pm.expect(user).to.have.all.keys('_id', 'name', 'email', 'role', 'slug', 'createdAt', 'updatedAt', 'addresses', 'wishlist', 'verified', 'isActive');",
+									"    });",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{authToken}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"New User from Admin\",\n  \"email\": \"newadminuser@example.com\",\n  \"password\": \"password123\",\n  \"passwordConfirm\": \"password123\",\n  \"role\": \"user\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/users/",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"users",
+								""
+							]
+						},
+						"description": "Create a new user. (Admin Only, Requires Auth). Supports image upload (use form-data in Postman)."
+					},
+					"response": []
+				},
+				{
+					"name": "Change Password",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200 (OK) or 401 (Unauthorized)\", function () {",
+									"    pm.expect(pm.response.code).to.be.oneOf([200, 401]);",
+									"});",
+									"",
+									"if (pm.response.code === 200) {",
+									"    pm.test(\"Response is valid JSON\", function () {",
+									"        pm.response.to.be.json;",
+									"    });",
+									"    pm.test(\"Response contains a success message\", function () {",
+									"        const jsonData = pm.response.json();",
+									"        pm.expect(jsonData).to.have.property('message');",
+									"    });",
+									"    // Optionally, if a new token is sent, capture it",
+									"    const jsonData = pm.response.json();",
+									"    if (jsonData.token) {",
+									"        pm.collectionVariables.set(\"authToken\", jsonData.token);",
+									"        console.log(\"authToken updated after password change: \" + jsonData.token);",
+									"    }",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{authToken}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"currentPassword\": \"oldpassword\",\n  \"newPassword\": \"newpassword\",\n  \"newPasswordConfirm\": \"newpassword\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/users/change-password",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"users",
+								"change-password"
+							]
+						},
+						"description": "Change the authenticated user's password. (Requires Auth)"
+					},
+					"response": []
+				},
+				{
+					"name": "Get My Profile",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200 (OK) or 401 (Unauthorized)\", function () {",
+									"    pm.expect(pm.response.code).to.be.oneOf([200, 401]);",
+									"});",
+									"",
+									"if (pm.response.code === 200) {",
+									"    pm.test(\"Response is valid JSON\", function () {",
+									"        pm.response.to.be.json;",
+									"    });",
+									"    pm.test(\"Response body contains user profile with _id, name, email\", function () {",
+									"        const jsonData = pm.response.json();",
+									"        const profile = jsonData.result ? jsonData.result.document : jsonData.data;",
+									"        pm.expect(profile).to.have.all.keys('_id', 'name', 'email', 'role', 'slug', 'createdAt', 'updatedAt', 'addresses', 'wishlist', 'verified', 'isActive');",
+									"    });",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{authToken}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/users/profile",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"users",
+								"profile"
+							]
+						},
+						"description": "Get the authenticated user's profile. (Requires Auth)"
+					},
+					"response": []
+				},
+				{
+					"name": "Get My Orders",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200 (OK) or 401 (Unauthorized)\", function () {",
+									"    pm.expect(pm.response.code).to.be.oneOf([200, 401]);",
+									"});",
+									"",
+									"if (pm.response.code === 200) {",
+									"    pm.test(\"Response is valid JSON\", function () {",
+									"        pm.response.to.be.json;",
+									"    });",
+									"    pm.test(\"Order list (result.documents or data) is an array\", function () {",
+									"        const jsonData = pm.response.json();",
+									"        const orders = jsonData.result ? jsonData.result.documents : jsonData.data;",
+									"        pm.expect(orders).to.be.an('array');",
+									"    });",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{authToken}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/users/orders",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"users",
+								"orders"
+							]
+						},
+						"description": "Get the authenticated user's order history. (User Only, Requires Auth)"
+					},
+					"response": []
+				},
+				{
+					"name": "Update My Profile",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200 (OK) or 401 (Unauthorized)\", function () {",
+									"    pm.expect(pm.response.code).to.be.oneOf([200, 401]);",
+									"});",
+									"",
+									"if (pm.response.code === 200) {",
+									"    pm.test(\"Response is valid JSON\", function () {",
+									"        pm.response.to.be.json;",
+									"    });",
+									"    pm.test(\"Response body contains updated user profile\", function () {",
+									"        const jsonData = pm.response.json();",
+									"        const profile = jsonData.result ? jsonData.result.document : jsonData.data;",
+									"        pm.expect(profile).to.have.property('_id');",
+									"        // Add more checks for updated fields if specific ones are expected",
+									"        // For example, if name was updated in request:",
+									"        // const requestBody = JSON.parse(pm.request.body.raw);",
+									"        // if(requestBody.name) pm.expect(profile.name).to.equal(requestBody.name);",
+									"    });",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{authToken}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Updated Name\",\n  \"email\": \"updated@example.com\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/users/update",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"users",
+								"update"
+							]
+						},
+						"description": "Update the authenticated user's profile information. (Requires Auth). Supports image upload (use form-data in Postman)."
+					},
+					"response": []
+				},
+				{
+					"name": "Get User by ID (Admin)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200 (OK) or 401/403 (Unauthorized/Forbidden) or 404 (Not Found)\", function () {",
+									"    pm.expect(pm.response.code).to.be.oneOf([200, 401, 403, 404]);",
+									"});",
+									"",
+									"if (pm.response.code === 200) {",
+									"    pm.test(\"Response is valid JSON\", function () {",
+									"        pm.response.to.be.json;",
+									"    });",
+									"    pm.test(\"Response body contains user with _id, name, email\", function () {",
+									"        const jsonData = pm.response.json();",
+									"        const user = jsonData.result ? jsonData.result.document : jsonData.data;",
+									"        pm.expect(user).to.have.all.keys('_id', 'name', 'email', 'role', 'slug', 'createdAt', 'updatedAt', 'addresses', 'wishlist', 'verified', 'isActive');",
+									"    });",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{authToken}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/users/:id",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"users",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "userId_here"
+								}
+							]
+						},
+						"description": "Get a specific user by ID. (Admin Only, Requires Auth)"
+					},
+					"response": []
+				},
+				{
+					"name": "Update User by ID (Admin)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200 (OK) or 401/403 (Unauthorized/Forbidden) or 404 (Not Found)\", function () {",
+									"    pm.expect(pm.response.code).to.be.oneOf([200, 401, 403, 404]);",
+									"});",
+									"",
+									"if (pm.response.code === 200) {",
+									"    pm.test(\"Response is valid JSON\", function () {",
+									"        pm.response.to.be.json;",
+									"    });",
+									"    pm.test(\"Response body contains updated user info\", function () {",
+									"        const jsonData = pm.response.json();",
+									"        const user = jsonData.result ? jsonData.result.document : jsonData.data;",
+									"        pm.expect(user).to.have.property('_id');",
+									"    });",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{authToken}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Updated Admin Name\",\n  \"email\": \"updatedadmin@example.com\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/users/:id",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"users",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "userId_here"
+								}
+							]
+						},
+						"description": "Update a specific user by ID. (Admin Only, Requires Auth). Supports image upload (use form-data in Postman)."
+					},
+					"response": []
+				},
+				{
+					"name": "Delete User by ID (Admin)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200 (OK) or 204 (No Content) or 401/403 (Unauthorized/Forbidden) or 404 (Not Found)\", function () {",
+									"    pm.expect(pm.response.code).to.be.oneOf([200, 204, 401, 403, 404]);",
+									"});",
+									"",
+									"if (pm.response.code === 200) {",
+									"    pm.test(\"Response is valid JSON\", function () {",
+									"        pm.response.to.be.json;",
+									"    });",
+									"    pm.test(\"Response contains a success message\", function () {",
+									"        const jsonData = pm.response.json();",
+									"        pm.expect(jsonData).to.have.property('message');",
+									"    });",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{authToken}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/users/:id",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"users",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "userId_here"
+								}
+							]
+						},
+						"description": "Delete a specific user by ID. (Admin Only, Requires Auth)"
+					},
+					"response": []
+				}
+			],
+			"description": "User profile management, wishlist, addresses, and admin user operations."
+		},
+		{
+			"name": "Categories",
+			"item": [
+				{
+					"name": "Get All Categories",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200 (OK)\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Response is valid JSON\", function () {",
+									"    pm.response.to.be.json;",
+									"});",
+									"",
+									"pm.test(\"Category list (result.documents or data) is an array\", function () {",
+									"    const jsonData = pm.response.json();",
+									"    const categories = jsonData.result ? jsonData.result.documents : jsonData.data;",
+									"    pm.expect(categories).to.be.an('array');",
+									"});",
+									"",
+									"pm.test(\"If category list is not empty, first category has _id and name\", function () {",
+									"    const jsonData = pm.response.json();",
+									"    const categories = jsonData.result ? jsonData.result.documents : jsonData.data;",
+									"    if (categories && categories.length > 0) {",
+									"        pm.expect(categories[0]).to.have.property('_id');",
+									"        pm.expect(categories[0]).to.have.property('name');",
+									"    }",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/categories",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"categories"
+							]
+						},
+						"description": "Get a list of all categories. Supports filtering and pagination (e.g., `?limit=10&page=1&sort=name`)."
+					},
+					"response": []
+				},
+				{
+					"name": "Create Category (Admin)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 201 (Created) or 401/403 (Unauthorized/Forbidden)\", function () {",
+									"    pm.expect(pm.response.code).to.be.oneOf([201, 401, 403]);",
+									"});",
+									"",
+									"if (pm.response.code === 201) {",
+									"    pm.test(\"Response is valid JSON\", function () {",
+									"        pm.response.to.be.json;",
+									"    });",
+									"    pm.test(\"Response body contains created category with _id and name\", function () {",
+									"        const jsonData = pm.response.json();",
+									"        const category = jsonData.result ? jsonData.result.document : jsonData.data;",
+									"        pm.expect(category).to.have.property('_id');",
+									"        pm.expect(category).to.have.property('name');",
+									"    });",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{authToken}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Electronics\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/categories",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"categories"
+							]
+						},
+						"description": "Create a new category. (Admin Only, Requires Auth). Supports image upload for category icon/image (use form-data in Postman)."
+					},
+					"response": []
+				},
+				{
+					"name": "Get Category by ID",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200 (OK) or 404 (Not Found)\", function () {",
+									"    pm.expect(pm.response.code).to.be.oneOf([200, 404]);",
+									"});",
+									"",
+									"if (pm.response.code === 200) {",
+									"    pm.test(\"Response is valid JSON\", function () {",
+									"        pm.response.to.be.json;",
+									"    });",
+									"    pm.test(\"Response body contains category with _id and name\", function () {",
+									"        const jsonData = pm.response.json();",
+									"        const category = jsonData.result ? jsonData.result.document : jsonData.data;",
+									"        pm.expect(category).to.have.property('_id');",
+									"        pm.expect(category).to.have.property('name');",
+									"    });",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/categories/:id",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"categories",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "categoryId_here"
+								}
+							]
+						},
+						"description": "Get a specific category by its ID."
+					},
+					"response": []
+				},
+				{
+					"name": "Update Category by ID (Admin)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200 (OK) or 401/403 (Unauthorized/Forbidden) or 404 (Not Found)\", function () {",
+									"    pm.expect(pm.response.code).to.be.oneOf([200, 401, 403, 404]);",
+									"});",
+									"",
+									"if (pm.response.code === 200) {",
+									"    pm.test(\"Response is valid JSON\", function () {",
+									"        pm.response.to.be.json;",
+									"    });",
+									"    pm.test(\"Response body contains updated category with _id and name\", function () {",
+									"        const jsonData = pm.response.json();",
+									"        const category = jsonData.result ? jsonData.result.document : jsonData.data;",
+									"        pm.expect(category).to.have.property('_id');",
+									"        pm.expect(category).to.have.property('name');",
+									"        // const requestBody = JSON.parse(pm.request.body.raw);",
+									"        // if(requestBody.name) pm.expect(category.name).to.equal(requestBody.name);",
+									"    });",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{authToken}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Updated Electronics\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/categories/:id",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"categories",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "categoryId_here"
+								}
+							]
+						},
+						"description": "Update a specific category by its ID. (Admin Only, Requires Auth). May support image update (use form-data in Postman)."
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Category by ID (Admin)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200 (OK) or 204 (No Content) or 401/403 (Unauthorized/Forbidden) or 404 (Not Found)\", function () {",
+									"    pm.expect(pm.response.code).to.be.oneOf([200, 204, 401, 403, 404]);",
+									"});",
+									"",
+									"if (pm.response.code === 200) {",
+									"    pm.test(\"Response is valid JSON\", function () {",
+									"        pm.response.to.be.json;",
+									"    });",
+									"    pm.test(\"Response contains a success message\", function () {",
+									"        const jsonData = pm.response.json();",
+									"        pm.expect(jsonData).to.have.property('message');",
+									"    });",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{authToken}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/categories/:id",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"categories",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "categoryId_here"
+								}
+							]
+						},
+						"description": "Delete a specific category by its ID. (Admin Only, Requires Auth). May handle associated image cleanup."
+					},
+					"response": []
+				}
+			],
+			"description": "Manage product categories."
+		},
+		{
+			"name": "Sub-Categories",
+			"item": [
+				{
+					"name": "Get All Sub-Categories for a Category",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200 (OK)\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Response is valid JSON\", function () {",
+									"    pm.response.to.be.json;",
+									"});",
+									"",
+									"pm.test(\"Sub-category list (result.documents or data) is an array\", function () {",
+									"    const jsonData = pm.response.json();",
+									"    const subCategories = jsonData.result ? jsonData.result.documents : jsonData.data;",
+									"    pm.expect(subCategories).to.be.an('array');",
+									"});",
+									"",
+									"pm.test(\"If sub-category list is not empty, first item has _id and name\", function () {",
+									"    const jsonData = pm.response.json();",
+									"    const subCategories = jsonData.result ? jsonData.result.documents : jsonData.data;",
+									"    if (subCategories && subCategories.length > 0) {",
+									"        pm.expect(subCategories[0]).to.have.property('_id');",
+									"        pm.expect(subCategories[0]).to.have.property('name');",
+									"        pm.expect(subCategories[0]).to.have.property('category'); // Should reference parent category",
+									"    }",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/categories/:categoryId/sub-categories",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"categories",
+								":categoryId",
+								"sub-categories"
+							],
+							"variable": [
+								{
+									"key": "categoryId",
+									"value": "parent_category_id_here"
+								}
+							]
+						},
+						"description": "Get all sub-categories for a specific category. Set `:categoryId` path variable."
+					},
+					"response": []
+				},
+				{
+					"name": "Create Sub-Category for a Category (Admin)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 201 (Created) or 401/403 (Unauthorized/Forbidden)\", function () {",
+									"    pm.expect(pm.response.code).to.be.oneOf([201, 401, 403]);",
+									"});",
+									"",
+									"if (pm.response.code === 201) {",
+									"    pm.test(\"Response is valid JSON\", function () {",
+									"        pm.response.to.be.json;",
+									"    });",
+									"    pm.test(\"Response body contains created sub-category with _id, name, and category reference\", function () {",
+									"        const jsonData = pm.response.json();",
+									"        const subCategory = jsonData.result ? jsonData.result.document : jsonData.data;",
+									"        pm.expect(subCategory).to.have.property('_id');",
+									"        pm.expect(subCategory).to.have.property('name');",
+									"        pm.expect(subCategory).to.have.property('category');",
+									"        // const requestBody = JSON.parse(pm.request.body.raw);",
+									"        // if(requestBody.name) pm.expect(subCategory.name).to.equal(requestBody.name);",
+									"        // Check if category in response matches categoryId from path (if possible/needed)",
+									"    });",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{authToken}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Laptops\",\n  \"category\": \"{{categoryId}}\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/categories/:categoryId/sub-categories",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"categories",
+								":categoryId",
+								"sub-categories"
+							],
+							"variable": [
+								{
+									"key": "categoryId",
+									"value": "parent_category_id_here"
+								}
+							]
+						},
+						"description": "Create a new sub-category under a specific category. Set `:categoryId`. (Admin Only, Requires Auth). Supports image upload (use form-data in Postman)."
+					},
+					"response": []
+				},
+				{
+					"name": "Get Sub-Category by ID",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200 (OK) or 404 (Not Found)\", function () {",
+									"    pm.expect(pm.response.code).to.be.oneOf([200, 404]);",
+									"});",
+									"",
+									"if (pm.response.code === 200) {",
+									"    pm.test(\"Response is valid JSON\", function () {",
+									"        pm.response.to.be.json;",
+									"    });",
+									"    pm.test(\"Response body contains sub-category with _id, name, and category reference\", function () {",
+									"        const jsonData = pm.response.json();",
+									"        const subCategory = jsonData.result ? jsonData.result.document : jsonData.data;",
+									"        pm.expect(subCategory).to.have.property('_id');",
+									"        pm.expect(subCategory).to.have.property('name');",
+									"        pm.expect(subCategory).to.have.property('category');",
+									"    });",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/categories/:categoryId/sub-categories/:subCategoryId",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"categories",
+								":categoryId",
+								"sub-categories",
+								":subCategoryId"
+							],
+							"variable": [
+								{
+									"key": "categoryId",
+									"value": "parent_category_id_here"
+								},
+								{
+									"key": "subCategoryId",
+									"value": "sub_category_id_here"
+								}
+							]
+						},
+						"description": "Get a specific sub-category by its ID, under a specific category. Set `:categoryId` and `:subCategoryId` path variables."
+					},
+					"response": []
+				},
+				{
+					"name": "Update Sub-Category by ID (Admin)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200 (OK) or 401/403 (Unauthorized/Forbidden) or 404 (Not Found)\", function () {",
+									"    pm.expect(pm.response.code).to.be.oneOf([200, 401, 403, 404]);",
+									"});",
+									"",
+									"if (pm.response.code === 200) {",
+									"    pm.test(\"Response is valid JSON\", function () {",
+									"        pm.response.to.be.json;",
+									"    });",
+									"    pm.test(\"Response body contains updated sub-category\", function () {",
+									"        const jsonData = pm.response.json();",
+									"        const subCategory = jsonData.result ? jsonData.result.document : jsonData.data;",
+									"        pm.expect(subCategory).to.have.property('_id');",
+									"        pm.expect(subCategory).to.have.property('name');",
+									"        // const requestBody = JSON.parse(pm.request.body.raw);",
+									"        // if(requestBody.name) pm.expect(subCategory.name).to.equal(requestBody.name);",
+									"    });",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{authToken}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Gaming Laptops\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/categories/:categoryId/sub-categories/:subCategoryId",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"categories",
+								":categoryId",
+								"sub-categories",
+								":subCategoryId"
+							],
+							"variable": [
+								{
+									"key": "categoryId",
+									"value": "parent_category_id_here"
+								},
+								{
+									"key": "subCategoryId",
+									"value": "sub_category_id_here"
+								}
+							]
+						},
+						"description": "Update a specific sub-category. Set `:categoryId` and `:subCategoryId`. (Admin Only, Requires Auth). Supports image upload (use form-data in Postman)."
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Sub-Category by ID (Admin)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200 (OK) or 204 (No Content) or 401/403 (Unauthorized/Forbidden) or 404 (Not Found)\", function () {",
+									"    pm.expect(pm.response.code).to.be.oneOf([200, 204, 401, 403, 404]);",
+									"});",
+									"",
+									"if (pm.response.code === 200) {",
+									"    pm.test(\"Response is valid JSON\", function () {",
+									"        pm.response.to.be.json;",
+									"    });",
+									"    pm.test(\"Response contains a success message\", function () {",
+									"        const jsonData = pm.response.json();",
+									"        pm.expect(jsonData).to.have.property('message');",
+									"    });",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{authToken}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/categories/:categoryId/sub-categories/:subCategoryId",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"categories",
+								":categoryId",
+								"sub-categories",
+								":subCategoryId"
+							],
+							"variable": [
+								{
+									"key": "categoryId",
+									"value": "parent_category_id_here"
+								},
+								{
+									"key": "subCategoryId",
+									"value": "sub_category_id_here"
+								}
+							]
+						},
+						"description": "Delete a specific sub-category. Set `:categoryId` and `:subCategoryId`. (Admin Only, Requires Auth)."
+					},
+					"response": []
+				}
+			],
+			"description": "Manage product sub-categories, nested under categories."
+		},
+		{
+			"name": "Brands",
+			"item": [
+				{
+					"name": "Get All Brands",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200 (OK)\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Response is valid JSON\", function () {",
+									"    pm.response.to.be.json;",
+									"});",
+									"",
+									"pm.test(\"Brand list (result.documents or data) is an array\", function () {",
+									"    const jsonData = pm.response.json();",
+									"    const brands = jsonData.result ? jsonData.result.documents : jsonData.data;",
+									"    pm.expect(brands).to.be.an('array');",
+									"});",
+									"",
+									"pm.test(\"If brand list is not empty, first brand has _id and name\", function () {",
+									"    const jsonData = pm.response.json();",
+									"    const brands = jsonData.result ? jsonData.result.documents : jsonData.data;",
+									"    if (brands && brands.length > 0) {",
+									"        pm.expect(brands[0]).to.have.property('_id');",
+									"        pm.expect(brands[0]).to.have.property('name');",
+									"    }",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/brands",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"brands"
+							]
+						},
+						"description": "Get a list of all brands. Supports filtering and pagination."
+					},
+					"response": []
+				},
+				{
+					"name": "Create Brand (Admin)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 201 (Created) or 401/403 (Unauthorized/Forbidden)\", function () {",
+									"    pm.expect(pm.response.code).to.be.oneOf([201, 401, 403]);",
+									"});",
+									"",
+									"if (pm.response.code === 201) {",
+									"    pm.test(\"Response is valid JSON\", function () {",
+									"        pm.response.to.be.json;",
+									"    });",
+									"    pm.test(\"Response body contains created brand with _id and name\", function () {",
+									"        const jsonData = pm.response.json();",
+									"        const brand = jsonData.result ? jsonData.result.document : jsonData.data;",
+									"        pm.expect(brand).to.have.property('_id');",
+									"        pm.expect(brand).to.have.property('name');",
+									"    });",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{authToken}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Apple\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/brands",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"brands"
+							]
+						},
+						"description": "Create a new brand. (Admin Only, Requires Auth). Supports image upload for brand logo (use form-data in Postman)."
+					},
+					"response": []
+				},
+				{
+					"name": "Get Brand by ID",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200 (OK) or 404 (Not Found)\", function () {",
+									"    pm.expect(pm.response.code).to.be.oneOf([200, 404]);",
+									"});",
+									"",
+									"if (pm.response.code === 200) {",
+									"    pm.test(\"Response is valid JSON\", function () {",
+									"        pm.response.to.be.json;",
+									"    });",
+									"    pm.test(\"Response body contains brand with _id and name\", function () {",
+									"        const jsonData = pm.response.json();",
+									"        const brand = jsonData.result ? jsonData.result.document : jsonData.data;",
+									"        pm.expect(brand).to.have.property('_id');",
+									"        pm.expect(brand).to.have.property('name');",
+									"    });",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/brands/:id",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"brands",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "brandId_here"
+								}
+							]
+						},
+						"description": "Get a specific brand by its ID."
+					},
+					"response": []
+				},
+				{
+					"name": "Update Brand by ID (Admin)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200 (OK) or 401/403 (Unauthorized/Forbidden) or 404 (Not Found)\", function () {",
+									"    pm.expect(pm.response.code).to.be.oneOf([200, 401, 403, 404]);",
+									"});",
+									"",
+									"if (pm.response.code === 200) {",
+									"    pm.test(\"Response is valid JSON\", function () {",
+									"        pm.response.to.be.json;",
+									"    });",
+									"    pm.test(\"Response body contains updated brand with _id and name\", function () {",
+									"        const jsonData = pm.response.json();",
+									"        const brand = jsonData.result ? jsonData.result.document : jsonData.data;",
+									"        pm.expect(brand).to.have.property('_id');",
+									"        pm.expect(brand).to.have.property('name');",
+									"    });",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{authToken}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Apple Inc.\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/brands/:id",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"brands",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "brandId_here"
+								}
+							]
+						},
+						"description": "Update a specific brand by its ID. (Admin Only, Requires Auth). Supports image upload for brand logo (use form-data in Postman)."
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Brand by ID (Admin)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200 (OK) or 204 (No Content) or 401/403 (Unauthorized/Forbidden) or 404 (Not Found)\", function () {",
+									"    pm.expect(pm.response.code).to.be.oneOf([200, 204, 401, 403, 404]);",
+									"});",
+									"",
+									"if (pm.response.code === 200) {",
+									"    pm.test(\"Response is valid JSON\", function () {",
+									"        pm.response.to.be.json;",
+									"    });",
+									"    pm.test(\"Response contains a success message\", function () {",
+									"        const jsonData = pm.response.json();",
+									"        pm.expect(jsonData).to.have.property('message');",
+									"    });",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{authToken}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/brands/:id",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"brands",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "brandId_here"
+								}
+							]
+						},
+						"description": "Delete a specific brand by its ID. (Admin Only, Requires Auth)."
+					},
+					"response": []
+				}
+			],
+			"description": "Manage product brands."
+		},
+		{
+			"name": "Products",
+			"item": [
+				{
+					"name": "Get All Products",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200 (OK)\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Response is valid JSON\", function () {",
+									"    pm.response.to.be.json;",
+									"});",
+									"",
+									"pm.test(\"Product list (result.documents or data) is an array\", function () {",
+									"    const jsonData = pm.response.json();",
+									"    const products = jsonData.result ? jsonData.result.documents : jsonData.data;",
+									"    pm.expect(products).to.be.an('array');",
+									"});",
+									"",
+									"pm.test(\"If product list is not empty, first product has _id, title, price\", function () {",
+									"    const jsonData = pm.response.json();",
+									"    const products = jsonData.result ? jsonData.result.documents : jsonData.data;",
+									"    if (products && products.length > 0) {",
+									"        pm.expect(products[0]).to.have.property('_id');",
+									"        pm.expect(products[0]).to.have.property('title');",
+									"        pm.expect(products[0]).to.have.property('price');",
+									"    }",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/products",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"products"
+							]
+						},
+						"description": "Get a list of all products. Supports filtering (e.g., by category, brand, price range), sorting, and pagination."
+					},
+					"response": []
+				},
+				{
+					"name": "Create Product (Admin)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 201 (Created) or 401/403 (Unauthorized/Forbidden)\", function () {",
+									"    pm.expect(pm.response.code).to.be.oneOf([201, 401, 403]);",
+									"});",
+									"",
+									"if (pm.response.code === 201) {",
+									"    pm.test(\"Response is valid JSON\", function () {",
+									"        pm.response.to.be.json;",
+									"    });",
+									"    pm.test(\"Response body contains created product with _id, title, price\", function () {",
+									"        const jsonData = pm.response.json();",
+									"        const product = jsonData.result ? jsonData.result.document : jsonData.data;",
+									"        pm.expect(product).to.have.property('_id');",
+									"        pm.expect(product).to.have.property('title');",
+									"        pm.expect(product).to.have.property('price');",
+									"        pm.expect(product).to.have.property('category');",
+									"        pm.expect(product).to.have.property('brand');",
+									"        pm.expect(product).to.have.property('stocks');",
+									"    });",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{authToken}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"title\": \"New Awesome Laptop\",\n  \"description\": \"This is a fantastic new laptop with all the bells and whistles.\",\n  \"price\": 1299.99,\n  \"category\": \"category_id_here\",\n  \"subCategories\": [\"sub_category_id_1\", \"sub_category_id_2\"],\n  \"brand\": \"brand_id_here\",\n  \"quantity\": 150,\n  \"sold\": 0,\n  \"stocks\": [\n    {\n      \"size\": \"13-inch\",\n      \"color\": \"Silver\",\n      \"quantity\": 50\n    },\n    {\n      \"size\": \"15-inch\",\n      \"color\": \"Space Gray\",\n      \"quantity\": 100\n    }\n  ]\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/products",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"products"
+							]
+						},
+						"description": "Create a new product. (Admin Only, Requires Auth). Supports uploading multiple 'images' (up to 10) and one 'imageCover' (use form-data in Postman)."
+					},
+					"response": []
+				},
+				{
+					"name": "Get Product by ID",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200 (OK) or 404 (Not Found)\", function () {",
+									"    pm.expect(pm.response.code).to.be.oneOf([200, 404]);",
+									"});",
+									"",
+									"if (pm.response.code === 200) {",
+									"    pm.test(\"Response is valid JSON\", function () {",
+									"        pm.response.to.be.json;",
+									"    });",
+									"    pm.test(\"Response body contains product with _id, title, price\", function () {",
+									"        const jsonData = pm.response.json();",
+									"        const product = jsonData.result ? jsonData.result.document : jsonData.data;",
+									"        pm.expect(product).to.have.property('_id');",
+									"        pm.expect(product).to.have.property('title');",
+									"        pm.expect(product).to.have.property('price');",
+									"    });",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/products/:id",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"products",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "productId_here"
+								}
+							]
+						},
+						"description": "Get a specific product by its ID. Populates reviews, category, brand, etc."
+					},
+					"response": []
+				},
+				{
+					"name": "Update Product by ID (Admin)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200 (OK) or 401/403 (Unauthorized/Forbidden) or 404 (Not Found)\", function () {",
+									"    pm.expect(pm.response.code).to.be.oneOf([200, 401, 403, 404]);",
+									"});",
+									"",
+									"if (pm.response.code === 200) {",
+									"    pm.test(\"Response is valid JSON\", function () {",
+									"        pm.response.to.be.json;",
+									"    });",
+									"    pm.test(\"Response body contains updated product with _id, title, price\", function () {",
+									"        const jsonData = pm.response.json();",
+									"        const product = jsonData.result ? jsonData.result.document : jsonData.data;",
+									"        pm.expect(product).to.have.property('_id');",
+									"        pm.expect(product).to.have.property('title');",
+									"        pm.expect(product).to.have.property('price');",
+									"    });",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{authToken}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"title\": \"Updated Awesome Laptop\",\n  \"price\": 1249.99\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/products/:id",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"products",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "productId_here"
+								}
+							]
+						},
+						"description": "Update a specific product by its ID. (Admin Only, Requires Auth). Supports updating images (use form-data in Postman)."
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Product by ID (Admin)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200 (OK) or 204 (No Content) or 401/403 (Unauthorized/Forbidden) or 404 (Not Found)\", function () {",
+									"    pm.expect(pm.response.code).to.be.oneOf([200, 204, 401, 403, 404]);",
+									"});",
+									"",
+									"if (pm.response.code === 200) {",
+									"    pm.test(\"Response is valid JSON\", function () {",
+									"        pm.response.to.be.json;",
+									"    });",
+									"    pm.test(\"Response contains a success message\", function () {",
+									"        const jsonData = pm.response.json();",
+									"        pm.expect(jsonData).to.have.property('message');",
+									"    });",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{authToken}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/products/:id",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"products",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "productId_here"
+								}
+							]
+						},
+						"description": "Delete a specific product by its ID. (Admin Only, Requires Auth)."
+					},
+					"response": []
+				}
+			],
+			"description": "Manage products, including details like stock, images, category, and brand associations."
+		},
+		{
+			"name": "Reviews",
+			"item": [
+				{
+					"name": "Get All Reviews",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200 (OK)\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Response is valid JSON\", function () {",
+									"    pm.response.to.be.json;",
+									"});",
+									"",
+									"pm.test(\"Review list (result.documents or data) is an array\", function () {",
+									"    const jsonData = pm.response.json();",
+									"    const reviews = jsonData.result ? jsonData.result.documents : jsonData.data;",
+									"    pm.expect(reviews).to.be.an('array');",
+									"});",
+									"",
+									"pm.test(\"If review list is not empty, first review has _id, title, ratings\", function () {",
+									"    const jsonData = pm.response.json();",
+									"    const reviews = jsonData.result ? jsonData.result.documents : jsonData.data;",
+									"    if (reviews && reviews.length > 0) {",
+									"        pm.expect(reviews[0]).to.have.property('_id');",
+									"        pm.expect(reviews[0]).to.have.property('title');",
+									"        pm.expect(reviews[0]).to.have.property('ratings');",
+									"        pm.expect(reviews[0]).to.have.property('user');",
+									"        pm.expect(reviews[0]).to.have.property('product');",
+									"    }",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/reviews?product=productId_filter_here",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"reviews"
+							],
+							"query": [
+								{
+									"key": "product",
+									"value": "productId_filter_here"
+								}
+							]
+						},
+						"description": "Get a list of all reviews. Can typically be filtered by product ID (e.g., `?product=productId`)."
+					},
+					"response": []
+				},
+				{
+					"name": "Create Review",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 201 (Created) or 401 (Unauthorized)\", function () {",
+									"    pm.expect(pm.response.code).to.be.oneOf([201, 401]);",
+									"});",
+									"",
+									"if (pm.response.code === 201) {",
+									"    pm.test(\"Response is valid JSON\", function () {",
+									"        pm.response.to.be.json;",
+									"    });",
+									"    pm.test(\"Response body contains created review with _id, title, ratings, user, product\", function () {",
+									"        const jsonData = pm.response.json();",
+									"        const review = jsonData.result ? jsonData.result.document : jsonData.data;",
+									"        pm.expect(review).to.have.property('_id');",
+									"        pm.expect(review).to.have.property('title');",
+									"        pm.expect(review).to.have.property('ratings');",
+									"        pm.expect(review).to.have.property('user');",
+									"        pm.expect(review).to.have.property('product');",
+									"    });",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{authToken}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"title\": \"Amazing Product!\",\n  \"ratings\": 5,\n  \"product\": \"product_id_here\",\n  \"comment\": \"This product exceeded all my expectations.\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/reviews",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"reviews"
+							]
+						},
+						"description": "Create a new review for a product. (User role required, Requires Auth). `user` is derived from auth token, `product` ID must be provided."
+					},
+					"response": []
+				},
+				{
+					"name": "Get Review by ID",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200 (OK) or 404 (Not Found)\", function () {",
+									"    pm.expect(pm.response.code).to.be.oneOf([200, 404]);",
+									"});",
+									"",
+									"if (pm.response.code === 200) {",
+									"    pm.test(\"Response is valid JSON\", function () {",
+									"        pm.response.to.be.json;",
+									"    });",
+									"    pm.test(\"Response body contains review with _id, title, ratings\", function () {",
+									"        const jsonData = pm.response.json();",
+									"        const review = jsonData.result ? jsonData.result.document : jsonData.data;",
+									"        pm.expect(review).to.have.property('_id');",
+									"        pm.expect(review).to.have.property('title');",
+									"        pm.expect(review).to.have.property('ratings');",
+									"    });",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/reviews/:id",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"reviews",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "reviewId_here"
+								}
+							]
+						},
+						"description": "Get a specific review by its ID."
+					},
+					"response": []
+				},
+				{
+					"name": "Update My Review",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200 (OK) or 401 (Unauthorized) or 403 (Forbidden) or 404 (Not Found)\", function () {",
+									"    pm.expect(pm.response.code).to.be.oneOf([200, 401, 403, 404]);",
+									"});",
+									"",
+									"if (pm.response.code === 200) {",
+									"    pm.test(\"Response is valid JSON\", function () {",
+									"        pm.response.to.be.json;",
+									"    });",
+									"    pm.test(\"Response body contains updated review details\", function () {",
+									"        const jsonData = pm.response.json();",
+									"        const review = jsonData.result ? jsonData.result.document : jsonData.data;",
+									"        pm.expect(review).to.have.property('_id');",
+									"    });",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{authToken}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"title\": \"Actually, it's pretty good\",\n  \"ratings\": 4,\n  \"comment\": \"After using it for a while, I've updated my thoughts.\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/reviews/:id",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"reviews",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "my_reviewId_here"
+								}
+							]
+						},
+						"description": "Update a specific review by its ID. (User role required, Requires Auth - user can typically only update their own review)."
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Review",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200 (OK) or 204 (No Content) or 401/403 (Unauthorized/Forbidden) or 404 (Not Found)\", function () {",
+									"    pm.expect(pm.response.code).to.be.oneOf([200, 204, 401, 403, 404]);",
+									"});",
+									"",
+									"if (pm.response.code === 200) {",
+									"    pm.test(\"Response is valid JSON and contains success message\", function () {",
+									"        pm.response.to.be.json;",
+									"        const jsonData = pm.response.json();",
+									"        pm.expect(jsonData).to.have.property('message');",
+									"    });",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{authToken}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/reviews/:id",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"reviews",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "reviewId_to_delete_here"
+								}
+							]
+						},
+						"description": "Delete a specific review by its ID. (User can delete their own, Admin can delete any. Requires Auth)."
+					},
+					"response": []
+				}
+			],
+			"description": "Manage product reviews."
+		},
+		{
+			"name": "Coupons (Admin Only)",
+			"item": [
+				{
+					"name": "Get All Coupons",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200 (OK) or 401/403 (Unauthorized/Forbidden)\", function () {",
+									"    pm.expect(pm.response.code).to.be.oneOf([200, 401, 403]);",
+									"});",
+									"",
+									"if (pm.response.code === 200) {",
+									"    pm.test(\"Response is valid JSON\", function () {",
+									"        pm.response.to.be.json;",
+									"    });",
+									"    pm.test(\"Coupon list (result.documents or data) is an array\", function () {",
+									"        const jsonData = pm.response.json();",
+									"        const coupons = jsonData.result ? jsonData.result.documents : jsonData.data;",
+									"        pm.expect(coupons).to.be.an('array');",
+									"    });",
+									"    pm.test(\"If coupon list is not empty, first coupon has _id, name, expire, discount\", function () {",
+									"        const jsonData = pm.response.json();",
+									"        const coupons = jsonData.result ? jsonData.result.documents : jsonData.data;",
+									"        if (coupons && coupons.length > 0) {",
+									"            pm.expect(coupons[0]).to.have.property('_id');",
+									"            pm.expect(coupons[0]).to.have.property('name');",
+									"            pm.expect(coupons[0]).to.have.property('expire');",
+									"            pm.expect(coupons[0]).to.have.property('discount');",
+									"        }",
+									"    });",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{authToken}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/coupons",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"coupons"
+							]
+						},
+						"description": "Get a list of all coupons. (Admin Only, Requires Auth)"
+					},
+					"response": []
+				},
+				{
+					"name": "Create Coupon",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 201 (Created) or 401/403 (Unauthorized/Forbidden)\", function () {",
+									"    pm.expect(pm.response.code).to.be.oneOf([201, 401, 403]);",
+									"});",
+									"",
+									"if (pm.response.code === 201) {",
+									"    pm.test(\"Response is valid JSON\", function () {",
+									"        pm.response.to.be.json;",
+									"    });",
+									"    pm.test(\"Response body contains created coupon with _id, name, expire, discount\", function () {",
+									"        const jsonData = pm.response.json();",
+									"        const coupon = jsonData.result ? jsonData.result.document : jsonData.data;",
+									"        pm.expect(coupon).to.have.property('_id');",
+									"        pm.expect(coupon).to.have.property('name');",
+									"        pm.expect(coupon).to.have.property('expire');",
+									"        pm.expect(coupon).to.have.property('discount');",
+									"    });",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{authToken}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"SUMMER25OFF\",\n  \"expire\": \"2024-09-30T23:59:59.000Z\",\n  \"discount\": 25,\n  \"quantity\": 100\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/coupons",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"coupons"
+							]
+						},
+						"description": "Create a new coupon. `name` is the coupon code. `expire` is the expiration date. `discount` is the percentage or fixed amount. `quantity` is the number of available coupons. (Admin Only, Requires Auth)"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Coupon by ID",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200 (OK) or 401/403 (Unauthorized/Forbidden) or 404 (Not Found)\", function () {",
+									"    pm.expect(pm.response.code).to.be.oneOf([200, 401, 403, 404]);",
+									"});",
+									"",
+									"if (pm.response.code === 200) {",
+									"    pm.test(\"Response is valid JSON\", function () {",
+									"        pm.response.to.be.json;",
+									"    });",
+									"    pm.test(\"Response body contains coupon with _id, name, expire, discount\", function () {",
+									"        const jsonData = pm.response.json();",
+									"        const coupon = jsonData.result ? jsonData.result.document : jsonData.data;",
+									"        pm.expect(coupon).to.have.property('_id');",
+									"        pm.expect(coupon).to.have.property('name');",
+									"        pm.expect(coupon).to.have.property('expire');",
+									"        pm.expect(coupon).to.have.property('discount');",
+									"    });",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{authToken}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/coupons/:id",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"coupons",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "couponId_here"
+								}
+							]
+						},
+						"description": "Get a specific coupon by its ID. (Admin Only, Requires Auth)"
+					},
+					"response": []
+				},
+				{
+					"name": "Update Coupon by ID",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200 (OK) or 401/403 (Unauthorized/Forbidden) or 404 (Not Found)\", function () {",
+									"    pm.expect(pm.response.code).to.be.oneOf([200, 401, 403, 404]);",
+									"});",
+									"",
+									"if (pm.response.code === 200) {",
+									"    pm.test(\"Response is valid JSON\", function () {",
+									"        pm.response.to.be.json;",
+									"    });",
+									"    pm.test(\"Response body contains updated coupon details\", function () {",
+									"        const jsonData = pm.response.json();",
+									"        const coupon = jsonData.result ? jsonData.result.document : jsonData.data;",
+									"        pm.expect(coupon).to.have.property('_id');",
+									"    });",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{authToken}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"expire\": \"2025-01-31T23:59:59.000Z\",\n  \"discount\": 30,\n  \"quantity\": 50\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/coupons/:id",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"coupons",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "couponId_here"
+								}
+							]
+						},
+						"description": "Update a specific coupon by its ID. (Admin Only, Requires Auth)"
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Coupon by ID",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200 (OK) or 204 (No Content) or 401/403 (Unauthorized/Forbidden) or 404 (Not Found)\", function () {",
+									"    pm.expect(pm.response.code).to.be.oneOf([200, 204, 401, 403, 404]);",
+									"});",
+									"",
+									"if (pm.response.code === 200) {",
+									"    pm.test(\"Response is valid JSON and contains success message\", function () {",
+									"        pm.response.to.be.json;",
+									"        const jsonData = pm.response.json();",
+									"        pm.expect(jsonData).to.have.property('message');",
+									"    });",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{authToken}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/coupons/:id",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"coupons",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "couponId_here"
+								}
+							]
+						},
+						"description": "Delete a specific coupon by its ID. (Admin Only, Requires Auth)."
+					},
+					"response": []
+				}
+			],
+			"description": "Manage discount coupons (Admin operations only)."
+		},
+		{
+			"name": "Cart Management (Requires Auth)",
+			"item": [
+				{
+					"name": "Add Product to Cart",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200 (OK) or 201 (Created) or 401 (Unauthorized)\", function () {",
+									"    pm.expect(pm.response.code).to.be.oneOf([200, 201, 401]);",
+									"});",
+									"",
+									"if (pm.response.code === 200 || pm.response.code === 201) {",
+									"    pm.test(\"Response is valid JSON\", function () {",
+									"        pm.response.to.be.json;",
+									"    });",
+									"    pm.test(\"Response body reflects updated cart\", function () {",
+									"        const jsonData = pm.response.json();",
+									"        const cart = jsonData.result ? jsonData.result.document : jsonData.data;",
+									"        pm.expect(cart).to.have.property('_id');",
+									"        pm.expect(cart).to.have.property('cartItems').that.is.an('array');",
+									"    });",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{authToken}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"productId\": \"product_id_here\",\n  \"quantity\": 1,\n  \"color\": \"Blue\",\n  \"size\": \"M\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/users/cart",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"users",
+								"cart"
+							]
+						},
+						"description": "Add a product to the authenticated user's cart. Requires `productId` and `quantity`. `color` and `size` may be optional depending on product and stock structure."
+					},
+					"response": []
+				},
+				{
+					"name": "Get My Cart",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200 (OK) or 401 (Unauthorized)\", function () {",
+									"    pm.expect(pm.response.code).to.be.oneOf([200, 401]);",
+									"});",
+									"",
+									"if (pm.response.code === 200) {",
+									"    pm.test(\"Response is valid JSON\", function () {",
+									"        pm.response.to.be.json;",
+									"    });",
+									"    pm.test(\"Response body contains cart details\", function () {",
+									"        const jsonData = pm.response.json();",
+									"        const cart = jsonData.result ? jsonData.result.document : jsonData.data;",
+									"        pm.expect(cart).to.have.property('_id');",
+									"        pm.expect(cart).to.have.property('cartItems').that.is.an('array');",
+									"        pm.expect(cart).to.have.property('totalPrice');",
+									"    });",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{authToken}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/users/cart",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"users",
+								"cart"
+							]
+						},
+						"description": "Get the authenticated user's current cart contents."
+					},
+					"response": []
+				},
+				{
+					"name": "Remove Item from Cart",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200 (OK) or 204 (No Content) or 401 (Unauthorized) or 404 (Not Found)\", function () {",
+									"    pm.expect(pm.response.code).to.be.oneOf([200, 204, 401, 404]);",
+									"});",
+									"",
+									"if (pm.response.code === 200) {",
+									"    pm.test(\"Response is valid JSON and reflects updated cart or success\", function () {",
+									"        pm.response.to.be.json;",
+									"        const jsonData = pm.response.json();",
+									"        const cart = jsonData.result ? jsonData.result.document : jsonData.data;",
+									"        pm.expect(cart).to.not.be.empty;",
+									"        // Further checks can be added if structure of updated cart is known",
+									"    });",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{authToken}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/users/cart/:itemId",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"users",
+								"cart",
+								":itemId"
+							],
+							"variable": [
+								{
+									"key": "itemId",
+									"value": "cart_item_id_here"
+								}
+							]
+						},
+						"description": "Remove a specific item from the cart by its cart item ID (not product ID)."
+					},
+					"response": []
+				},
+				{
+					"name": "Clear My Cart",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200 (OK) or 204 (No Content) or 401 (Unauthorized)\", function () {",
+									"    pm.expect(pm.response.code).to.be.oneOf([200, 204, 401]);",
+									"});",
+									"",
+									"if (pm.response.code === 200) {",
+									"    pm.test(\"Response is valid JSON\", function () {",
+									"        pm.response.to.be.json;",
+									"    });",
+									"    pm.test(\"Response indicates cart is cleared or success message\", function () {",
+									"        const jsonData = pm.response.json();",
+									"        // Example: check if cartItems is empty or a success message",
+									"        const cart = jsonData.result ? jsonData.result.document : jsonData.data;",
+									"        if(cart && cart.hasOwnProperty('cartItems')) {",
+									"           pm.expect(cart.cartItems).to.be.an('array').that.is.empty;",
+									"        } else {",
+									"           pm.expect(jsonData).to.have.property('message');",
+									"        }",
+									"    });",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{authToken}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/users/cart",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"users",
+								"cart"
+							]
+						},
+						"description": "Clear all items from the authenticated user's cart."
+					},
+					"response": []
+				},
+				{
+					"name": "Update Cart Item Quantity",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200 (OK) or 401 (Unauthorized) or 404 (Not Found)\", function () {",
+									"    pm.expect(pm.response.code).to.be.oneOf([200, 401, 404]);",
+									"});",
+									"",
+									"if (pm.response.code === 200) {",
+									"    pm.test(\"Response is valid JSON\", function () {",
+									"        pm.response.to.be.json;",
+									"    });",
+									"    pm.test(\"Response body reflects updated cart item quantity\", function () {",
+									"        const jsonData = pm.response.json();",
+									"        const cart = jsonData.result ? jsonData.result.document : jsonData.data;",
+									"        pm.expect(cart).to.have.property('_id');",
+									"        pm.expect(cart).to.have.property('cartItems').that.is.an('array');",
+									"        // Further check: find the item and verify its quantity if itemId is known",
+									"        // const requestBody = JSON.parse(pm.request.body.raw);",
+									"        // const itemId = pm.request.url.getPathVariables().itemId;",
+									"        // const updatedItem = cart.cartItems.find(item => item._id === itemId || item.product === itemId); // depending on what :itemId refers to",
+									"        // if(updatedItem) pm.expect(updatedItem.quantity).to.equal(requestBody.quantity);",
+									"    });",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{authToken}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"quantity\": 3\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/users/cart/:itemId",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"users",
+								"cart",
+								":itemId"
+							],
+							"variable": [
+								{
+									"key": "itemId",
+									"value": "cart_item_id_here"
+								}
+							]
+						},
+						"description": "Update the quantity of a specific item in the cart by its cart item ID."
+					},
+					"response": []
+				}
+			],
+			"description": "Manage the authenticated user's shopping cart."
+		},
+		{
+			"name": "Orders",
+			"item": [
+				{
+					"name": "Create Cash on Delivery (COD) Order",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 201 (Created) or 401 (Unauthorized)\", function () {",
+									"    pm.expect(pm.response.code).to.be.oneOf([201, 401]);",
+									"});",
+									"",
+									"if (pm.response.code === 201) {",
+									"    pm.test(\"Response is valid JSON\", function () {",
+									"        pm.response.to.be.json;",
+									"    });",
+									"    pm.test(\"Response body contains created order details\", function () {",
+									"        const jsonData = pm.response.json();",
+									"        const order = jsonData.result ? jsonData.result.document : jsonData.data;",
+									"        pm.expect(order).to.have.property('_id');",
+									"        pm.expect(order).to.have.property('user');",
+									"        pm.expect(order).to.have.property('shippingAddress');",
+									"        pm.expect(order).to.have.property('orderItems').that.is.an('array');",
+									"        pm.expect(order).to.have.property('totalOrderPrice');",
+									"        pm.expect(order.paymentMethod).to.equal('cash');",
+									"    });",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{authToken}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"shippingAddressId\": \"user_address_id_here\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/order/cod",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"order",
+								"cod"
+							]
+						},
+						"description": "Create a Cash on Delivery (COD) order using items from the user's current cart and a specified shipping address. (User role required, Requires Auth)"
+					},
+					"response": []
+				},
+				{
+					"name": "Get All Orders (Admin)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200 (OK) or 401/403 (Unauthorized/Forbidden)\", function () {",
+									"    pm.expect(pm.response.code).to.be.oneOf([200, 401, 403]);",
+									"});",
+									"",
+									"if (pm.response.code === 200) {",
+									"    pm.test(\"Response is valid JSON\", function () {",
+									"        pm.response.to.be.json;",
+									"    });",
+									"    pm.test(\"Order list (result.documents or data) is an array\", function () {",
+									"        const jsonData = pm.response.json();",
+									"        const orders = jsonData.result ? jsonData.result.documents : jsonData.data;",
+									"        pm.expect(orders).to.be.an('array');",
+									"    });",
+									"    pm.test(\"If order list is not empty, first order has _id, user, totalOrderPrice\", function () {",
+									"        const jsonData = pm.response.json();",
+									"        const orders = jsonData.result ? jsonData.result.documents : jsonData.data;",
+									"        if (orders && orders.length > 0) {",
+									"            pm.expect(orders[0]).to.have.property('_id');",
+									"            pm.expect(orders[0]).to.have.property('user');",
+									"            pm.expect(orders[0]).to.have.property('totalOrderPrice');",
+									"            pm.expect(orders[0]).to.have.property('isPaid');",
+									"            pm.expect(orders[0]).to.have.property('isDelivered');",
+									"        }",
+									"    });",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{authToken}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/order/cod",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"order",
+								"cod"
+							]
+						},
+						"description": "Get a list of all orders. (Admin Only, Requires Auth). Note: This endpoint seems to be GET /api/order/cod based on router definition, which is unusual for getting all orders. Usually, it would be GET /api/order/ or GET /api/order/all."
+					},
+					"response": []
+				},
+				{
+					"name": "Create Stripe Checkout Session",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200 (OK) or 401 (Unauthorized)\", function () {",
+									"    pm.expect(pm.response.code).to.be.oneOf([200, 401]);",
+									"});",
+									"",
+									"if (pm.response.code === 200) {",
+									"    pm.test(\"Response is valid JSON\", function () {",
+									"        pm.response.to.be.json;",
+									"    });",
+									"    pm.test(\"Response body contains Stripe session ID and URL\", function () {",
+									"        const jsonData = pm.response.json();",
+									"        const session = jsonData.result ? jsonData.result.session : (jsonData.data ? jsonData.data.session : jsonData.session);",
+									"        pm.expect(session).to.have.property('id');",
+									"        pm.expect(session.id).to.include('cs_'); // Stripe Checkout Session IDs usually start with cs_",
+									"        pm.expect(session).to.have.property('url');",
+									"    });",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{authToken}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"shippingAddressId\": \"user_address_id_here\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/order/checkout-session",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"order",
+								"checkout-session"
+							]
+						},
+						"description": "Create a Stripe checkout session for online payment using items from the user's cart. Returns a Stripe session ID to redirect the user to Stripe's payment page. (User role required, Requires Auth)"
+					},
+					"response": []
+				},
+				{
+					"name": "Mark Order as Paid (Admin)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200 (OK) or 401/403 (Unauthorized/Forbidden) or 404 (Not Found)\", function () {",
+									"    pm.expect(pm.response.code).to.be.oneOf([200, 401, 403, 404]);",
+									"});",
+									"",
+									"if (pm.response.code === 200) {",
+									"    pm.test(\"Response is valid JSON\", function () {",
+									"        pm.response.to.be.json;",
+									"    });",
+									"    pm.test(\"Response body shows order isPaid is true\", function () {",
+									"        const jsonData = pm.response.json();",
+									"        const order = jsonData.result ? jsonData.result.document : jsonData.data;",
+									"        pm.expect(order).to.have.property('isPaid', true);",
+									"    });",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{authToken}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/order/:orderId/pay",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"order",
+								":orderId",
+								"pay"
+							],
+							"variable": [
+								{
+									"key": "orderId",
+									"value": "order_id_here"
+								}
+							]
+						},
+						"description": "Update an order's status to 'Paid'. (Admin Only, Requires Auth)"
+					},
+					"response": []
+				},
+				{
+					"name": "Mark Order as Delivered (Admin)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200 (OK) or 401/403 (Unauthorized/Forbidden) or 404 (Not Found)\", function () {",
+									"    pm.expect(pm.response.code).to.be.oneOf([200, 401, 403, 404]);",
+									"});",
+									"",
+									"if (pm.response.code === 200) {",
+									"    pm.test(\"Response is valid JSON\", function () {",
+									"        pm.response.to.be.json;",
+									"    });",
+									"    pm.test(\"Response body shows order isDelivered is true\", function () {",
+									"        const jsonData = pm.response.json();",
+									"        const order = jsonData.result ? jsonData.result.document : jsonData.data;",
+									"        pm.expect(order).to.have.property('isDelivered', true);",
+									"    });",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{authToken}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/order/:orderId/deliver",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"order",
+								":orderId",
+								"deliver"
+							],
+							"variable": [
+								{
+									"key": "orderId",
+									"value": "order_id_here"
+								}
+							]
+						},
+						"description": "Update an order's status to 'Delivered'. (Admin Only, Requires Auth)"
+					},
+					"response": []
+				},
+				{
+					"name": "Stripe Webhook for Checkout Events",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200 (OK) - Acknowledged\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"// Further tests are difficult without actual Stripe event simulation and signature.",
+									"// If your webhook returns a specific JSON body on success, you can test for it:",
+									"// pm.test(\"Response indicates receipt, e.g., { received: true }\", function () {",
+									"//     const jsonData = pm.response.json();",
+									"//     pm.expect(jsonData).to.have.property('received', true);",
+									"// });"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Stripe-Signature",
+								"value": "{{stripe_signature_header_value}}",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"id\": \"evt_example\",\n  \"object\": \"event\",\n  \"type\": \"checkout.session.completed\",\n  \"data\": {\n    \"object\": {\n      \"id\": \"cs_test_a1b2c3d4e5f6g7h8i9j0\",\n      \"object\": \"checkout.session\",\n      \"customer_details\": {\n         \"email\": \"customer@example.com\"\n       },\n      \"metadata\": {\n        \"orderId\": \"your_internal_order_id_if_set\"\n      }\n      // ... other checkout session fields sent by Stripe\n    }\n  }\n  // ... other event fields sent by Stripe\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/stripe/webhook-checkout",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"stripe",
+								"webhook-checkout"
+							]
+						},
+						"description": "Stripe webhook endpoint to receive events like 'checkout.session.completed'. This endpoint is called by Stripe servers. Requires `express.raw({type: 'application/json'})` on the server for proper signature verification. The request body and `Stripe-Signature` header are provided by Stripe. For local testing, use Stripe CLI to forward webhooks."
+					},
+					"response": []
+				}
+			],
+			"description": "Manage orders, including creation (COD, Stripe), status updates, and Stripe webhook handling."
+		}
+	],
+	"auth": {
+		"type": "bearer",
+		"bearer": [
+			{
+				"key": "token",
+				"value": "{{authToken}}",
+				"type": "string"
+			}
+		]
+	},
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "baseUrl",
+			"value": "http://localhost:5000",
+			"type": "string"
+		},
+		{
+			"key": "authToken",
+			"value": "YOUR_JWT_TOKEN_HERE",
+			"type": "string"
+		},
+		{
+			"key": "categoryId",
+			"value": "some_category_id",
+			"type": "string"
+		},
+		{
+			"key": "subCategoryId",
+			"value": "some_subCategory_id",
+			"type": "string"
+		}
+	]
+}
