@@ -3,13 +3,27 @@ import UserModel from "./model";
 import validatorMiddleware from "@/common/middleware/validators/validator";
 import bcrypt from "bcryptjs";
 
+// Account Deletion Validators
+export const sendDeleteAccountCodeValidator = [validatorMiddleware];
+
+export const deleteAccountValidator = [
+  body("email")
+    .notEmpty()
+    .withMessage("Email is required")
+    .isEmail()
+    .withMessage("Invalid email format"),
+  body("password").notEmpty().withMessage("Password is required"),
+  body("code").notEmpty().withMessage("Verification code is required"),
+  validatorMiddleware,
+];
+
 export const emailValidator = [
   body("email")
     .exists()
     .withMessage("Email is required")
     .isEmail()
     .withMessage("Invalid email format")
-    .normalizeEmail()
+    .normalizeEmail({ gmail_remove_dots: false })
     .custom(async (email) => {
       const exists = await UserModel.findOne({ email });
       if (exists) {
@@ -26,7 +40,7 @@ export const changePasswordValidator = [
     .withMessage("Current password must be a string")
     .custom(async (value, { req }) => {
       const id = req.user?._id as string;
-      const user = await UserModel.findById(id);
+      const user = await UserModel.findById(id).select("+password");
       if (!user) {
         throw new Error("Not found");
       }

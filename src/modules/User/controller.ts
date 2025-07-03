@@ -1,3 +1,4 @@
+// ...existing code...
 import UserModel from "./model";
 import baseController from "@/common/controllers/handlers";
 import expressAsyncHandler from "express-async-handler";
@@ -20,6 +21,15 @@ export const UserC = {
       },
     },
   }),
+
+  sendDeleteAccountCode: {
+    handler: expressAsyncHandler(userService.sendDeleteAccountCode),
+    validator: userValidator.sendDeleteAccountCodeValidator,
+  },
+  deleteAccount: {
+    handler: expressAsyncHandler(userService.deleteAccount),
+    validator: userValidator.deleteAccountValidator,
+  },
 
   changePassword: {
     handler: expressAsyncHandler(userService.changePassword),

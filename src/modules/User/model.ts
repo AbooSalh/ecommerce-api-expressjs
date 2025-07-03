@@ -1,9 +1,17 @@
+
 import { addSlugMiddleware } from "@/common/middleware/mongoose/addSlugMiddleware";
 import mongoose from "mongoose";
-import bcrypt from "node_modules/bcryptjs";
-
+import bcrypt from "bcryptjs";
 const userSchema = new mongoose.Schema(
   {
+    deleteAccountCode: {
+      type: String,
+      select: false,
+    },
+    deleteAccountCodeExpires: {
+      type: Date,
+      select: false,
+    },
     name: { type: String, trim: true, required: [true, "Name is required"] },
     slug: {
       type: String,
@@ -18,14 +26,36 @@ const userSchema = new mongoose.Schema(
       type: String,
       required: [true, "Password is required"],
       minlength: [6, "Password must be at least 6 characters"],
+      select: false,
     },
     passwordChangedAt: Date,
-    passwordResetCode: String,
-    passwordResetCodeExpires: Date,
+    passwordResetCode: {
+      type: String,
+      select: false,
+    },
+    passwordResetCodeExpires: {
+      type: Date,
+      select: false,
+    },
     passwordResetVerified: {
       type: Boolean,
       default: undefined,
+      select: false,
     },
+    emailVerificationCode: {
+      type: String,
+      select: false,
+    },
+    emailVerificationCodeExpires: {
+      type: Date,
+      select: false,
+    },
+    emailVerified: {
+      type: Boolean,
+      default: false,
+      select: false,
+    },
+    
     role: {
       type: String,
       enum: ["user", "admin"],
@@ -51,18 +81,18 @@ const userSchema = new mongoose.Schema(
         },
       },
     ],
-    usedCoupons: [
-      {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "Coupon",
-      },
-    ],
   },
   {
     timestamps: true,
   }
 );
 addSlugMiddleware(userSchema, "name");
+
+// TTL index: auto-remove unverified users after code expires
+userSchema.index(
+  { emailVerificationCodeExpires: 1 },
+  { expireAfterSeconds: 0, partialFilterExpression: { emailVerified: false } }
+);
 userSchema.pre("save", async function (next) {
   if (this.isModified("password")) {
     this.password = await bcrypt.hash(this.password, 10);
