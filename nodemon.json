@@ -9,5 +9,5 @@
         "src/**/__tests__",
         "src/**/*.spec.ts"
     ],
-    "exec": "pnpm ts-node -r tsconfig-paths/register src/server.ts"
+    "exec": "npx ts-node -r tsconfig-paths/register src/server.ts"
 }

@@ -1,3 +1,4 @@
+// ...existing code...
 import UserModel from "./model";
 import baseController from "@/common/controllers/handlers";
 import expressAsyncHandler from "express-async-handler";
@@ -7,10 +8,10 @@ import * as userValidator from "./user.validator";
 export const UserC = {
   ...baseController(UserModel, {
     excludedData: {
-      create: [],
-      update: ["password", "email"],
+      create: ["wishlist"],
+      update: ["password", "email", "wishlist"],
     },
-    excludeValidation: ["email", "phone"],
+    excludeValidation: ["email", "phone", "wishlist"],
     customValidators: {
       create: {
         email: userValidator.emailValidator,
@@ -20,6 +21,15 @@ export const UserC = {
       },
     },
   }),
+
+  sendDeleteAccountCode: {
+    handler: expressAsyncHandler(userService.sendDeleteAccountCode),
+    validator: userValidator.sendDeleteAccountCodeValidator,
+  },
+  deleteAccount: {
+    handler: expressAsyncHandler(userService.deleteAccount),
+    validator: userValidator.deleteAccountValidator,
+  },
 
   changePassword: {
     handler: expressAsyncHandler(userService.changePassword),
@@ -33,6 +43,9 @@ export const UserC = {
   updateAuthUser: {
     handler: expressAsyncHandler(userService.updateAuthUser),
     validator: userValidator.updateAuthUserValidator,
+  },
+  getOrders: {
+    handler: expressAsyncHandler(userService.getOrders),
   },
 };
 

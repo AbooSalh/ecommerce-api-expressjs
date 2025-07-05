@@ -1,6 +1,12 @@
 import { addSlugMiddleware } from "@/common/middleware/mongoose/addSlugMiddleware";
 import mongoose from "mongoose";
-
+const sizeEnum = ["xs", "s", "m", "l", "xl", "xxl"];
+type ISize = (typeof sizeEnum)[number];
+export type IStock = {
+  size: ISize;
+  color: string;
+  quantity: number;
+};
 const productSchema = new mongoose.Schema(
   {
     title: {
@@ -14,6 +20,25 @@ const productSchema = new mongoose.Schema(
       type: String,
       lowercase: true,
     },
+    stocks: [
+      {
+        size: {
+          type: String,
+          enum: sizeEnum,
+          required: [true, "Size is required"],
+        },
+        color: {
+          type: String,
+          required: [true, "Color is required"],
+        },
+        quantity: {
+          type: Number,
+          required: [true, "Stock quantity is required"],
+          min: [0, "Stock quantity cannot be negative"],
+          default: 0,
+        },
+      },
+    ],
     description: {
       type: String,
       required: [true, "Product description is required"],
@@ -39,7 +64,6 @@ const productSchema = new mongoose.Schema(
       min: [1, "Discount must be at least 1%"],
       max: [100, "Discount must be at most 100%"],
     },
-    colors: [String],
     imageCover: {
       type: String,
       required: [true, "Product image cover is required"],
@@ -60,18 +84,15 @@ const productSchema = new mongoose.Schema(
       type: mongoose.Schema.ObjectId,
       ref: "Brand",
     },
-    ratings: [
-      {
-        type: Number,
-        min: [1, "Rating must be at least 1.0"],
-        max: [5, "Rating must be at most 5.0"],
-      },
-    ],
-    ratingAvg: {
-      type: Number,
-    },
+    ratings: Number,
+    ratingAvg: Number,
   },
-  { timestamps: true }
+  {
+    timestamps: true,
+    toJSON: { virtuals: true },
+    toObject: { virtuals: true },
+    id: false,
+  }
 );
 
 addSlugMiddleware(productSchema, "title"); // Add slug middleware for title
@@ -81,6 +102,11 @@ productSchema.pre("find", async function (next) {
     select: "name",
   });
   next();
+});
+productSchema.virtual("reviews", {
+  ref: "Review",
+  foreignField: "product",
+  localField: "_id",
 });
 const ProductM = mongoose.model("Product", productSchema);
 

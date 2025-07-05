@@ -40,9 +40,9 @@ const subCategorySchema = new Schema<ISubCategory>(
 );
 
 addSlugMiddleware(subCategorySchema, "title");
-const SubCategoryModel = mongoose.model<ISubCategory>(
+const SubCategoryM = mongoose.model<ISubCategory>(
   "SubCategory",
   subCategorySchema
 );
 
-export default SubCategoryModel;
+export default SubCategoryM;
